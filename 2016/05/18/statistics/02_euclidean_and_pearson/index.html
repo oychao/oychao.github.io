@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="这段时间打算深入学习一下机器学习的常用基本算法，包括弄明白这些算法的原理等。笔记主要总结这些算法。本文内容主要关于书中第二章『提供推荐』的两个基本概念，欧几里得距离和皮尔逊相关度及实现。">
+<meta name="keywords" content="Statistics">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习笔记1：欧几里得距离和皮尔逊相关度">
+<meta property="og:url" content="http://yoursite.com/2016/05/18/statistics/02_euclidean_and_pearson/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="这段时间打算深入学习一下机器学习的常用基本算法，包括弄明白这些算法的原理等。笔记主要总结这些算法。本文内容主要关于书中第二章『提供推荐』的两个基本概念，欧几里得距离和皮尔逊相关度及实现。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.344Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="机器学习笔记1：欧几里得距离和皮尔逊相关度">
+<meta name="twitter:description" content="这段时间打算深入学习一下机器学习的常用基本算法，包括弄明白这些算法的原理等。笔记主要总结这些算法。本文内容主要关于书中第二章『提供推荐』的两个基本概念，欧几里得距离和皮尔逊相关度及实现。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/18/statistics/02_euclidean_and_pearson/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>机器学习笔记1：欧几里得距离和皮尔逊相关度 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/18/statistics/02_euclidean_and_pearson/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">机器学习笔记1：欧几里得距离和皮尔逊相关度
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-05-18 01:29:00" itemprop="dateCreated datePublished" datetime="2016-05-18T01:29:00+08:00">2016-05-18</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">这段时间打算深入学习一下机器学习的常用基本算法，包括弄明白这些算法的原理等。笔记主要总结这些算法。本文内容主要关于书中第二章『提供推荐』的两个基本概念，欧几里得距离和皮尔逊相关度及实现。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>这段时间打算学习一下机器学习的常用基本算法，包括弄明白这些算法的原理等。笔记主要总结这些算法。本文内容主要关于书中第二章『提供推荐』的两个基本概念，欧几里得距离和皮尔逊相关度及实现。</p>
+<h3 id="背景"><a href="#背景" class="headerlink" title="背景"></a>背景</h3><p>假设我们有一些用户对电影的评价数据如下。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># test data</span></span><br><span class="line"><span class="comment"># 格式如下</span></span><br><span class="line"><span class="comment"># critics = &#123;</span></span><br><span class="line"><span class="comment">#     '用户': &#123;</span></span><br><span class="line"><span class="comment">#         '电影名': 分数值,</span></span><br><span class="line"><span class="comment">#         ...</span></span><br><span class="line"><span class="comment">#     &#125;,</span></span><br><span class="line"><span class="comment">#     ...</span></span><br><span class="line"><span class="comment"># &#125;</span></span><br><span class="line">critics = &#123;</span><br><span class="line">    <span class="string">'Lisa Rose'</span>: &#123;</span><br><span class="line">        <span class="string">'Lady in the Water'</span>: <span class="number">2.5</span>,</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">3.5</span>,</span><br><span class="line">        <span class="string">'Just My Luck'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">3.5</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">2.5</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">3.0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Gene Seymour'</span>: &#123;</span><br><span class="line">        <span class="string">'Lady in the Water'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">3.5</span>,</span><br><span class="line">        <span class="string">'Just My Luck'</span>: <span class="number">1.5</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">5.0</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">3.5</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Michael Phillips'</span>: &#123;</span><br><span class="line">        <span class="string">'Lady in the Water'</span>: <span class="number">2.5</span>,</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">3.5</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">4.0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Claudia Puig'</span>: &#123;</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">3.5</span>,</span><br><span class="line">        <span class="string">'Just My Luck'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">4.5</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">4.0</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">2.5</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Mick LaSalle'</span>: &#123;</span><br><span class="line">        <span class="string">'Lady in the Water'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">4.0</span>,</span><br><span class="line">        <span class="string">'Just My Luck'</span>: <span class="number">2.0</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">2.0</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Jack Mattews'</span>: &#123;</span><br><span class="line">        <span class="string">'Lady in the Water'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">4.0</span>,</span><br><span class="line">        <span class="string">'The Night Listener'</span>: <span class="number">3.0</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">5.0</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">3.5</span></span><br><span class="line">    &#125;,</span><br><span class="line">    <span class="string">'Toby'</span>: &#123;</span><br><span class="line">        <span class="string">'Snakes on a Plane'</span>: <span class="number">4.5</span>,</span><br><span class="line">        <span class="string">'You, Me and Dupree'</span>: <span class="number">1.0</span>,</span><br><span class="line">        <span class="string">'Superman Returns'</span>: <span class="number">4.0</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上述Python嵌套字典存储了我们需要的数据（保存为recommendations.py），接下来我们以这些数据来学习计算相似度评价值。</p>
+<h3 id="欧几里得距离"><a href="#欧几里得距离" class="headerlink" title="欧几里得距离"></a>欧几里得距离</h3><p>欧几里得距离评价（Euclidean Distance Score）是计算相似度评价值的一个非常简单的方法。欧氏距离是在欧氏空间中两点的距离值，欧几里得距离评价即经过适当处理后的值（欧氏距离加1后取倒数），两点之间的距离越近，其欧几里得距离评价越高，取值范围为[0,1]。其Python的实现如下所示（添加到recommendations.py中）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> math <span class="keyword">import</span> sqrt</span><br><span class="line"><span class="comment"># Euclidean Distance Score</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sim_distance</span><span class="params">(prefs, person1, person2)</span>:</span></span><br><span class="line">    si = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> prefs[person1]:</span><br><span class="line">        <span class="keyword">if</span> item <span class="keyword">in</span> prefs[person2]:</span><br><span class="line">            si[item] = <span class="number">1</span></span><br><span class="line">    <span class="keyword">if</span> len(si) == <span class="number">0</span>: <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    sum_of_squares = sum(pow(prefs[person1][item] - prefs[person2][item], <span class="number">2</span>)</span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> prefs[person1] <span class="keyword">if</span> item <span class="keyword">in</span> prefs[person2])</span><br><span class="line">    <span class="keyword">return</span> <span class="number">1</span> / (<span class="number">1</span> + sqrt(sum_of_squares))</span><br></pre></td></tr></table></figure>
+<p>上面的sim_distance函数共有3个参数，分别是偏好数据（就是我们的示例数据字典），用户1，和用户2。该函数根据偏好数据来计算用户1和用户2的欧几里得距离评价。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> recommendations <span class="keyword">import</span> *</span><br><span class="line">sim_distance(critics, <span class="string">'Lisa Rose'</span>, <span class="string">'Gene Seymour'</span>)</span><br><span class="line"><span class="comment"># 输出结果为0.294298055086</span></span><br></pre></td></tr></table></figure>
+<p>注意sim_distance函数中的最后一行，我们把求到的欧氏距离加1后取倒数，这是为了能让我们队偏好相近的情况给出越大的值。所以这里给欧氏距离加1厚去倒数（加1是为了防止被零整除的错误）。</p>
+<h3 id="皮尔逊相关度"><a href="#皮尔逊相关度" class="headerlink" title="皮尔逊相关度"></a>皮尔逊相关度</h3><p><strong>皮尔逊相关度（Pearson Correlation Score）</strong>相对于欧几里得距离而言稍微复杂一些，该相关系数是判断两组数据与某一直线的拟合程度的一种度量。</p>
+<p>皮尔逊相关度对『夸大分值（grade inflation）』进行了修正。示例数据中，Jack Matthews总是比Lisa Rose给出的分值更高，但最终的直线仍然是拟合的，这是因为他们两者有着近似的偏好。如果某人总是倾向于给出比另一个人更高的分值，而二者的分值之差又始终保持一致，则他们依然可能会存在很好的相关性。欧几里得距离评价会因为一个人的评价比另一个人更严格，而得出评价始终相对偏低的结论（并不说这样是错的，根据具体的应用场景不同而不同）。</p>
+<p>皮尔逊相关度算法的具体Python实现如下所示（添加到recommendations.py中）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Pearson Correlation Score</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">sim_pearson</span><span class="params">(prefs, person1, person2)</span>:</span></span><br><span class="line">    si = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> item <span class="keyword">in</span> prefs[person1]:</span><br><span class="line">        <span class="keyword">if</span> item <span class="keyword">in</span> prefs[person2]:</span><br><span class="line">            si[item] = <span class="number">1</span></span><br><span class="line">    n = len(si)</span><br><span class="line">    <span class="keyword">if</span> n == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span></span><br><span class="line">    sum1 = sum([prefs[person1][item] <span class="keyword">for</span> item <span class="keyword">in</span> si])</span><br><span class="line">    sum2 = sum([prefs[person2][item] <span class="keyword">for</span> item <span class="keyword">in</span> si])</span><br><span class="line">    sum1Sq = sum([pow(prefs[person1][item], <span class="number">2</span>) <span class="keyword">for</span> item <span class="keyword">in</span> si])</span><br><span class="line">    sum2Sq = sum([pow(prefs[person2][item], <span class="number">2</span>) <span class="keyword">for</span> item <span class="keyword">in</span> si])</span><br><span class="line">    pSum = sum([prefs[person1][item] * prefs[person2][item] <span class="keyword">for</span> item <span class="keyword">in</span> si])</span><br><span class="line">    num = pSum - (sum1 * sum2 / n)</span><br><span class="line">    den = sqrt((sum1Sq - pow(sum1, <span class="number">2</span>) / n) * (sum2Sq - pow(sum2, <span class="number">2</span>) / n))</span><br><span class="line">    <span class="keyword">if</span> den == <span class="number">0</span>:</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span></span><br><span class="line">    r = num / den</span><br><span class="line">    <span class="keyword">return</span> r</span><br></pre></td></tr></table></figure>
+<p>sim_pearson函数的三个参数与意义相同，但函数的值域在[-1,1]之间。值为1表示两个人对每一样物品均有完全一致的评价，值为-1表示两人对每一样物品均有截然相反的评价，值为0表示两人无相关性。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> recommendations <span class="keyword">import</span> *</span><br><span class="line">sim_pearson(critics, <span class="string">'Lisa Rose'</span>, <span class="string">'Gene Seymour'</span>)</span><br><span class="line"><span class="comment"># 输出结果为0.396059017191</span></span><br></pre></td></tr></table></figure>
+<h3 id="为评论者打分"><a href="#为评论者打分" class="headerlink" title="为评论者打分"></a>为评论者打分</h3><p>我们现在已经能对两个人进行比较了，为了找出对用户而言最合适的评论者，我们可以编写函数然后排序来找到结果，代码如下（添加到recommendations.py中）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">topMatches</span><span class="params">(prefs, person, n = <span class="number">5</span>, similarity = sim_pearson)</span>:</span></span><br><span class="line">    scores = [(similarity(prefs, person, other), other) <span class="keyword">for</span> other <span class="keyword">in</span> prefs <span class="keyword">if</span> other != person]</span><br><span class="line">    scores.sort()</span><br><span class="line">    scores.reverse()</span><br><span class="line">    <span class="keyword">return</span> scores[<span class="number">0</span> : n]</span><br></pre></td></tr></table></figure>
+<p>topMatches函数一共四个参数，分别是偏好数据，目标用户，取排序的前几名，相似度算法的选取。其中默认取排序的前5名，相似度算法默认用皮尔逊相关度。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> recommendations <span class="keyword">import</span> *</span><br><span class="line">topMatches(critics, <span class="string">'Toby'</span>, n = <span class="number">3</span>, similarity = sim_pearson)</span><br><span class="line"><span class="comment"># 输出结果如下</span></span><br><span class="line">[(<span class="number">0.9912407071619299</span>, <span class="string">'Lisa Rose'</span>),</span><br><span class="line">(<span class="number">0.9244734516419049</span>, <span class="string">'Mick LaSalle'</span>),</span><br><span class="line">(<span class="number">0.8934051474415647</span>, <span class="string">'Claudia Puig'</span>)]</span><br></pre></td></tr></table></figure>
+<p>根据结果可知，Toby应该阅读Lisa Rose撰写的影评，因为她的评委与Toby很相近。</p>
+<h3 id="推荐物品"><a href="#推荐物品" class="headerlink" title="推荐物品"></a>推荐物品</h3><p>很多时候我们需要的不是去看别人的影评，而是希望得到一份电影的推荐列表。问题是，如果Toby只看Lisa Rose撰写的影评，可能会有一些特殊情况，比如Lisa偏好有些古怪，她特别喜欢某部电影，而该电影在其他影评人那里口碑都很差；又或者Lisa有些电影没看到，而这些电影恰恰就是Toby喜欢看的电影。</p>
+<p>为了解决这个问题，我们需要对影片的评分加权值，将权值乘以评分后，再除以权值的和。简单地说就是类似于取评分的数学期望，注意这里的评分是不均匀的。下表给出了具体的执行过程。</p>
+<table>
+<thead>
+<tr>
+<th>评论者</th>
+<th>相似度</th>
+<th>Night</th>
+<th>S.xNight</th>
+<th>Lady</th>
+<th>S.xLady</th>
+<th>Luck</th>
+<th>S.xLuck</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Rose</td>
+<td>0.99</td>
+<td>3.0</td>
+<td>2.97</td>
+<td>2.5</td>
+<td>2.48</td>
+<td>3.0</td>
+<td>2.97</td>
+</tr>
+<tr>
+<td>Seymour</td>
+<td>0.38</td>
+<td>3.0</td>
+<td>1.14</td>
+<td>3.0</td>
+<td>1.14</td>
+<td>1.5</td>
+<td>0.57</td>
+</tr>
+<tr>
+<td>Puig</td>
+<td>0.89</td>
+<td>4.5</td>
+<td>4.02</td>
+<td></td>
+<td></td>
+<td>3.0</td>
+<td>2.68</td>
+</tr>
+<tr>
+<td>LaSalle</td>
+<td>0.92</td>
+<td>3.0</td>
+<td>2.77</td>
+<td>3.0</td>
+<td>2.77</td>
+<td>2.0</td>
+<td>1.85</td>
+</tr>
+<tr>
+<td>Matthews</td>
+<td>0.66</td>
+<td>3.0</td>
+<td>1.99</td>
+<td>3.0</td>
+<td>1.99</td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>总计</td>
+<td></td>
+<td></td>
+<td>12.89</td>
+<td></td>
+<td>8.38</td>
+<td></td>
+<td>8.07</td>
+</tr>
+<tr>
+<td>Sim.Sum</td>
+<td></td>
+<td></td>
+<td>3.84</td>
+<td></td>
+<td>2.95</td>
+<td></td>
+<td>3.18</td>
+</tr>
+<tr>
+<td>总计/Sim.Sum</td>
+<td></td>
+<td></td>
+<td>3.35</td>
+<td></td>
+<td>2.83</td>
+<td></td>
+<td>2.53</td>
+</tr>
+</tbody>
+</table>
+<p>算法的具体Python实现如下所示（添加到recommendations.py中）。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Recommendations</span></span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">getRecommendations</span><span class="params">(prefs, person, similarity = sim_pearson)</span>:</span></span><br><span class="line">    totals = &#123;&#125;</span><br><span class="line">    simSums = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> other <span class="keyword">in</span> prefs:</span><br><span class="line">        <span class="keyword">if</span> person == other:</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        sim = similarity(prefs, person, other)</span><br><span class="line">        <span class="keyword">if</span> sim &lt;= <span class="number">0</span> :</span><br><span class="line">            <span class="keyword">continue</span></span><br><span class="line">        <span class="keyword">for</span> item <span class="keyword">in</span> prefs[other]:</span><br><span class="line">            <span class="keyword">if</span> item <span class="keyword">not</span> <span class="keyword">in</span> prefs[person] <span class="keyword">or</span> prefs[person][item] == <span class="number">0</span>:</span><br><span class="line">                totals.setdefault(item, <span class="number">0</span>)</span><br><span class="line">                totals[item] += prefs[other][item] * sim</span><br><span class="line">                simSums.setdefault(item, <span class="number">0</span>)</span><br><span class="line">                simSums[item] += sim</span><br><span class="line">    rankings = [(total / simSums[item], item) <span class="keyword">for</span> item, total <span class="keyword">in</span> totals.items()]</span><br><span class="line">    rankings.sort()</span><br><span class="line">    rankings.reverse()</span><br><span class="line">    <span class="keyword">return</span> rankings</span><br></pre></td></tr></table></figure>
+<p>使用欧几里得距离评价测试如下。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> recommendations <span class="keyword">import</span> *</span><br><span class="line">rankings = getRecommendations(critics, <span class="string">'Toby'</span>, similarity = sim_distance)</span><br><span class="line"><span class="keyword">for</span> ranking <span class="keyword">in</span> rankings:</span><br><span class="line">    print(ranking)</span><br><span class="line"><span class="comment"># 输出结果如下</span></span><br><span class="line"><span class="comment"># (3.4571286944914226, 'The Night Listener')</span></span><br><span class="line"><span class="comment"># (2.7785840038149234, 'Lady in the Water')</span></span><br><span class="line"><span class="comment"># (2.422482042361917, 'Just My Luck')</span></span><br></pre></td></tr></table></figure>
+<p>使用皮尔逊相关系数评价测试如下。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> recommendations <span class="keyword">import</span> *</span><br><span class="line">rankings = getRecommendations(critics, <span class="string">'Toby'</span>, similarity = sim_pearson)</span><br><span class="line"><span class="keyword">for</span> ranking <span class="keyword">in</span> rankings:</span><br><span class="line">    print(ranking)</span><br><span class="line"><span class="comment"># 输出结果如下</span></span><br><span class="line"><span class="comment"># (3.3477895267131013, 'The Night Listener')</span></span><br><span class="line"><span class="comment"># (2.832549918264162, 'Lady in the Water')</span></span><br><span class="line"><span class="comment"># (2.5309807037655645, 'Just My Luck')</span></span><br></pre></td></tr></table></figure>
+<p>以上，我们根据不同的使用相似度评价值算法，得到了Toby的影片推荐列表，可以看出在本例中，二者的并没有质的区别。</p>
+<p>最后我们还可以对数据先进行转置，然后再调用topMatches函数，我们可以得到和指定某部电影近似的其他电影，具体过程这里不再赘述。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://www.amazon.cn/%E9%9B%86%E4%BD%93%E6%99%BA%E6%85%A7%E7%BC%96%E7%A8%8B-%E6%89%98%E6%AF%94%C2%B7%E8%A5%BF%E6%A0%BC%E5%85%B0/dp/B00UI93JD8/ref=sr_1_1?ie=UTF8&amp;qid=1463501355&amp;sr=8-1&amp;keywords=%E9%9B%86%E4%BD%93%E6%99%BA%E6%85%A7%E7%BC%96%E7%A8%8B" target="_blank" rel="noopener">集体智慧编程 - Toby Segaran - 亚马逊中国</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Euclidean_distance" target="_blank" rel="noopener">Euclidean distance - Wikipedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Pearson_product-moment_correlation_coefficient" target="_blank" rel="noopener">Pearson product-moment correlation coefficient - Wikipedia</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Statistics/" rel="tag"># Statistics</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/14/statistics/01_hmm_viterbi/" rel="next" title="隐马尔可夫模型和Viterbi算法总结">
+                <i class="fa fa-chevron-left"></i> 隐马尔可夫模型和Viterbi算法总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/18/statistics/03_pearsons_r/" rel="prev" title="机器学习笔记2：皮尔逊相关系数的几何意义">
+                机器学习笔记2：皮尔逊相关系数的几何意义 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#背景"><span class="nav-number">2.</span> <span class="nav-text">背景</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#欧几里得距离"><span class="nav-number">3.</span> <span class="nav-text">欧几里得距离</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#皮尔逊相关度"><span class="nav-number">4.</span> <span class="nav-text">皮尔逊相关度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为评论者打分"><span class="nav-number">5.</span> <span class="nav-text">为评论者打分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐物品"><span class="nav-number">6.</span> <span class="nav-text">推荐物品</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

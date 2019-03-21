@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="用Git也有两年了，但是很多好的分支习惯都没有养成，前两天老大建议用git rebase解决本地冲突，惭愧的是以前连rebase这个命令都没了解过，有必要体系的学习一下Git的用法了，了解一下一些好的实践和还没有用到过的命令。本篇是GitHub上的一片文章，翻译过来，学习一下。">
+<meta name="keywords" content="其他">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Git&#x2F;GitHub 分支标准和习惯">
+<meta property="og:url" content="http://yoursite.com/2017/12/17/else/14_gitlab/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="用Git也有两年了，但是很多好的分支习惯都没有养成，前两天老大建议用git rebase解决本地冲突，惭愧的是以前连rebase这个命令都没了解过，有必要体系的学习一下Git的用法了，了解一下一些好的实践和还没有用到过的命令。本篇是GitHub上的一片文章，翻译过来，学习一下。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://camo.githubusercontent.com/f011896cab0a6e086954a10d3a5132d57ca69468/687474703a2f2f662e636c2e6c792f6974656d732f3369315a336e3154316b3339327231413351306d2f676974666c6f772d6d6f64656c2e3030312e706e67">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.353Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Git&#x2F;GitHub 分支标准和习惯">
+<meta name="twitter:description" content="用Git也有两年了，但是很多好的分支习惯都没有养成，前两天老大建议用git rebase解决本地冲突，惭愧的是以前连rebase这个命令都没了解过，有必要体系的学习一下Git的用法了，了解一下一些好的实践和还没有用到过的命令。本篇是GitHub上的一片文章，翻译过来，学习一下。">
+<meta name="twitter:image" content="https://camo.githubusercontent.com/f011896cab0a6e086954a10d3a5132d57ca69468/687474703a2f2f662e636c2e6c792f6974656d732f3369315a336e3154316b3339327231413351306d2f676974666c6f772d6d6f64656c2e3030312e706e67">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/12/17/else/14_gitlab/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Git/GitHub 分支标准和习惯 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/12/17/else/14_gitlab/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Git/GitHub 分支标准和习惯
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-12-17 23:30:00" itemprop="dateCreated datePublished" datetime="2017-12-17T23:30:00+08:00">2017-12-17</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">用Git也有两年了，但是很多好的分支习惯都没有养成，前两天老大建议用git rebase解决本地冲突，惭愧的是以前连rebase这个命令都没了解过，有必要体系的学习一下Git的用法了，了解一下一些好的实践和还没有用到过的命令。本篇是GitHub上的一片文章，翻译过来，学习一下。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><blockquote>
+<p>用Git也有两年了，但是很多好的分支习惯都没有养成，前两天老大建议用git rebase解决本地冲突，惭愧的是以前连rebase这个命令都没了解过，有必要体系的学习一下Git的用法了，了解一下一些好的实践和还没有用到过的命令。本篇是GitHub上的一片文章，翻译过来，学习一下。</p>
+</blockquote>
+<h3 id="快速图例"><a href="#快速图例" class="headerlink" title="快速图例"></a>快速图例</h3><table>
+<thead>
+<tr>
+<th>实例</th>
+<th>分支</th>
+<th>描述，教例，笔记</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Stable</td>
+<td>stable</td>
+<td>接收来自Working和Hotfix的合并</td>
+</tr>
+<tr>
+<td>Working</td>
+<td>master</td>
+<td>接收来自Feature/Issue和Hotfix的合并</td>
+</tr>
+<tr>
+<td>Feature/Issue</td>
+<td>topic-*</td>
+<td>总是当前最新的Working的分支</td>
+</tr>
+<tr>
+<td>Hotfix</td>
+<td>hotfix-*</td>
+<td>总是Stable的分支</td>
+</tr>
+</tbody>
+</table>
+<h3 id="主要分支"><a href="#主要分支" class="headerlink" title="主要分支"></a>主要分支</h3><p>主要库总是包含两个最常用的分支：</p>
+<ul>
+<li>master</li>
+<li>stable</li>
+</ul>
+<p>主要分支应该是origin/master，该分支上的最新源码总是反应出下一个发布版最新的变化的状态。作为开发者，你需要从master上开分支，然后再合并回来。</p>
+<p>可以把origin/stable当做总是表述为部署到生产环境的最新代码。stable分支不会每天都和最新的代码进行交互。</p>
+<p>当master分支上的源码已经稳定却被部署了，所有的改变都会合并到stable分支上，并且打上发布号。这个步骤具体如何完成我们后面再讨论。</p>
+<h3 id="其他分支"><a href="#其他分支" class="headerlink" title="其他分支"></a>其他分支</h3><p>其他分支用于在团队成员之间辅助并行开发，使跟踪特性更容易，并且有助于上线之后各种问题的快速修复。和主分支不一样，这些分支总是有一个优先的生命期限，它们最终会被移除掉。</p>
+<p>可能用到的不同的分支类型有：</p>
+<p>Feature分支<br>Bug分支<br>Hotfix分支</p>
+<p>每一类分支都有特定的目的并遵循严格的规范，比如哪些分支是它们的起始分支，哪些分支又是它们的合并终点。接下来详细解释每个分支及其用法。</p>
+<h4 id="特性分支"><a href="#特性分支" class="headerlink" title="特性分支"></a>特性分支</h4><p>特性分支用于开发有可能开发时间比一次发布周期还长的一个新特性或者新功能。开始开发时，可能无法确定新特性的具体在哪次版本发布。只要这个分支已经完成了，它就会被合并会master分支。</p>
+<p>在特性的开发周期中，最新的代码时钟需要注意master分支（通过GitHub上的netword功能或者branch功能），查看从分支被创建起，master是否有新的提交。任何对master的改变都应该在当前分支合并回master分支前，被合并到当前分支中，这个操作可以重复多次，或者在最后再做也行，但应该注意处理合并冲突的次数。</p>
+<p>特性分支</p>
+<ul>
+<li>必须是master的分支</li>
+<li>必须合并回master分支</li>
+<li>分支命名约定： <code>feature-&lt;分支号&gt;</code></li>
+</ul>
+<h5 id="使用特性分支"><a href="#使用特性分支" class="headerlink" title="使用特性分支"></a>使用特性分支</h5><p>如果分支还不存在，现在本地创建一个分支，然后将其push到GitHub上。一个特性分支应该总是公共可用的，这样做的意义在于，开发永远不应该只在一个开发者的本地分支上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout -b feature-id master                 // 为新特性创建一个本地分支</span><br><span class="line">$ git push origin feature-id                        // 推到服务器，使公共可见</span><br></pre></td></tr></table></figure>
+<p>master上的改变（如果有的话）应该被定期合并到你的特性分支上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git merge master                                  // 从master分支上合并新commits到特性分支</span><br></pre></td></tr></table></figure>
+<p>当一个分支上的开发已经结束，Leader应该将改变合并到master，然后确保服务器上的分支被删除。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master                               // 切换到master分支上</span><br><span class="line">$ git merge --no-ff feature-id                      // 确保当合并时创建一个commit对象</span><br><span class="line">$ git push origin master                            // push修改</span><br><span class="line">$ git push origin :feature-id                       // 删除服务器上的分支</span><br></pre></td></tr></table></figure>
+<h4 id="Bug分支"><a href="#Bug分支" class="headerlink" title="Bug分支"></a>Bug分支</h4><p>Bug分支和特性分支只是在语义上不同，当使用时有Bug时创建Bug分支，修复后合并到下一次部署中来。也因此，Bug分支的生存周期一般来说不会超过一次部署的循环周期。此外，Bug分支显式地区分了Bug分支和特性分支。无论Bug分支在什么时候完成，它永远都会被合并到master来中。</p>
+<p>虽然可能性很小，在Bug修复的过程中，最新代码应该监听master分支，以检查是否在切出分支以来是否有新的提交。在Bug分支中合并回master分支之前，master分支的所所有改变都应该被合并到Bug分支中，这个操作可以在Bug分支的修复过程中或者结束时进行，但是注意要考虑处理冲突的时机。</p>
+<p>Bug分支</p>
+<ul>
+<li>必须是master的分支</li>
+<li>必须合并回master分支</li>
+<li>分支命名约定：<code>bug-&lt;分支号&gt;</code></li>
+</ul>
+<h5 id="使用Bug分支"><a href="#使用Bug分支" class="headerlink" title="使用Bug分支"></a>使用Bug分支</h5><p>如果Bug还不存在（检查最新代码），那就创建一个本地分支并将其推到GitHub。一个Bug分支应该总是公共可用的，这样做的意义在于，开发永远不应该只在一个开发者的本地分支上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout -b bug-id master                     // 为新bug创建一个本地分支</span><br><span class="line">$ git push origin bug-id                            // 推送新分支到服务器</span><br></pre></td></tr></table></figure>
+<p>master上的改变（如果有的话）应该被定期合并到你的Bug分支上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$ git merge master                                  // 合并新的commits到当前分支</span><br></pre></td></tr></table></figure>
+<p>当一个分支上的开发已经结束，Leader应该将改变合并到master，然后确保服务器上的分支被删除。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master                               // 切换到master分支</span><br><span class="line">$ git merge --no-ff bug-id                          // 确保当合并时创建一个commit对象</span><br><span class="line">$ git push origin master                            // push修改</span><br><span class="line">$ git push origin :bug-id                           // 删除服务器上的分支</span><br></pre></td></tr></table></figure>
+<h4 id="快速修复分支"><a href="#快速修复分支" class="headerlink" title="快速修复分支"></a>快速修复分支</h4><p>快速修复分支（Hotfix分支）用于需要对生产版本（Stable分支）进行快速更新。另外，由于这种情况的紧急性，一个快速修复分支不需要被推到一个开发周期中去。由于这些需要，一个快速修复分支总是从<code>stable</code>分支切出，原因如下：</p>
+<ul>
+<li>快速修复分支提出之后<code>master</code>分支上可以继续开发。</li>
+<li>一个标记的<code>stable</code>分支仍然会在生产中使用。只要快速修复分支被需要，就可以有多个提交到<code>master</code>因为<code>master</code>已经不是最新的生产环境了。</li>
+</ul>
+<p>Hotfix分支</p>
+<ul>
+<li>必须是stable的分支</li>
+<li>必须被合并回stable和master分支</li>
+<li>分支明明约定： <code>hotfix-&lt;分支号&gt;</code></li>
+</ul>
+<h5 id="使用Hotfix分支"><a href="#使用Hotfix分支" class="headerlink" title="使用Hotfix分支"></a>使用Hotfix分支</h5><p>如果分支还不存在，先在本地创建分支，然后在推到GitHub上。一个快速修复分支应该总是公共可用的，这样做的意义在于，开发永远不应该只在一个开发者的本地分支上。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout -b hotfix-id stable                  // 为新的快速修复创建一个分支</span><br><span class="line">$ git push origin hotfix-id                         // 将新分支推到服务器</span><br></pre></td></tr></table></figure>
+<p>当快速修复已经完成，这些改变就应该被合并到<code>stable</code>中，并随后更新标签。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout stable                               // 切换到stable分支</span><br><span class="line">$ git merge --no-ff hotfix-id                       // 强制创建commit对象</span><br><span class="line">$ git tag -a &lt;tag&gt;                                  // 给修复打tag</span><br><span class="line">$ git push origin stable --tags                     // 推送tag修改</span><br></pre></td></tr></table></figure>
+<p>最后将新的修改合并到<code>master</code>中以保证<code>master</code>也得到更新，然后删除远程快速修复分支。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ git checkout master                               // 切换到master分支</span><br><span class="line">$ git merge --no-ff hotfix-id                       // 强制创建commit对象</span><br><span class="line">$ git push origin master                            // push修改</span><br><span class="line">$ git push origin :hotfix-id                        // 删除服务器上的分支</span><br></pre></td></tr></table></figure>
+<h3 id="工作流图例"><a href="#工作流图例" class="headerlink" title="工作流图例"></a>工作流图例</h3><p><img src="https://camo.githubusercontent.com/f011896cab0a6e086954a10d3a5132d57ca69468/687474703a2f2f662e636c2e6c792f6974656d732f3369315a336e3154316b3339327231413351306d2f676974666c6f772d6d6f64656c2e3030312e706e67" alt></p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://gist.github.com/digitaljhelms/4287848" target="_blank" rel="noopener">Branching - <a href="https://gist.github.com/digitaljhelms" target="_blank" rel="noopener">digitaljhelms - Gist</a></a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/其他/" rel="tag"># 其他</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/06/vue/01_vue_communication/" rel="next" title="Vue组件通信模式">
+                <i class="fa fa-chevron-left"></i> Vue组件通信模式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/03/27/javascript/35_async_await/" rel="prev" title="async await和co库深入浅出">
+                async await和co库深入浅出 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#快速图例"><span class="nav-number">2.</span> <span class="nav-text">快速图例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#主要分支"><span class="nav-number">3.</span> <span class="nav-text">主要分支</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#其他分支"><span class="nav-number">4.</span> <span class="nav-text">其他分支</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#特性分支"><span class="nav-number">4.1.</span> <span class="nav-text">特性分支</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用特性分支"><span class="nav-number">4.1.1.</span> <span class="nav-text">使用特性分支</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Bug分支"><span class="nav-number">4.2.</span> <span class="nav-text">Bug分支</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用Bug分支"><span class="nav-number">4.2.1.</span> <span class="nav-text">使用Bug分支</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#快速修复分支"><span class="nav-number">4.3.</span> <span class="nav-text">快速修复分支</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#使用Hotfix分支"><span class="nav-number">4.3.1.</span> <span class="nav-text">使用Hotfix分支</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#工作流图例"><span class="nav-number">5.</span> <span class="nav-text">工作流图例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

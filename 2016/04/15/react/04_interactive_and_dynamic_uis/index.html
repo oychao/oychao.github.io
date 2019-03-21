@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="官方文档『Interactivity and Dynamic UIs』译文。React中的状态(state)和属性(props)的区别。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React交互动态UI">
+<meta property="og:url" content="http://yoursite.com/2016/04/15/react/04_interactive_and_dynamic_uis/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="官方文档『Interactivity and Dynamic UIs』译文。React中的状态(state)和属性(props)的区别。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.369Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React交互动态UI">
+<meta name="twitter:description" content="官方文档『Interactivity and Dynamic UIs』译文。React中的状态(state)和属性(props)的区别。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/15/react/04_interactive_and_dynamic_uis/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React交互动态UI | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/15/react/04_interactive_and_dynamic_uis/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React交互动态UI
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-04-15 21:16:00" itemprop="dateCreated datePublished" datetime="2016-04-15T21:16:00+08:00">2016-04-15</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">官方文档『Interactivity and Dynamic UIs』译文。React中的状态(state)和属性(props)的区别。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="2017年2月11日更新"><a href="#2017年2月11日更新" class="headerlink" title="2017年2月11日更新"></a>2017年2月11日更新</h3><p><a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Interactivity and Dynamic UIs - React</a></p>
+<blockquote>
+<p>2017年2月11日注：官网原文已删除。</p>
+</blockquote>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>你已经学会了怎样用React展示数据。现在让我们来看一下怎样让我们的UI变得能互动吧。</p>
+<h3 id="从一个原型设计开始"><a href="#从一个原型设计开始" class="headerlink" title="从一个原型设计开始"></a>从一个原型设计开始</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> LikeButton = React.createClass(&#123;</span><br><span class="line">  getInitialState: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="attr">liked</span>: <span class="literal">false</span>&#125;;</span><br><span class="line">  &#125;,</span><br><span class="line">  handleClick: <span class="function"><span class="keyword">function</span>(<span class="params">event</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;<span class="attr">liked</span>: !<span class="keyword">this</span>.state.liked&#125;);</span><br><span class="line">  &#125;,</span><br><span class="line">  render: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> text = <span class="keyword">this</span>.state.liked ? <span class="string">'like'</span> : <span class="string">'haven\'t liked'</span>;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;p onClick=&#123;<span class="keyword">this</span>.handleClick&#125;&gt;</span><br><span class="line">        You &#123;text&#125; <span class="keyword">this</span>. Click to toggle.</span><br><span class="line">      &lt;<span class="regexp">/p&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">  &#125;</span></span><br><span class="line"><span class="regexp">&#125;);</span></span><br><span class="line"><span class="regexp">ReactDOM.render(</span></span><br><span class="line"><span class="regexp">  &lt;LikeButton /</span>&gt;,</span><br><span class="line">  <span class="built_in">document</span>.getElementById(<span class="string">'example'</span>)</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<h3 id="事件处理和自定义事件"><a href="#事件处理和自定义事件" class="headerlink" title="事件处理和自定义事件"></a>事件处理和自定义事件</h3><p>通过React你只需要将事件处理器作为属性（驼峰命名规则）传递进去就行，就像在一般的HTML中所做的那样。React通过一个人工的事件系统（中间层），保证了在所有的浏览器中，所有的事件处理都一样。也就是说，React根据标准，知道怎么去处理事件冒泡和事件捕获，并且保证了传递到你的事件处理器中的事件是与W3C标准一致的，不管你用的什么浏览器都一样。</p>
+<h3 id="底层：自动绑定和事件委托"><a href="#底层：自动绑定和事件委托" class="headerlink" title="底层：自动绑定和事件委托"></a>底层：自动绑定和事件委托</h3><p>为了保证你的代码的高性能，React在底层做了一些很容易理解的工作。</p>
+<p><strong>自动绑定：</strong>当用JavaScript创建回调函数时，你经常需要明确地绑定一个方法给当前实例，这样this指针的值才能正确。用React，所有的方法都是自动绑定到了当前组件实例（除非用ES6的class）。React缓存了绑定方法，这样也就使得CPU和内存非常高效。同时敲的代码也少了。</p>
+<p><strong>事件委托：</strong>React实际上不附加事件处理器给节点本身。当React启动的时候，会通过一个单一的事件处理器开始监听所有顶级事件。当一个组件被挂载或者被卸载时，事件处理器只是在一个内部映射表中添加项或者删除项。当一个事件发生时，React知道怎么通过映射表去分派事件处理。如果在映射表中没有事件处理器时，React不作任何处理。想知道为什么这样做更快，可以阅读<a href="https://davidwalsh.name/event-delegate" target="_blank" rel="noopener">参考2</a></p>
+<h3 id="组件只是状态机"><a href="#组件只是状态机" class="headerlink" title="组件只是状态机"></a>组件只是状态机</h3><p>React认为UI跟状态机一样简单。认为UI处于不同状态中并渲染，通过这种理念很容易使你的UI持久化。</p>
+<p>在React中，你只是更新一个组件的状态，然后基于这个新的状态渲染出了一个新的UI。React用最高效的方式为你处理了DOM的更新。</p>
+<h3 id="状态是怎么工作的"><a href="#状态是怎么工作的" class="headerlink" title="状态是怎么工作的"></a>状态是怎么工作的</h3><p>一般通知React数据改变了时调用setState(data, callback)方法。这个方法讲数据合并到了this.state中，并且重新渲染了组件。让组件完成渲染时，可选参数callback被调用。由于React会保证你的UI最新，所以大多数情况下你都不需要提供一个回调函数。</p>
+<h3 id="组件需要有些什么状态？"><a href="#组件需要有些什么状态？" class="headerlink" title="组件需要有些什么状态？"></a>组件需要有些什么状态？</h3><p>你的大多数组件应该只负责从属性中拿数据并且渲染。不过有时你需要对用户输入、服务器请求或者随时间变化而变化的因素做响应。这种情况下你就需要用状态。</p>
+<p>尽量试着让你的组件无状态。通过这样做你会分离出状态到它符合逻辑地最应该在的位置并且使冗余性最低，使得更容易合理化你的应用。</p>
+<p>一个常用的模式是创建几个渲染数据的无状态的组件，然后在层级结构中相对最顶层加一个富状态组件（stateful component），该组件通过属性传递自己的状态给其子层。含有多个状态的组件包含了所有的相互作用逻辑，而无状态组件负责通过声明式的方法渲染组件。</p>
+<h3 id="哪些数据应该存放在状态中？"><a href="#哪些数据应该存放在状态中？" class="headerlink" title="哪些数据应该存放在状态中？"></a>哪些数据应该存放在状态中？</h3><p>组件的状态应该包含该组件的事件处理器可能改变触发UI更新的数据在真实的应用中，这种数据倾向于很小，并且都是JSON序列化的。当创建一个富状态组件时，考虑一下状态可能的最小集，然后仅存那些在this.state中的属性。在render()内部再基于状态去计算其他你需要的信息。你会发现用这种方法考虑和编写的应用是最正确的，因为在状态中添加冗余数据或者可计算值意味着你需要明确地保持这种数据的同步，而你不能指望React帮你计算这些数据。</p>
+<h3 id="哪些数据不应该存放在状态中？"><a href="#哪些数据不应该存放在状态中？" class="headerlink" title="哪些数据不应该存放在状态中？"></a>哪些数据不应该存放在状态中？</h3><p>this.state应该只包含需要表征你UI状态的最小数据量。也就是说，它不应该包含：</p>
+<ul>
+<li><strong>可计算的数据：</strong>别担心通过状态去提前计算你需要的值 —— 如果你用render()方法做所有的逻辑计算处理，持久化UI会变得很容易。举个例子，如果你在状态中有一个数组（listItems）并且你需要把数组长度渲染成字符串，只要在你的render()方法中处理this.state.listItems.length + ‘list items’就可以，而不需要把它存储在状态中。</li>
+<li><strong>React组件：</strong>根据属性和状态在render()方法中创建组件。</li>
+<li><strong>属性中的副本数据：</strong>可能的话试着用属性作为真实数据源。作为父组件的重新渲染的结果，属性可能会改变，所以知道属性在父组件或者更之前的值再把属性放到状态中的用法也是一种正确的用法。</li>
+</ul>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Interactivity and Dynamic UIs - React</a></li>
+<li><a href="https://davidwalsh.name/event-delegate" target="_blank" rel="noopener">How JavaScript Event Delegation Works - David Walsh</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/12/react/03_thinking_in_react/" rel="next" title="Thinking in React？">
+                <i class="fa fa-chevron-left"></i> Thinking in React？
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/17/else/03_mysql_engine/" rel="prev" title="MySQL数据库引擎，InnoDB和MyISAM的区别">
+                MySQL数据库引擎，InnoDB和MyISAM的区别 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#2017年2月11日更新"><span class="nav-number">1.</span> <span class="nav-text">2017年2月11日更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从一个原型设计开始"><span class="nav-number">3.</span> <span class="nav-text">从一个原型设计开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事件处理和自定义事件"><span class="nav-number">4.</span> <span class="nav-text">事件处理和自定义事件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#底层：自动绑定和事件委托"><span class="nav-number">5.</span> <span class="nav-text">底层：自动绑定和事件委托</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组件只是状态机"><span class="nav-number">6.</span> <span class="nav-text">组件只是状态机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#状态是怎么工作的"><span class="nav-number">7.</span> <span class="nav-text">状态是怎么工作的</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#组件需要有些什么状态？"><span class="nav-number">8.</span> <span class="nav-text">组件需要有些什么状态？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哪些数据应该存放在状态中？"><span class="nav-number">9.</span> <span class="nav-text">哪些数据应该存放在状态中？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#哪些数据不应该存放在状态中？"><span class="nav-number">10.</span> <span class="nav-text">哪些数据不应该存放在状态中？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">11.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="译文，官方文档，Reconciliation。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React在虚拟DOM和DOM的协调">
+<meta property="og:url" content="http://yoursite.com/2017/03/15/react/13_reconciliation/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="译文，官方文档，Reconciliation。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React在虚拟DOM和DOM的协调">
+<meta name="twitter:description" content="译文，官方文档，Reconciliation。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/03/15/react/13_reconciliation/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React在虚拟DOM和DOM的协调 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/15/react/13_reconciliation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React在虚拟DOM和DOM的协调
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-03-15 23:52:00" itemprop="dateCreated datePublished" datetime="2017-03-15T23:52:00+08:00">2017-03-15</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">译文，官方文档，Reconciliation。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<p><strong><a href="https://facebook.github.io/react/docs/reconciliation.html" target="_blank" rel="noopener">原文：Reconciliation - React Docs</a></strong></p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>React提供了一个声明式的API，你无需担心每次更新具体都发生了些什么。这使得写应用变得简单多了，但是React内部到底怎么实现的可能不是很明显。本文解释了我们在React的diff算法中所做的选择，从而使得组件的更新是可预测的的同时，且更新对于高性能的应用也表现得足够快。</p>
+<h3 id="动机"><a href="#动机" class="headerlink" title="动机"></a>动机</h3><p>当你使用React，在一个特定的时间点，你可以把<em>render()</em>当做创建一个React元素树的函数。在下次状态或者属性更新的时候，<em>render()</em>函数会返回一个不同的React元素树。然后React要负责搞定怎样高效地更新UI以匹配最相似的树。</p>
+<p>对这个算法问题，有一些一般的生成最少操作的来转换一个树到另一个树的解决方案。然而，这些算法的时间复杂度高达$O(n^3)$，这里的$n$代表一个树中元素的个数。</p>
+<p>如果我们在React中用这些算法，展示1000元素则需要十亿次比较。这个实在是太昂贵了。相反，React实现了一种基于以下两种假设的启发式的$O(n)$算法。</p>
+<ol>
+<li>两个不同的元素会生成不同的树；</li>
+<li>开发者可以通过<em>key</em>属性知道在诸多渲染（render）函数和控制那个子元素可能是稳定的。</li>
+</ol>
+<blockquote>
+<p>译者注：<br>第一个假设意思是，一个元素下属的树，如果该元素（根节点）改变了，则其子树不一样；</p>
+</blockquote>
+<p>在实践中，这些假设几乎在所有的实践用例中都是正确的。</p>
+<h3 id="Diff算法"><a href="#Diff算法" class="headerlink" title="Diff算法"></a>Diff算法</h3><p>做两棵树的diff时，React首先比较两个根节点元素。然后根据根节点元素的类型决定后续行为。</p>
+<h4 id="不同类型的元素"><a href="#不同类型的元素" class="headerlink" title="不同类型的元素"></a>不同类型的元素</h4><p>只要根节点是不同类型的元素，React会拆除原来的树然后构建一棵新的树。从<code>a</code>标签到<code>img</code>标签，或者从<code>Article</code>到<code>Commnet</code>，后者从<code>Button</code>到<code>div</code>——任何这种情况都会引发整棵树的重新构建。</p>
+<p>当拆除一棵树的时候，老的DOM节点会被销毁。组件实例处理<em>componentWillUnmount()</em>。当创建一棵新的树的时候，新的DOM节点会被插入到DOM中。组件实例处理<em>componentWillMount()</em>之后处理<em>componentDidMount()</em>。任何与原有的树相关的状态都会丢失。</p>
+<p>根节点元素下的任何组件也会被卸载，并且其状态也将被删除。如下所示，当做diff时：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Counter</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">span</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">Counter</span> /&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">span</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这种情况会销毁<code>Counter</code>然后然后重新挂载一个新的<code>Counter</code>。</p>
+<h4 id="相同类型的DOM元素"><a href="#相同类型的DOM元素" class="headerlink" title="相同类型的DOM元素"></a>相同类型的DOM元素</h4><p>当比较两个相同的React DOM元素时，React会查看两者的属性，然后保留DOM节点下相同的属性，而只更新修改过的属性。例如：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">className</span>=<span class="string">"before"</span> <span class="attr">title</span>=<span class="string">"stuff"</span> /&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">className</span>=<span class="string">"after"</span> <span class="attr">title</span>=<span class="string">"stuff"</span> /&gt;</span></span><br></pre></td></tr></table></figure>
+<p>通过对比这两个元素，React知道只修改DOM节点下的<em>className</em>属性。</p>
+<p>当更新<em>style</em>时，React也会知道只更新改变过了的属性。例如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">&lt;div style=&#123;&#123;<span class="attr">color</span>: <span class="string">'red'</span>, <span class="attr">fontWeight</span>: <span class="string">'bold'</span>&#125;&#125; /&gt;</span><br><span class="line"></span><br><span class="line">&lt;div style=&#123;&#123;<span class="attr">color</span>: <span class="string">'green'</span>, <span class="attr">fontWeight</span>: <span class="string">'bold'</span>&#125;&#125; /&gt;</span><br></pre></td></tr></table></figure>
+<p>当转换两个元素的时候，React知道只修改<em>color</em>样式，而不会去改<em>fontWeight</em>。</p>
+<p>在处理了当前DOM节点之后，React会递归处理所有子节点。</p>
+<h4 id="相同类型的组件元素"><a href="#相同类型的组件元素" class="headerlink" title="相同类型的组件元素"></a>相同类型的组件元素</h4><p>组件更新时，React会保留同一个实例，所以在渲染期间，状态都被保持。React更新组件实例的属性来匹配新的元素，并且在实例上调用<em>componentWillReceiveProps()</em>方法和<em>componentWillUpdate()</em>方法。</p>
+<p>之后调用<em>render()</em>方法，然后在上一次渲染的结果和新的渲染结果上递归做diff。</p>
+<h4 id="子元素上的递归"><a href="#子元素上的递归" class="headerlink" title="子元素上的递归"></a>子元素上的递归</h4><p>默认情况下，当对一个DOM节点上的子元素进行递归时，React只是同时迭代了修改前和修改后的两个列表的子元素，并且只要发现了不同就生成一个修改。</p>
+<p>举个例子，当在列表的尾部添加一个元素时候，两个数之间的转换就顺利地进行：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>first<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>second<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>first<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>second<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>third<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>React会对比两个<em>&lt;li&gt;first&lt;/li&gt;</em>，两个<em>&lt;li&gt;second&lt;/li&gt;</em>，然后插入<em>&lt;li&gt;third&lt;/li&gt;</em>。</p>
+<p>如果你很直白的实现这个，在列表的头部插入就性能很差了。举个例子，两棵树的转换就表现不佳：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>Duke<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>Villanova<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>Connecticut<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>Duke<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span>&gt;</span>Villanova<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>React会修改每一个子节点，而并不能认识到其实可以完好无损地保存<em>&lt;li&gt;Duke&lt;/li&gt;</em>和<em>&lt;li&gt;Villanova&lt;/li&gt;</em>两颗子树。这个低效率的工作方式是有问题的。</p>
+<h4 id="Keys"><a href="#Keys" class="headerlink" title="Keys"></a>Keys</h4><p>为了解决这个问题，React提供了<em>key</em>属性。当子元素有<em>key</em>时，React用<em>key</em>来匹配原树中的子元素和新树中的子元素。举个例子，添加一个<em>key</em>到上面的示例中去，树的转换就变得有效了：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">"2015"</span>&gt;</span>Duke<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">"2016"</span>&gt;</span>Villanova<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br><span class="line"></span><br><span class="line"><span class="tag">&lt;<span class="name">ul</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">"2014"</span>&gt;</span>Connecticut<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">"2015"</span>&gt;</span>Duke<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">"2016"</span>&gt;</span>Villanova<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br><span class="line"><span class="tag">&lt;/<span class="name">ul</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>这样React知道<em>key</em>为<em>‘2014’</em>的元素是个新元素了，且知道key为’2015’和’2016’的元素只是被移动了而已。</p>
+<p>在实践中，找一个<em>key</em>属性一般都不难。你要展示的元素已经有一个唯一的ID，所以<em>key</em>可以直接从数据中找：</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">li</span> <span class="attr">key</span>=<span class="string">&#123;item.id&#125;</span>&gt;</span>&#123;item.name&#125;<span class="tag">&lt;/<span class="name">li</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>如果不是这种情况（找不到<em>key</em>），你可以添加一个新的ID属性到你的模型中或者离散化你的部分内容以生成一个<em>key</em>。这个<em>key</em>在兄弟节点中必须是唯一的，不要求全局唯一。</p>
+<p>此外还有最后一招，你可以传递数组中的当前项的索引作为一个<em>key</em>。如果永远不重新排序的话基本就没问题，但是重新排序会变得很慢。</p>
+<h3 id="折中做法"><a href="#折中做法" class="headerlink" title="折中做法"></a>折中做法</h3><p>React在虚拟DOM和DOM的协调算法是一个实现细节，这点很重要。React可以对每个动作重新渲染整个APP，最后的结果都会是一样的。我们会经常改进启发方法以让一般用例更快。</p>
+<p>在当前实现中，可以注意到子树会移动到其兄弟节点间，但是它不会被移动到了其他地方。算法会重新渲染整个子树。</p>
+<p>由于React基于的启发方法，如果不满足这些启发背后的假定，性能就很糟糕了。</p>
+<ol>
+<li>算法不会尝试对比不同组件类型的子树。如果遇到在两个不同组件类型的组件中输出了很相似的结果，你应该想想怎么让它们变成同一类型。我们发现在实践中这是一个问题。</li>
+<li>key应该是稳定的，可预测的，并且是唯一的。不稳定的key（如使用<em>Math.random()</em>生成的key）会引发大量组件实例和DOM节点和其他不必要更新，这个会恶化性能，并且丢失子组件的状态。</li>
+</ol>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://facebook.github.io/react/docs/reconciliation.html" target="_blank" rel="noopener">Reconciliation - React Docs</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/08/react/12_vitual_dom/" rel="next" title="虚拟DOM和DOM的不同">
+                <i class="fa fa-chevron-left"></i> 虚拟DOM和DOM的不同
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/17/else/13_latex_in_word/" rel="prev" title="如何在Word中写Latex">
+                如何在Word中写Latex <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#动机"><span class="nav-number">2.</span> <span class="nav-text">动机</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Diff算法"><span class="nav-number">3.</span> <span class="nav-text">Diff算法</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#不同类型的元素"><span class="nav-number">3.1.</span> <span class="nav-text">不同类型的元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#相同类型的DOM元素"><span class="nav-number">3.2.</span> <span class="nav-text">相同类型的DOM元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#相同类型的组件元素"><span class="nav-number">3.3.</span> <span class="nav-text">相同类型的组件元素</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#子元素上的递归"><span class="nav-number">3.4.</span> <span class="nav-text">子元素上的递归</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Keys"><span class="nav-number">3.5.</span> <span class="nav-text">Keys</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#折中做法"><span class="nav-number">4.</span> <span class="nav-text">折中做法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Java 8 Lambda学习笔记，通过一个逐渐完善的例子来学习Lambda。">
+<meta name="keywords" content="Java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Java 8 Lambda学习笔记">
+<meta property="og:url" content="http://yoursite.com/2016/05/04/java/01_lambda/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="Java 8 Lambda学习笔记，通过一个逐渐完善的例子来学习Lambda。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.354Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Java 8 Lambda学习笔记">
+<meta name="twitter:description" content="Java 8 Lambda学习笔记，通过一个逐渐完善的例子来学习Lambda。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/04/java/01_lambda/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Java 8 Lambda学习笔记 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/04/java/01_lambda/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Java 8 Lambda学习笔记
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-05-04 21:46:00" itemprop="dateCreated datePublished" datetime="2016-05-04T21:46:00+08:00">2016-05-04</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">Java 8 Lambda学习笔记，通过一个逐渐完善的例子来学习Lambda。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概要"><a href="#概要" class="headerlink" title="概要"></a>概要</h3><p>找了几篇Java Lambda表达式的学习文章来看，虽然其他几篇也不错，但参考3（参考4是视频版）是最好的。这里结合自己的理解，重新梳理一下Java Lambda的学习流程。</p>
+<p>关于Lambda的概念，Lambda表达式就是匿名方法。以上就是Java 8 Lambda的一句话概括。以下我们结合实例来学习。</p>
+<h3 id="基本学习"><a href="#基本学习" class="headerlink" title="基本学习"></a>基本学习</h3><h4 id="功能性接口"><a href="#功能性接口" class="headerlink" title="功能性接口"></a>功能性接口</h4><p>为了引入Lambda表达式，这里先介绍功能性接口（Functional Interface）。在Java 8中，有且仅有一个方法的接口被称为功能性接口。示例如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">interface</span> <span class="title">DemoI</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">demo</span><span class="params">()</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="最基本的Lambda表达式"><a href="#最基本的Lambda表达式" class="headerlink" title="最基本的Lambda表达式"></a>最基本的Lambda表达式</h4><p>概要中说到，Lambda表达式就是匿名方法，实际上，在Java 8以前的版本中是通过匿名类的方式实现匿名方法的，示例如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        DemoI demoI = <span class="keyword">new</span> DemoI() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">demo</span><span class="params">()</span> </span>&#123;</span><br><span class="line">                System.out.println(<span class="string">"Hello Java Lambda."</span>);</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码中，匿名类实际有用的代码是demo()方法，而这样一个方法最关键的是它的参数声明，以及方法体中的处理逻辑，至于这个方法实际实现的接口名（DemoI），重写的方法名（demo()），实际上程序员在实现这个匿名类的时候是不关心的。</p>
+<p>接下来我们来看Lambda的写法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        DemoI demoI = () -&gt; System.out.println(<span class="string">"Hello Java Lambda."</span>);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面的代码中，我们看到<figure class="highlight plain"><figcaption><span>-> System.out.println(“Hello Java Lambda.”)```返回了一个DemoI的匿名类，这句代码和上面的一段代码是等价的。()是方法参数的声明，处理逻辑是```System.out.println(“Hello Java Lambda.”)```。这样，我们的Lambda表达式就完成了。</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">实际上，Java 8的编译器会帮我们翻译成实现匿名类等价的代码，引入Lambda表达式使我们的代码更简洁易读。</span><br><span class="line"></span><br><span class="line">接下来我们来看一个稍微复杂一点的Lambda表达式，我们来完成一个简单的四则运算功能。</span><br><span class="line"></span><br><span class="line">```java</span><br><span class="line">interface Operation &#123;</span><br><span class="line">    public int operate(int a, int b);</span><br><span class="line">&#125;</span><br><span class="line">public class DemoLambda &#123;</span><br><span class="line">    public static void main(String... args) &#123;</span><br><span class="line">        // 加法</span><br><span class="line">        Operation add = (a, b) -&gt; a + b;</span><br><span class="line">        System.out.println(add.operate(4, 2)); // 6</span><br><span class="line">        // 减法</span><br><span class="line">        Operation minus = (a, b) -&gt; a - b;</span><br><span class="line">        System.out.println(minus.operate(4, 2)); // 2</span><br><span class="line">        // 乘法</span><br><span class="line">        Operation multiple = (a, b) -&gt; a * b;</span><br><span class="line">        System.out.println(multiple.operate(4, 2)); // 8</span><br><span class="line">        // 除法</span><br><span class="line">        Operation devide = (a, b) -&gt; a / b;</span><br><span class="line">        System.out.println(devide.operate(4, 2)); // 2</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure></p>
+<h4 id="表达式Lambda和声明式Lambda"><a href="#表达式Lambda和声明式Lambda" class="headerlink" title="表达式Lambda和声明式Lambda"></a>表达式Lambda和声明式Lambda</h4><p>在上面的Labmda表达式中，我们的逻辑都只有一句话，或者输出，或者计算加减乘除的值，这种Lambda称为表达式Lambda（Statement Lambda），处理逻辑更复杂的情况我们需要用到声明式Lambda（Expression Lambda），声明式Lambda需要用大括号将多个语句包含起来。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 稍微复杂一点的运算</span></span><br><span class="line">        Operation o = (a, b) -&gt; &#123;</span><br><span class="line">            <span class="comment">// do something.</span></span><br><span class="line">            <span class="keyword">int</span> result = <span class="number">0</span>;</span><br><span class="line">            result = a + b;</span><br><span class="line">            result /= <span class="number">2</span>;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;;</span><br><span class="line">        System.out.println(o.operate(<span class="number">4</span>, <span class="number">2</span>)); <span class="comment">// 3</span></span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上就是Java 8中Lambda表达式的基本使用。</p>
+<h3 id="进阶学习"><a href="#进阶学习" class="headerlink" title="进阶学习"></a>进阶学习</h3><h4 id="用户管理程序V1"><a href="#用户管理程序V1" class="headerlink" title="用户管理程序V1"></a>用户管理程序V1</h4><p>先来看以下代码。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Gender</span> </span>&#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> MALE = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">static</span> <span class="keyword">int</span> FEMALE = <span class="number">2</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Person</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> String name;</span><br><span class="line">    <span class="keyword">private</span> Integer age;</span><br><span class="line">    <span class="keyword">private</span> Integer gender;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, Integer age, Integer gender)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.name = name;</span><br><span class="line">        <span class="keyword">this</span>.age = age;</span><br><span class="line">        <span class="keyword">this</span>.gender = gender;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// setters and getters</span></span><br><span class="line">    <span class="meta">@Override</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> String <span class="title">toString</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">"Person[name:"</span> + <span class="keyword">this</span>.name + <span class="string">",age:"</span> + <span class="keyword">this</span>.age + <span class="string">",gender"</span> + <span class="keyword">this</span>.gender + <span class="string">"]"</span>;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>定义了一个Person类（以上Setter和Getter都省略），分别包括姓名，年龄和性别，还定义了一个用于设定性别的Gender类。现在我们还需要一个Admin，他需要对Person进行管理，他还需要找出成年人管理的Person列表中的成年人（age &gt;= 18）和所有女性（gender == Gender.FEMALE），并输出成年人的信息。代码如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Admin</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Person&gt; personList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Objects.nonNull(person)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.personList.add(person);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">filterAdults</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Person person : <span class="keyword">this</span>.personList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (person.getAge() &gt;= <span class="number">18</span>) &#123;</span><br><span class="line">                System.out.println(person.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">filterFemales</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Person person : <span class="keyword">this</span>.personList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (person.getGender() == Gender.FEMALE) &#123;</span><br><span class="line">                System.out.println(person.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// getter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>Getter省略，Admin中保存了一个Person的List，还有一个filterAdults()方法筛选成年人和filterFemale()方法筛选女性的信息并输出。以下是程序入口。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> Admin admin = <span class="keyword">new</span> Admin();</span><br><span class="line">    <span class="keyword">static</span> &#123;</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Ouyang"</span>, <span class="number">25</span>, Gender.MALE));</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Zhao"</span>, <span class="number">27</span>, Gender.MALE));</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Qian"</span>, <span class="number">30</span>, Gender.MALE));</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Sun"</span>, <span class="number">15</span>, Gender.FEMALE));</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Li"</span>, <span class="number">21</span>, Gender.FEMALE));</span><br><span class="line">        admin.addPerson(<span class="keyword">new</span> Person(<span class="string">"Enami"</span>, <span class="number">20</span>, Gender.FEMALE));</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        admin.filterAdults();</span><br><span class="line">        Sysmtem.out.println();</span><br><span class="line">        admin.filterFemales();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出结果如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Person[name:Ouyang,age:25,gender1]</span><br><span class="line">Person[name:Zhao,age:27,gender1]</span><br><span class="line">Person[name:Qian,age:30,gender1]</span><br><span class="line">Person[name:Li,age:21,gender2]</span><br><span class="line">Person[name:Enami,age:20,gender2]</span><br><span class="line">Person[name:Sun,age:15,gender2]</span><br><span class="line">Person[name:Li,age:21,gender2]</span><br><span class="line">Person[name:Enami,age:20,gender2]</span><br></pre></td></tr></table></figure>
+<p>上面的代码完成了我们要的效果，但仍有一些问题。</p>
+<h4 id="用户管理程序V2"><a href="#用户管理程序V2" class="headerlink" title="用户管理程序V2"></a>用户管理程序V2</h4><p>Lambda表达式的意义在于更支持DRY（Don’t Repeat Yourself）规则以及使代码更简单更易读。上面的代码的问题在于：</p>
+<ul>
+<li>为每一个条件单独定义了一个方法，可重用性相对不高，每个筛选标准都需要实现一个方法。</li>
+<li>代码弹性低，如果筛选标准改变，需要改变筛选方法中的代码。</li>
+</ul>
+<p>为了解决上述问题，我们需要筛选逻辑提取出来，注意是仅提取筛选逻辑部分。修改后的Admin如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Admin</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Person&gt; personList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Objects.nonNull(person)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.personList.add(person);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">filterAdults</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Person person : <span class="keyword">this</span>.personList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.isAdult(person)) &#123;</span><br><span class="line">                System.out.println(person.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">filterFemales</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">for</span> (Person person : <span class="keyword">this</span>.personList) &#123;</span><br><span class="line">            <span class="keyword">if</span> (<span class="keyword">this</span>.isFemale(person)) &#123;</span><br><span class="line">                System.out.println(person.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isAdult</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> person.getAge() &gt;= <span class="number">18</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isFemale</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> person.getGender == Gender.FEMALE;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// getter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>运行结果仍然是正常的，这样，我们单独提取出来了判断是否是成年人的判断逻辑和是否是女性的判断逻辑，但我们还可以改进。</p>
+<h4 id="用户管理程序V3"><a href="#用户管理程序V3" class="headerlink" title="用户管理程序V3"></a>用户管理程序V3</h4><p>我们可以通过一个泛型的功能性接口来进一步提取判断逻辑，我们可以自定义这个接口，其中需要一个判断方法。但Java 8中已经为我们提供了这样一个接口。在Java 8的java.util.function中，提供了一系列的标准功能性接口。这里我们需要用到的是Predicate接口。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">Predicate</span>&lt;<span class="title">T</span>&gt; </span>&#123;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(T t)</span></span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>修改后的Admin如下。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Admin</span> </span>&#123;</span><br><span class="line">    <span class="keyword">private</span> List&lt;Person&gt; personList = <span class="keyword">new</span> ArrayList&lt;&gt;();</span><br><span class="line">    <span class="function"><span class="keyword">public</span> List&lt;Person&gt; <span class="title">getPersonList</span><span class="params">()</span> </span>&#123;</span><br><span class="line">        <span class="keyword">return</span> personList;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addPerson</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">if</span> (Objects.nonNull(person)) &#123;</span><br><span class="line">            <span class="keyword">this</span>.personList.add(person);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">filterPerson</span><span class="params">(Predicate&lt;Person&gt; personPredicate)</span> </span>&#123;</span><br><span class="line">        <span class="keyword">this</span>.personList.forEach(person -&gt; &#123;</span><br><span class="line">            <span class="keyword">if</span> (personPredicate.test(person)) &#123;</span><br><span class="line">                System.out.println(person.toString());</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// getter</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>我们的判断逻辑不见了，这是因为我们通过Lambda把我们的代码数据化了，判断逻辑将通过filterPerson()方法的参数传递进来。我们需要进一步修改main()方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 省略初始化</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 筛选成人信息</span></span><br><span class="line">        admin.filterPerson(<span class="keyword">new</span> Predicate&lt;Person&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> person.getAge() &gt;= <span class="number">18</span>;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">        <span class="comment">// 筛选女性信息</span></span><br><span class="line">        admin.filterPerson(<span class="keyword">new</span> Predicate&lt;Person&gt;() &#123;</span><br><span class="line">            <span class="meta">@Override</span></span><br><span class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">test</span><span class="params">(Person person)</span> </span>&#123;</span><br><span class="line">                <span class="keyword">return</span> person.getGender() == Gender.FEMALE;</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>上面两个匿名类就很熟悉了，根据我们本文在第二小节中所述，我们可以直接在这里改成Lambda表达式。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DemoLambda</span> </span>&#123;</span><br><span class="line">    <span class="comment">// 省略初始化</span></span><br><span class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String... args)</span> </span>&#123;</span><br><span class="line">        <span class="comment">// 筛选成人信息</span></span><br><span class="line">        admin.filterPerson(p -&gt; p.getAge() &gt;= <span class="number">18</span>);</span><br><span class="line">        System.out.println();</span><br><span class="line">        <span class="comment">// 筛选女性信息</span></span><br><span class="line">        admin.filterPerson(p -&gt; p.getGender() == Gender.FEMALE);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样，整个代码比一开始的V1更简洁更易读，这就是Lambda的好处。</p>
+<p>输出结果如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">Person[name:Ouyang,age:25,gender1]</span><br><span class="line">Person[name:Zhao,age:27,gender1]</span><br><span class="line">Person[name:Qian,age:30,gender1]</span><br><span class="line">Person[name:Li,age:21,gender2]</span><br><span class="line">Person[name:Enami,age:20,gender2]</span><br><span class="line">Person[name:Sun,age:15,gender2]</span><br><span class="line">Person[name:Li,age:21,gender2]</span><br><span class="line">Person[name:Enami,age:20,gender2]</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上就是我们Java 8中Labmda的一般使用方法了，使用Lambda表达式使我们的Java开发更简单，使冗长的代码更精简。</p>
+<p>进一步学习的话可以学习如何使用上面提到的java.util.function中各种标准功能性接口。另外Java 8中的一些Collection实现也提供了stream()方法和parallel()方法，分流是为了使用Lambda表达式实现的流式方法和并行式（利用多核CPU）方法，本文就不展开介绍了。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://blog.jetbrains.com/idea/2014/09/the-inspection-connection-issue-1/" target="_blank" rel="noopener">The Inspection Connection – Issue #1, Migration Translation</a></li>
+<li><a href="http://tutorials.jenkov.com/java/lambda-expressions.html#single-method-interface" target="_blank" rel="noopener">Java Lambda Expressions</a></li>
+<li><a href="http://www.oracle.com/webfolder/technetwork/tutorials/obe/java/Lambda-QuickStart/index.html" target="_blank" rel="noopener">Java SE 8: Lambda Quick Start</a></li>
+<li><a href="https://www.youtube.com/watch?v=bzO5GSujdqI" target="_blank" rel="noopener">Jump-Starting Lambda</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Java/" rel="tag"># Java</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/01/else/07_concepts/" rel="next" title="几个基本概念">
+                <i class="fa fa-chevron-left"></i> 几个基本概念
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/13/else/08_aliyun/" rel="prev" title="阿里云服务器重装系统笔记">
+                阿里云服务器重装系统笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概要"><span class="nav-number">1.</span> <span class="nav-text">概要</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#基本学习"><span class="nav-number">2.</span> <span class="nav-text">基本学习</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#功能性接口"><span class="nav-number">2.1.</span> <span class="nav-text">功能性接口</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#最基本的Lambda表达式"><span class="nav-number">2.2.</span> <span class="nav-text">最基本的Lambda表达式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#表达式Lambda和声明式Lambda"><span class="nav-number">2.3.</span> <span class="nav-text">表达式Lambda和声明式Lambda</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#进阶学习"><span class="nav-number">3.</span> <span class="nav-text">进阶学习</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#用户管理程序V1"><span class="nav-number">3.1.</span> <span class="nav-text">用户管理程序V1</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用户管理程序V2"><span class="nav-number">3.2.</span> <span class="nav-text">用户管理程序V2</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#用户管理程序V3"><span class="nav-number">3.3.</span> <span class="nav-text">用户管理程序V3</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

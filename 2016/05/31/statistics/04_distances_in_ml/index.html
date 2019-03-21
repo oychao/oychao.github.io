@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="闵可夫斯基距离根据p的取值不同又有更多细分，常用的有曼哈顿距离，欧几里得距离和切比雪夫距离。向量内积引申下去有余弦值，余弦值继续引申又有皮尔逊相关系数。">
+<meta name="keywords" content="Statistics">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习笔记3：闵可夫斯基距离与向量内积简介">
+<meta property="og:url" content="http://yoursite.com/2016/05/31/statistics/04_distances_in_ml/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="闵可夫斯基距离根据p的取值不同又有更多细分，常用的有曼哈顿距离，欧几里得距离和切比雪夫距离。向量内积引申下去有余弦值，余弦值继续引申又有皮尔逊相关系数。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://images.cnitblog.com/blog/533521/201308/07220559-ae662025d1394f90bfd62f7c21c3d895.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.346Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="机器学习笔记3：闵可夫斯基距离与向量内积简介">
+<meta name="twitter:description" content="闵可夫斯基距离根据p的取值不同又有更多细分，常用的有曼哈顿距离，欧几里得距离和切比雪夫距离。向量内积引申下去有余弦值，余弦值继续引申又有皮尔逊相关系数。">
+<meta name="twitter:image" content="http://images.cnitblog.com/blog/533521/201308/07220559-ae662025d1394f90bfd62f7c21c3d895.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/31/statistics/04_distances_in_ml/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>机器学习笔记3：闵可夫斯基距离与向量内积简介 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/31/statistics/04_distances_in_ml/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">机器学习笔记3：闵可夫斯基距离与向量内积简介
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-05-31 08:33:00" itemprop="dateCreated datePublished" datetime="2016-05-31T08:33:00+08:00">2016-05-31</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">闵可夫斯基距离根据p的取值不同又有更多细分，常用的有曼哈顿距离，欧几里得距离和切比雪夫距离。向量内积引申下去有余弦值，余弦值继续引申又有皮尔逊相关系数。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<h3 id="闵可夫斯基距离啊"><a href="#闵可夫斯基距离啊" class="headerlink" title="闵可夫斯基距离啊"></a>闵可夫斯基距离啊</h3><p>闵可夫斯基距离（Minkowski distance）是衡量数值点之间距离的一种非常常见的方法，假设数值点P和Q坐标如下：</p>
+<p>$$<br>\large<br>P = (x_1, x_2, \cdots, x_n) \ and \ Q = (y_1, y_2, \cdots, y_n) \in \mathbb R ^n<br>$$</p>
+<p>那么，闵可夫斯基距离定义为：</p>
+<p>$$<br>\large<br>\begin{pmatrix}<br>\sum \limits_{i=1}^n \vert x _i - y _i \vert ^p<br>\end{pmatrix} ^{1 \over p}<br>$$</p>
+<p>当p为1时表示曼哈顿距离（Manhattan distance），也叫L1距离；<br>当p为2时表示欧几里得距离（Euclidean distance），也叫L2距离；<br>当p趋近无穷大时表示切比雪夫距离（Chebyshev distance）。</p>
+<p>以下是p为其他取值时的情况：</p>
+<p><img src="http://images.cnitblog.com/blog/533521/201308/07220559-ae662025d1394f90bfd62f7c21c3d895.png" alt></p>
+<p>闵可夫斯基距离比较直观，但是它与数据的分布无关，具有一定的局限性，如果 x 方向的幅值远远大于y方向的值，这个距离公式就会过度放大x维度的作用。所以，在计算距离之前，我们可能还需要对数据进行z-transform处理，即减去均值，除以标准差：</p>
+<p>$$<br>\large<br>(x_1,y_1)<br>\longmapsto<br>\begin{pmatrix}<br>{x_1-\mu_x \over \sigma_x},<br>{y_1-\mu_y \over \sigma_y}<br>\end{pmatrix}<br>$$</p>
+<p>$\mu$表示该维度上的均值；$\sigma$表示该维度上的标准差。</p>
+<h3 id="向量内积"><a href="#向量内积" class="headerlink" title="向量内积"></a>向量内积</h3><p>向量内积是线性代数里最为常见的计算，实际上它还是一种有效并且直观的相似性测量手段。向量内积的定义如下：</p>
+<p>$$<br>\large<br>Inner(x,y) = \langle a,b \rangle =<br>\sum\limits_i x_i y_i<br>$$</p>
+<p>向量内积的结果是没有界限的，一种解决办法是除以长度之后再求内积，这就是应用十分广泛的余弦相似度（Cosine similarity）：</p>
+<p>$$<br>\large<br>CosSim(x,y) =<br>{\sum\limits_i x_i y_i<br>\over<br>\sqrt {\sum\limits_i x_i^2}<br>\sqrt {\sum\limits_i y_i^2}<br>} =<br>{\langle x,y \rangle<br>\over<br>|x||y|<br>}<br>$$</p>
+<p>余弦相似度与向量的幅值无关，只与向量的方向相关。需要注意一点的是，余弦相似度受到向量的平移影响，上式如果将x平移到x+1，余弦值就会改变。怎样才能实现平移不变性？这就是下面要说的皮尔逊相关系数（Pearson correlation），有时候也直接叫相关系数:</p>
+<p>$$<br>Corr(x,y) =<br>{\sum\limits_i(x_i - \overline x)(y_i - \overline y)<br>\over<br>\sqrt {\sum\limits_i(x_i - \overline x)^2}<br>\sqrt {\sum\limits_i(y_i - \overline y)^2}<br>} =<br>{\langle x - \overline x, y - \overline y \rangle<br>\over<br>|x - \overline x| |y - \overline y|} =<br>CosSim(x - \overline x, y - \overline y)<br>$$</p>
+<p>皮尔逊相关系数具有平移不变性和尺度不变性，计算出了两个向量（维度）的相关性。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://www.cnblogs.com/daniel-D/p/3244718.html" target="_blank" rel="noopener">皮尔逊积矩相关系数 - 维基百科</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Statistics/" rel="tag"># Statistics</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/05/18/statistics/03_pearsons_r/" rel="next" title="机器学习笔记2：皮尔逊相关系数的几何意义">
+                <i class="fa fa-chevron-left"></i> 机器学习笔记2：皮尔逊相关系数的几何意义
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/20/statistics/05_knn/" rel="prev" title="机器学习笔记4：K近邻算法">
+                机器学习笔记4：K近邻算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#闵可夫斯基距离啊"><span class="nav-number">1.</span> <span class="nav-text">闵可夫斯基距离啊</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#向量内积"><span class="nav-number">2.</span> <span class="nav-text">向量内积</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">3.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="工作中看到的问题，写篇笔记记录一下。一般来说，在表结构中存储树结构只需要添加一个自关联的外键即可（parentId），这种存储结构被被称为邻接表（Adjacency List Model），但邻接表存储树结构在查询方面却存在一定效率问题。">
+<meta name="keywords" content="Algorithm">
+<meta property="og:type" content="article">
+<meta property="og:title" content="关系型数据库中树结构的路径查询">
+<meta property="og:url" content="http://yoursite.com/2018/11/26/algorithm/03_modified_preordered_tree_tranvesal/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="工作中看到的问题，写篇笔记记录一下。一般来说，在表结构中存储树结构只需要添加一个自关联的外键即可（parentId），这种存储结构被被称为邻接表（Adjacency List Model），但邻接表存储树结构在查询方面却存在一定效率问题。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://sitepointstatic.com/graphics/sitepoint_tree.gif">
+<meta property="og:image" content="http://sitepointstatic.com/graphics/sitepoint_numbering.gif">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.356Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="关系型数据库中树结构的路径查询">
+<meta name="twitter:description" content="工作中看到的问题，写篇笔记记录一下。一般来说，在表结构中存储树结构只需要添加一个自关联的外键即可（parentId），这种存储结构被被称为邻接表（Adjacency List Model），但邻接表存储树结构在查询方面却存在一定效率问题。">
+<meta name="twitter:image" content="http://sitepointstatic.com/graphics/sitepoint_tree.gif">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/11/26/algorithm/03_modified_preordered_tree_tranvesal/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>关系型数据库中树结构的路径查询 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/11/26/algorithm/03_modified_preordered_tree_tranvesal/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">关系型数据库中树结构的路径查询
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-11-26 12:23:00" itemprop="dateCreated datePublished" datetime="2018-11-26T12:23:00+08:00">2018-11-26</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">工作中看到的问题，写篇笔记记录一下。一般来说，在表结构中存储树结构只需要添加一个自关联的外键即可（parentId），这种存储结构被被称为邻接表（Adjacency List Model），但邻接表存储树结构在查询方面却存在一定效率问题。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>工作中看到的问题，写篇笔记记录一下。</p>
+<p>一般来说，在表结构中存储树结构只需要添加一个自关联的外键即可（parentId），这种存储结构被被称为邻接表（Adjacency List Model），但邻接表存储树结构在查询方面却存在一定效率问题。</p>
+<p>除邻接表之外的另一种存储结构就是预排序遍历树（Modified Preorder Tree Traversal），这种方法通过引入额外的顺序字段维护了树的路径关系，对于树结构较深，或者查询量较大的情况有很大的优势。</p>
+<h3 id="邻接表"><a href="#邻接表" class="headerlink" title="邻接表"></a>邻接表</h3><p>邻接表是一种最直观的方式，有一定数据结构基础的同学应该对此非常熟悉。</p>
+<p>假设我们有如下图需要存储。</p>
+<p><img src="http://sitepointstatic.com/graphics/sitepoint_tree.gif" alt="待存储的树"></p>
+<p>其对应的邻接表为：</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>parentId</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Food</td>
+<td></td>
+</tr>
+<tr>
+<td>Fruit</td>
+<td>Food</td>
+</tr>
+<tr>
+<td>Red</td>
+<td>Fruit</td>
+</tr>
+<tr>
+<td>Cherry</td>
+<td>Red</td>
+</tr>
+<tr>
+<td>Yellow</td>
+<td>Fruit</td>
+</tr>
+<tr>
+<td>Banana</td>
+<td>Yellow</td>
+</tr>
+<tr>
+<td>Meat</td>
+<td>Food</td>
+</tr>
+<tr>
+<td>Beef</td>
+<td>Meat</td>
+</tr>
+<tr>
+<td>Pork</td>
+<td>Meat</td>
+</tr>
+</tbody>
+</table>
+<p>表中，每一条记录代表一个节点，parentId表示了当前节点父节点Id，在数据库中，我们可以将parentId和id用外键的方式关联起来。可以看出，邻接表是非常直观的一种方式，该表记录了一颗树的完整信息。</p>
+<p>但是当我们需要查询一段路径时，问题就出现了。</p>
+<p>比如现在需要查询从Banana到Food的路径，邻接表必须先从Banana开始，找到其父节点Yellow，再上溯到Fruit，最后上溯到Food，才能将整个树的路径查找出来。</p>
+<p>在关系型数据库中，这意味着我们需要执行多次SQL查询（即便将多次查询放到自定义函数或者是存储过程中，也无法避免多次查询操作），如果树的层级过深，数据较多，查询效率可能也难以接受。</p>
+<h3 id="预排序遍历树"><a href="#预排序遍历树" class="headerlink" title="预排序遍历树"></a>预排序遍历树</h3><p>事实上，除了邻接表的结构，一种被称作预排序遍历树的结构可以较好地解决路径查询效率低下的问题。</p>
+<p>预排序遍历树本质上还是采用邻接表的方式存储，但该结构通过添加两个用于维护节点关联关系的字段，使得查询路径时可以在一条查询语句内通过直接缩小两个字段的范围来实现。</p>
+<p>预排序遍历树的构建过程实际上就是对一棵树进行后序遍历，树的顺序编号从1开始。</p>
+<p><img src="http://sitepointstatic.com/graphics/sitepoint_numbering.gif" alt="预排序遍历树构建过程"></p>
+<p>对于每个节点的过程如下：</p>
+<ol>
+<li>设置当前节点的左序号为flag+1（flag的初始值为0）；</li>
+<li>递归处理左子树；</li>
+<li>递归处理右子树；</li>
+<li>设置当前节点的右序号为flag+1。</li>
+</ol>
+<p>最终的构建表记录如下：</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>parentId</th>
+<th>left</th>
+<th>right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Food</td>
+<td></td>
+<td>1</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Fruit</td>
+<td>Food</td>
+<td>2</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Red</td>
+<td>Fruit</td>
+<td>3</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Cherry</td>
+<td>Red</td>
+<td>4</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Yellow</td>
+<td>Fruit</td>
+<td>7</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Banana</td>
+<td>Yellow</td>
+<td>8</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Meat</td>
+<td>Food</td>
+<td>12</td>
+<td>17</td>
+</tr>
+<tr>
+<td>Beef</td>
+<td>Meat</td>
+<td>13</td>
+<td>14</td>
+</tr>
+<tr>
+<td>Pork</td>
+<td>Meat</td>
+<td>15</td>
+<td>16</td>
+</tr>
+</tbody>
+</table>
+<p>一棵预排序遍历树构建好之后，查询一条路径就简单很多了。</p>
+<p>比如还是从Banana到Food，我们可以查找left和right值在Banana和Food之间的所有节点。</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">select</span> * <span class="keyword">from</span> tree <span class="keyword">where</span> <span class="keyword">left</span> <span class="keyword">between</span> <span class="number">1</span> <span class="keyword">and</span> <span class="number">8</span> <span class="keyword">and</span> <span class="keyword">right</span> <span class="keyword">between</span> <span class="number">9</span> <span class="keyword">and</span> <span class="number">18</span>;</span><br></pre></td></tr></table></figure>
+<p>查询出的结果如下：</p>
+<table>
+<thead>
+<tr>
+<th>id</th>
+<th>parentId</th>
+<th>left</th>
+<th>right</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Food</td>
+<td></td>
+<td>1</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Fruit</td>
+<td>Food</td>
+<td>2</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Yellow</td>
+<td>Fruit</td>
+<td>7</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Banana</td>
+<td>Yellow</td>
+<td>8</td>
+<td>9</td>
+</tr>
+</tbody>
+</table>
+<p>可以看到这种方式查询一条路径时只需要一条语句即可，相比前面的方便很多。</p>
+<p>对数据结构比较敏感的同学肯定已经发现，相比最基本的邻接表结构，预排序遍历树对于插入节点的处理要麻烦一些，因为一个节点的插入，对于其他的节点的left和right值会有一定的影响。</p>
+<p>当有新节点加入时，我们当然可以从头开始构建这棵树，但这种方式不仅不优雅，而且当数据量比较大时，需要对一整张表的所有记录进行遍历，显然这是无法接受的。</p>
+<p>除此之外，我们可以针对性地去处理具体需要变动的节点，假设我们需要插入一个节点，其父节点是Red，id为Strawberry。</p>
+<p>我们需要做的具体操作如下：</p>
+<ol>
+<li>找到我们要插入位置的上一个兄弟节点，假定为preNode；</li>
+<li>更新比preNode.right大的所有节点的left值，全部+2；</li>
+<li>更新比preNode.right大的所有节点的right值，全部+2；</li>
+<li>新增一条记录，left为preNode.right+1，right为preNode.right+2。</li>
+</ol>
+<p>SQL语句为：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">UPDATE</span> tree <span class="keyword">SET</span> <span class="keyword">right</span>=<span class="keyword">right</span>+<span class="number">2</span> <span class="keyword">WHERE</span> <span class="keyword">right</span>&gt;<span class="number">5</span>;</span><br><span class="line"><span class="keyword">UPDATE</span> tree <span class="keyword">SET</span> <span class="keyword">right</span>=<span class="keyword">right</span>+<span class="number">2</span> <span class="keyword">WHERE</span> <span class="keyword">right</span>&gt;<span class="number">5</span>;</span><br><span class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> tree <span class="keyword">VALUES</span>(<span class="string">'Strawberry'</span>, <span class="string">'Red'</span>, <span class="number">6</span>, <span class="number">7</span>);</span><br></pre></td></tr></table></figure>
+<p>这样，一个新的节点就插入了，实际操作起来并不比邻接表麻烦多少。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>邻接表和预排序遍历树的简单对比如下。</p>
+<h4 id="邻接表-1"><a href="#邻接表-1" class="headerlink" title="邻接表"></a>邻接表</h4><ol>
+<li>优势：<ol>
+<li>理解简单；</li>
+<li>插入速度快。</li>
+</ol>
+</li>
+<li>劣势：<ol>
+<li>查询路径速度较慢，需要逐级回溯。</li>
+</ol>
+</li>
+</ol>
+<h4 id="预排序遍历树-1"><a href="#预排序遍历树-1" class="headerlink" title="预排序遍历树"></a>预排序遍历树</h4><ol>
+<li>优势：<ol>
+<li>查询路径速度快。</li>
+</ol>
+</li>
+<li>劣势：<ol>
+<li>需要额外字段维护路径关系；</li>
+<li>插入速度较慢，当有新节点插入时，需要更新新节点的所有后续节点。</li>
+</ol>
+</li>
+</ol>
+<p>可以看出预排序遍历树相比邻接表对于树的存储方便了很多，但是二者并不能说谁优谁劣，根据不同的使用场景，邻接表也有其优势，预排序遍历树也有其劣势。</p>
+<p>具体使用哪种实现方式，可以根据不同的业务场景去选择，如果不限于关系型数据库，也可以考虑Hierarchical Database。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://www.sitepoint.com/hierarchical-data-database/" target="_blank" rel="noopener">Storing Hierarchical Data in a Database - Gijs Van Tulder</a></li>
+<li><a href="https://www.cnblogs.com/woodcutter/archive/2010/04/21/1716923.html" target="_blank" rel="noopener">预排序遍历树算法(modified preorder tree traversal algorithm) - woodcutter</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Algorithm/" rel="tag"># Algorithm</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/10/23/javascript/37_y_combinator/" rel="next" title="函数式编程中的Y组合子">
+                <i class="fa fa-chevron-left"></i> 函数式编程中的Y组合子
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/12/02/algorithm/04_monacha_algorithm/" rel="prev" title="最大回文子串之Manacher算法">
+                最大回文子串之Manacher算法 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#邻接表"><span class="nav-number">2.</span> <span class="nav-text">邻接表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#预排序遍历树"><span class="nav-number">3.</span> <span class="nav-text">预排序遍历树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#邻接表-1"><span class="nav-number">4.1.</span> <span class="nav-text">邻接表</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#预排序遍历树-1"><span class="nav-number">4.2.</span> <span class="nav-text">预排序遍历树</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

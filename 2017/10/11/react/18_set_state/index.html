@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="setState是React中最重要的API之一，可是当我们调用setState的时候到底发生了什么呢？setState到底是同步改变状态，还是异步改变状态的呢？本文将从源码层面上来剖析setState的执行流程，通过逐步调试来搞清楚，setState到底做了一些什么事情。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="调用setState方法时到底发生了什么">
+<meta property="og:url" content="http://yoursite.com/2017/10/11/react/18_set_state/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="setState是React中最重要的API之一，可是当我们调用setState的时候到底发生了什么呢？setState到底是同步改变状态，还是异步改变状态的呢？本文将从源码层面上来剖析setState的执行流程，通过逐步调试来搞清楚，setState到底做了一些什么事情。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/react_calling_stack.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.371Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="调用setState方法时到底发生了什么">
+<meta name="twitter:description" content="setState是React中最重要的API之一，可是当我们调用setState的时候到底发生了什么呢？setState到底是同步改变状态，还是异步改变状态的呢？本文将从源码层面上来剖析setState的执行流程，通过逐步调试来搞清楚，setState到底做了一些什么事情。">
+<meta name="twitter:image" content="http://yoursite.com/images/react_calling_stack.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/10/11/react/18_set_state/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>调用setState方法时到底发生了什么 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/10/11/react/18_set_state/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">调用setState方法时到底发生了什么
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-10-11 23:25:00" itemprop="dateCreated datePublished" datetime="2017-10-11T23:25:00+08:00">2017-10-11</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">setState是React中最重要的API之一，可是当我们调用setState的时候到底发生了什么呢？setState到底是同步改变状态，还是异步改变状态的呢？本文将从源码层面上来剖析setState的执行流程，通过逐步调试来搞清楚，setState到底做了一些什么事情。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>setState是React中最重要的API之一，可是当我们调用setState的时候到底发生了什么呢？setState到底是同步改变状态，还是异步改变状态的呢？本文将从源码层面上来剖析setState的执行流程，通过逐步调试来搞清楚，setState到底做了一些什么事情。</p>
+<h3 id="调试准备"><a href="#调试准备" class="headerlink" title="调试准备"></a>调试准备</h3><p>为了理解setState的执行过程，我们需要一个计数器的组件，相信看过各种React教程的demo的我们对这个组件应该很熟悉。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> React, &#123; Component &#125; <span class="keyword">from</span> <span class="string">'react'</span>;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">App</span> <span class="keyword">extends</span> <span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">    <span class="keyword">super</span>(props);</span><br><span class="line">    <span class="keyword">this</span>.state = &#123;</span><br><span class="line">      value: <span class="number">0</span></span><br><span class="line">    &#125;;</span><br><span class="line">    <span class="keyword">this</span>.handleClick = <span class="keyword">this</span>.handleClick.bind(<span class="keyword">this</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  handleClick(e) &#123;</span><br><span class="line">    <span class="keyword">debugger</span>;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">      value: <span class="keyword">this</span>.state.value + <span class="number">1</span></span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div className=<span class="string">"App"</span>&gt;</span><br><span class="line">        &lt;p&gt;</span><br><span class="line">          &lt;span&gt;&#123;<span class="keyword">this</span>.state.value&#125;&lt;<span class="regexp">/span&gt;</span></span><br><span class="line"><span class="regexp">        &lt;/</span>p&gt;</span><br><span class="line">        &lt;button onClick=&#123;<span class="keyword">this</span>.handleClick&#125;&gt;Click me!<span class="xml"><span class="tag">&lt;/<span class="name">button</span>&gt;</span></span></span><br><span class="line">      &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">    );</span></span><br><span class="line"><span class="regexp">  &#125;</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">export default App;</span></span><br></pre></td></tr></table></figure>
+<p>构造方法中初始化了状态对象，里面有一个value属性，然后绑定了handleClick到当前对象。</p>
+<p>handleClick方法中调用了this.setState()方法来更新value。</p>
+<p>render方法中根据当前的value渲染点击次数，此外添加一个按钮，并绑定事件，使当点击该按钮时执行handleClick方法。</p>
+<p>组件的实现很简单，但我们需要的东西已经基本都有了，然后我们把它挂载到某个DOM的某个节点（作为APP的根节点）下即可。</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">ReactDOM.render(<span class="xml"><span class="tag">&lt;<span class="name">App</span> /&gt;</span>, document.getElementById('root'));</span></span><br><span class="line"><span class="xml">// ...</span></span><br></pre></td></tr></table></figure>
+<p>为了方便调试，我们在handleClick方法中添加了一行debugger。</p>
+<h3 id="开始调试"><a href="#开始调试" class="headerlink" title="开始调试"></a>开始调试</h3><p>首先打开网页，打开开发者工具，然后点击计数器按钮，这是代码就会在断点处停住。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">handleClick(e) &#123;</span><br><span class="line">  <span class="keyword">debugger</span>; <span class="comment">// &lt;-- 这里是断点，我们从这里开始往下调试。</span></span><br><span class="line">  <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">    value: <span class="keyword">this</span>.state.value + <span class="number">1</span></span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>接着继续往下走。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">ReactComponent.prototype.setState = <span class="function"><span class="keyword">function</span> (<span class="params">partialState, callback</span>) </span>&#123;</span><br><span class="line">  !(<span class="keyword">typeof</span> partialState === <span class="string">'object'</span> || <span class="keyword">typeof</span> partialState === <span class="string">'function'</span> || partialState == <span class="literal">null</span>) ? process.env.NODE_ENV !== <span class="string">'production'</span> ? invariant(<span class="literal">false</span>, <span class="string">'setState(...): takes an object of state variables to update or a function which returns an object of state variables.'</span>) : _prodInvariant(<span class="string">'85'</span>) : <span class="keyword">void</span> <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">this</span>.updater.enqueueSetState(<span class="keyword">this</span>, partialState); <span class="comment">// &lt;-- 这里，我们继续深入下去</span></span><br><span class="line">  <span class="keyword">if</span> (callback) &#123;</span><br><span class="line">    <span class="keyword">this</span>.updater.enqueueCallback(<span class="keyword">this</span>, callback, <span class="string">'setState'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>在ReactComponent.prototype.setState方法中，这个函数内一共三句代码：</p>
+<ol>
+<li>验证参数类型；</li>
+<li>执行this.updater.enqueueSetState(this, partialState);</li>
+<li>如果有callback，则执行this.updater.enqueueCallback(this, callback, ‘setState’);</li>
+</ol>
+<p>不难发现，第2行代码才是我们关注的重点，虽然为了方便setState执行状态更新之后的回调逻辑，React引入了setState的callback参数，但callback的处理其实和state的处理很类似，所以我们先来看state的更新是如何实现的。</p>
+<p>执行到第二行代码之后，继续往下执行。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">enqueueSetState: <span class="function"><span class="keyword">function</span> (<span class="params">publicInstance, partialState</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (process.env.NODE_ENV !== <span class="string">'production'</span>) &#123;</span><br><span class="line">    ReactInstrumentation.debugTool.onSetState();</span><br><span class="line">    process.env.NODE_ENV !== <span class="string">'production'</span> ? warning(partialState != <span class="literal">null</span>, <span class="string">'setState(...): You passed an undefined or null state object; '</span> + <span class="string">'instead, use forceUpdate().'</span>) : <span class="keyword">void</span> <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> internalInstance = getInternalInstanceReadyForUpdate(publicInstance, <span class="string">'setState'</span>); <span class="comment">// 获取React的内部实例</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!internalInstance) &#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">var</span> queue = internalInstance._pendingStateQueue || (internalInstance._pendingStateQueue = []);  <span class="comment">// 获取内部实例的_pendingStateQueue</span></span><br><span class="line">  queue.push(partialState);</span><br><span class="line"></span><br><span class="line">  enqueueUpdate(internalInstance); <span class="comment">// &lt;-- 在这里继续深入调试</span></span><br><span class="line">&#125;,</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>一开始的那一长串又是参数验证，我们直接跳过，然后有一行internalInstance的代码，实际上，React在内存中为每一个组件实例都保存了一个内部实例，内部实例有会临时保存我们对实例的一些变动，比如现在我们正在看的状态的改变，就会在内部实例的某些属性中保存起来。</p>
+<p>queue那行代码获取了内部实例用于处理状态更新的一个关键数组，_pendingStateQueue（如果不存在，则赋值一个新的空的数组），然后将新的状态推进数组queue中。</p>
+<p>函数的最后，调用了euqueueUpdate(internalInstance)方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">enqueueUpdate</span>(<span class="params">internalInstance</span>) </span>&#123;</span><br><span class="line">  ReactUpdates.enqueueUpdate(internalInstance); <span class="comment">// &lt;-- 秘密还在更里面</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>继续执行enqueueUpdate函数，它接收了内部实例作为参数，注意我们已经把新的状态放到了内部实例的_pendingStateQueue中去了，现在的内部实例有我们想要更新的全部信息。</p>
+<p>到目前为止，我们还是没有看到setState到底哪里更新了状态，而enqueueUpdate函数中只有一行代码，毋庸置疑，秘密肯定就在这里，为了一探究竟，我们继续往深处调试。（别急，我们快到底了）。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">enqueueUpdate</span>(<span class="params">component</span>) </span>&#123;</span><br><span class="line">  ensureInjected();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!batchingStrategy.isBatchingUpdates) &#123;</span><br><span class="line">    batchingStrategy.batchedUpdates(enqueueUpdate, component);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  dirtyComponents.push(component);</span><br><span class="line">  <span class="keyword">if</span> (component._updateBatchNumber == <span class="literal">null</span>) &#123;</span><br><span class="line">    component._updateBatchNumber = updateBatchNumber + <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>enqueueUpdate是中的第一句确保了React有一个更新策略，这一行也只是在做验证，不是我们关注的重点。</p>
+<blockquote>
+<p>React目前只有一个ReactDefaultBatchingStrategy更新策略，猜想React的这个更新策略模式可能是为了以后方便扩展而设计的。</p>
+</blockquote>
+<p>如果当前策略不处于更新状态的话（batchingStrategy.isBatchingUpdates === false），则进行更新的相关处理并且返回，但很明显，我们现在就处于更新状态（毕竟我们就在更新一个组件嘛，不过我们后面还会分析为什么现在处于更新状态），因此我们会执行setState方法中最关键的一条语句：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">dirtyComponents.push(component);</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>dirtyComponents是一个用于存储<strong>『脏组件』</strong>的数组，所谓的脏组件，就是组件的一些属性发生了变动，但是还没有将新属性更新到视图的组件。</p>
+<p>最后记录一下当前待更新组件的updateBatchNumber（为了防止一个组件被更新多次而设置的一个ID，感兴趣的同学可以去看下源码的注释，这里不是我们的重点，重点是dirtyComponents）。</p>
+<p>然后呢？好像所有的代码都分析完了，后面也没有代码可调试了，不信我们可以试试，会发现调试确实随着我们刚刚看到的调用栈又一步一步走了出来。</p>
+<p>好了，到这一步，setState方法已经完成了所有的工作，我们简单总结一下它做了什么。</p>
+<p><strong>根据当前组件实例获取React管理的内部实例，将新的状态放到_pendingStateQueue中，如果当前React更新组件的策略不处于更新状态，则执行策略的batchedUpdates方法，否则将当前内部实例放到一个dirtyComponents的数组中。</strong></p>
+<p>以上就是setState做的核心工作（不含对callback的处理，对callback的处理类似，也是临时存储，也是将内部实例放到dirtyComponents中）。</p>
+<p>那么问题来了，我们有没有看到状态更新呢？并没有，状态依然没有更新，<strong>setState并没有直接更新组件的状态</strong>。</p>
+<p>为了进一步弄明白React是如何更新状态的，在我们完全调试完setState之后，我们还需要继续往上调试，搞清楚了setState做的这些工作还不够，我们还要看看，到底是谁调用handleClick？</p>
+<p>为什么要去看handleClick呢？因为我们目前确定的信息是，<strong>setState没有更新状态，但handleClick的整个事件处理过程中肯定是在某一步更新了状态。</strong>虽然不确定到底React是在哪一步更新的状态，但是从handleClick开始考虑，肯定是不会有错的。</p>
+<h3 id="事件、ReactDefaultBatchingStrategy、状态更新"><a href="#事件、ReactDefaultBatchingStrategy、状态更新" class="headerlink" title="事件、ReactDefaultBatchingStrategy、状态更新"></a>事件、ReactDefaultBatchingStrategy、状态更新</h3><p>handleClick到底是在哪里处理的呢？有同学会说，当然是点击事件处理的handleClick。</p>
+<p>事件的处理不是本文的重点，但是我们还是需要了解一点基础，实际上React并不会将真正的DOM事件挂载到具体的节点上，而是直接在根节点上挂载一个事件处理器，然后通过事件委托的方式去处理具体的节点。</p>
+<p>所以当我们点击一个组件的时候，事件的真正处理者是根节点，当点击事件。</p>
+<p>为了搞清楚状态的更改到底发生在哪里，我们需要来看一下handleClick的调用栈。</p>
+<p><img align="center" src="/images/react_calling_stack.png" width="300"></p>
+<p>上面的调用栈是从点击事件开始一直到handleClick的调用栈，我们从下往上看，会发现有一个ReactDefaultBatchingStrategy的文件（从下往上看第3个文件），里面调用了batchedUpdates这个方法，这个方法实际上在上面出现过，在哪里呢？就在dirtyComponents添加内部实例这句话的上面。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (!batchingStrategy.isBatchingUpdates) &#123;</span><br><span class="line">  batchingStrategy.batchedUpdates(enqueueUpdate, component); <span class="comment">// &lt;-- 这里</span></span><br><span class="line">  <span class="keyword">return</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">dirtyComponents.push(component);</span><br></pre></td></tr></table></figure>
+<p>之前说过batchingStrategy其实就是事件ReactDefaultBatchingStrategy，现在来看看这个里面的代码是什么。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> ReactDefaultBatchingStrategy = &#123;</span><br><span class="line">  isBatchingUpdates: <span class="literal">false</span>,</span><br><span class="line"></span><br><span class="line">  batchedUpdates: <span class="function"><span class="keyword">function</span> (<span class="params">callback, a, b, c, d, e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> alreadyBatchingUpdates = ReactDefaultBatchingStrategy.isBatchingUpdates;</span><br><span class="line"></span><br><span class="line">    ReactDefaultBatchingStrategy.isBatchingUpdates = <span class="literal">true</span>; <span class="comment">// &lt;-- 设置当前更新状态为真</span></span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (alreadyBatchingUpdates) &#123;</span><br><span class="line">      <span class="keyword">return</span> callback(a, b, c, d, e);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> transaction.perform(callback, <span class="literal">null</span>, a, b, c, d, e); <span class="comment">// &lt;-- 调用栈入口</span></span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>在batchedUpdates中，isBatchingUpdates被设置为真，而之前判断的isBatchingUpdates和这个是同一个属性，此外还有一行关键的代码，transaction.perform(callback, null, a, b, c, d, e)。</p>
+<p>如果看过<a href="https://oychao.github.io/2017/09/25/react/16_transaction/" target="_blank" rel="noopener">参考1</a>或者对React底层比较熟悉，这行代码应该很眼熟，这就是我们在前面的文章中有详细讲过的React中的Transaction。进一步调试会发现，事务中执行目标函数的时候依然没有更新状态，然而当调试到执行closeAll时，状态终于更新了。</p>
+<p>为了搞清楚整个过程，我们先回顾一下React的事务。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> *                       wrappers (injected at creation time)</span></span><br><span class="line"><span class="comment"> *                                      +        +</span></span><br><span class="line"><span class="comment"> *                                      |        |</span></span><br><span class="line"><span class="comment"> *                    +-----------------|--------|--------------+</span></span><br><span class="line"><span class="comment"> *                    |                 v        |              |</span></span><br><span class="line"><span class="comment"> *                    |      +---------------+   |              |</span></span><br><span class="line"><span class="comment"> *                    |   +--|    wrapper1   |---|----+         |</span></span><br><span class="line"><span class="comment"> *                    |   |  +---------------+   v    |         |</span></span><br><span class="line"><span class="comment"> *                    |   |          +-------------+  |         |</span></span><br><span class="line"><span class="comment"> *                    |   |     +----|   wrapper2  |--------+   |</span></span><br><span class="line"><span class="comment"> *                    |   |     |    +-------------+  |     |   |</span></span><br><span class="line"><span class="comment"> *                    |   |     |                     |     |   |</span></span><br><span class="line"><span class="comment"> *                    |   v     v                     v     v   | wrapper</span></span><br><span class="line"><span class="comment"> *                    | +---+ +---+   +---------+   +---+ +---+ | invariants</span></span><br><span class="line"><span class="comment"> * perform(anyMethod) | |   | |   |   |         |   |   | |   | | maintained</span></span><br><span class="line"><span class="comment"> * +-----------------&gt;|-|---|-|---|--&gt;|anyMethod|---|---|-|---|-|--------&gt;</span></span><br><span class="line"><span class="comment"> *                    | |   | |   |   |         |   |   | |   | |</span></span><br><span class="line"><span class="comment"> *                    | |   | |   |   |         |   |   | |   | |</span></span><br><span class="line"><span class="comment"> *                    | |   | |   |   |         |   |   | |   | |</span></span><br><span class="line"><span class="comment"> *                    | +---+ +---+   +---------+   +---+ +---+ |</span></span><br><span class="line"><span class="comment"> *                    |  initialize                    close    |</span></span><br><span class="line"><span class="comment"> *                    +-----------------------------------------+</span></span><br><span class="line"><span class="comment"> */</span></span><br></pre></td></tr></table></figure>
+<p>上面的注释就是React事务的原理图，具体到状态更新的事务时，处理handleClick和setState就在最中间的anyMethod那里被执行，但是状态的更新却是在某个wrapper的close时被执行。</p>
+<p>这就是为什么setState之后无法立刻获取到最新的状态的原因了，因为最新的状态一直到事务的目标函数执行结束，都只存在_pendingStateQueue中，直到某个wrapper执行close时才真正被更新。</p>
+<p>整个更新实际上从一开始就处于一个大的事务中，这个事务就是ReactDefaultBatchingStrategyTransaction，它在ReactDefaultBatchingStrategy.js文件中被声明。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">'use strict'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> _assign = <span class="built_in">require</span>(<span class="string">'object-assign'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> ReactUpdates = <span class="built_in">require</span>(<span class="string">'./ReactUpdates'</span>);</span><br><span class="line"><span class="keyword">var</span> Transaction = <span class="built_in">require</span>(<span class="string">'./Transaction'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> emptyFunction = <span class="built_in">require</span>(<span class="string">'fbjs/lib/emptyFunction'</span>);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> RESET_BATCHED_UPDATES = &#123;</span><br><span class="line">  initialize: emptyFunction,</span><br><span class="line">  close: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    ReactDefaultBatchingStrategy.isBatchingUpdates = <span class="literal">false</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> FLUSH_BATCHED_UPDATES = &#123;</span><br><span class="line">  initialize: emptyFunction,</span><br><span class="line">  close: ReactUpdates.flushBatchedUpdates.bind(ReactUpdates)</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> TRANSACTION_WRAPPERS = [FLUSH_BATCHED_UPDATES, RESET_BATCHED_UPDATES];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">ReactDefaultBatchingStrategyTransaction</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.reinitializeTransaction();</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">_assign(ReactDefaultBatchingStrategyTransaction.prototype, Transaction, &#123;</span><br><span class="line">  getTransactionWrappers: <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> TRANSACTION_WRAPPERS;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> transaction = <span class="keyword">new</span> ReactDefaultBatchingStrategyTransaction();</span><br><span class="line"></span><br><span class="line"><span class="keyword">var</span> ReactDefaultBatchingStrategy = &#123;</span><br><span class="line">  isBatchingUpdates: <span class="literal">false</span>,</span><br><span class="line"></span><br><span class="line">  batchedUpdates: <span class="function"><span class="keyword">function</span> (<span class="params">callback, a, b, c, d, e</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> alreadyBatchingUpdates = ReactDefaultBatchingStrategy.isBatchingUpdates;</span><br><span class="line"></span><br><span class="line">    ReactDefaultBatchingStrategy.isBatchingUpdates = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (alreadyBatchingUpdates) &#123;</span><br><span class="line">      <span class="keyword">return</span> callback(a, b, c, d, e);</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      <span class="keyword">return</span> transaction.perform(callback, <span class="literal">null</span>, a, b, c, d, e);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">module</span>.exports = ReactDefaultBatchingStrategy;</span><br></pre></td></tr></table></figure>
+<p>它包含了两个wrapper，分别是RESET_BATCHED_UPDATES和FLUSH_BATCHED_UPDATES，注意FLUSH_BATCHED_UPDATES的close方法，它是ReactUpdates.flushBatchedUpdates.bind(ReactUpdates)，现在来看这个方法在ReactUpdates中的实现。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">var</span> flushBatchedUpdates = <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="keyword">while</span> (dirtyComponents.length || asapEnqueued) &#123;</span><br><span class="line">    <span class="keyword">if</span> (dirtyComponents.length) &#123;</span><br><span class="line">      <span class="keyword">var</span> transaction = ReactUpdatesFlushTransaction.getPooled();</span><br><span class="line">      transaction.perform(runBatchedUpdates, <span class="literal">null</span>, transaction);</span><br><span class="line">      ReactUpdatesFlushTransaction.release(transaction);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (asapEnqueued) &#123;</span><br><span class="line">      asapEnqueued = <span class="literal">false</span>;</span><br><span class="line">      <span class="keyword">var</span> queue = asapCallbackQueue;</span><br><span class="line">      asapCallbackQueue = CallbackQueue.getPooled();</span><br><span class="line">      queue.notifyAll();</span><br><span class="line">      CallbackQueue.release(queue);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>flushBatchedUpdates会检测dirtyComponents的长度，如果有脏组件，它就会对其进行真正的状态更新（还包括执行setState的callback）。</p>
+<p><strong>现在可以总结一下了，当点击一个事件时，React会启动默认的组件更新策略（ReactDefaultBatchingStrategy），该策略有一个事务（ReactDefaultBatchingStrategyTransaction），它绑定的目标函数会层层深入，最终执行handleClick中的setState的方法，然后React管理的内部实例就会保存当前更新的状态。</strong></p>
+<p><strong>策略事务的目标函数执行完毕之后，事务的closeAll启动，开始执行绑定的wrapper，而其中有一个名FLUSH_BATCHED_UPDATES为wrapper，它的close方法才是真正处理React组件状态更新的地方（其实还包括一些生命周期函数，如果有的话）。</strong></p>
+<h3 id="如果不是事件触发的更新呢？"><a href="#如果不是事件触发的更新呢？" class="headerlink" title="如果不是事件触发的更新呢？"></a>如果不是事件触发的更新呢？</h3><p>考虑另外一种情况，现在我们是通过点击事件处理触发的状态更新，点击事件发生后，默认的更新策略将更新状态调整为true（ReactDefaultBatchingStrategy.isBatchingUpdates = true），可是如果不是事件触发呢？如果是异步操作中执行的setState呢？来看下面的代码：</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">constructor</span>(props) &#123;</span><br><span class="line">  <span class="keyword">super</span>(props);</span><br><span class="line">  <span class="keyword">this</span>.state = &#123;</span><br><span class="line">    value: <span class="number">0</span></span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line">componentDidMount() &#123;</span><br><span class="line">  setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">      value: <span class="keyword">this</span>.state.value + <span class="number">1</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.state.value);</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">      value: <span class="keyword">this</span>.state.value + <span class="number">1</span></span><br><span class="line">    &#125;);</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="keyword">this</span>.state.value);</span><br><span class="line">  &#125;, <span class="number">1000</span>);</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>这里在componentDidMount生命周期函数中执行了两个this.setState方法，每次执行this.setState方法之后都输出了this.state.value，那输出结果会是多少呢？在没有深入了解setState，只是听说setState是异步的之前，你可能会说输出的都是0，但实际的运行结果可能会出乎你的意料。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 1</span></span><br><span class="line"><span class="comment">// 2</span></span><br></pre></td></tr></table></figure>
+<p>两行代码分别输出1和2，怎么回事，我们上面不是说过，setState只是把新的状态放到_pendingStateQueue中去，然后把对应的内部实例放到dirtyComponents中去吗？注意这个分支有个前提条件，那就是当前更新策略出于更新状态，当我们触发一个点击事件时，如果执行到了handleClick这一步，说明更新策略的更新状态早就已经被设置为true了（ReactDefaultBatchingStrategy.isBatchingUpdates = true），可是当我们异步操作中执行setState呢？更新策略并没有处于更新状态，当前传入setTimeout中的函数是调用栈的顶层函数，这时我们再深入setState调用栈中的enqueueUpdate函数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">enqueueUpdate</span>(<span class="params">component</span>) </span>&#123;</span><br><span class="line">  ensureInjected();</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span> (!batchingStrategy.isBatchingUpdates) &#123;</span><br><span class="line">    batchingStrategy.batchedUpdates(enqueueUpdate, component);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  dirtyComponents.push(component);</span><br><span class="line">  <span class="keyword">if</span> (component._updateBatchNumber == <span class="literal">null</span>) &#123;</span><br><span class="line">    component._updateBatchNumber = updateBatchNumber + <span class="number">1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>注意第一个if语句，这时我们会执行这里面的逻辑，只有一句batchingStrategy.batchedUpdates(enqueueUpdate, component)，然后就return了，所以并不会添加内部实例到脏组件数组中。</p>
+<p>那问题就在batchingStrategy.batchedUpdates(enqueueUpdate, component)里面，它到底做了什么呢？</p>
+<p>还记得batchedUpdates吗，前面我们有贴过这段代码，但是只看了它所在的对象ReactDefaultBatchingStrategy的isBatchingUpdates，现在我们来看一下batchedUpdates。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">batchedUpdates: <span class="function"><span class="keyword">function</span> (<span class="params">callback, a, b, c, d, e</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">var</span> alreadyBatchingUpdates = ReactDefaultBatchingStrategy.isBatchingUpdates;</span><br><span class="line"></span><br><span class="line">  ReactDefaultBatchingStrategy.isBatchingUpdates = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">  <span class="comment">// The code is written this way to avoid extra allocations</span></span><br><span class="line">  <span class="keyword">if</span> (alreadyBatchingUpdates) &#123;</span><br><span class="line">    <span class="keyword">return</span> callback(a, b, c, d, e);</span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> transaction.perform(callback, <span class="literal">null</span>, a, b, c, d, e);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>首先它被传入了enqueueUpdate自身，以及内部实例component。</p>
+<p>执行时先获取了默认更新策略，然后把更新状态设置为了true，ReactDefaultBatchingStrategy.isBatchingUpdates = true，然后呢？</p>
+<p>注意，又是通过我们上面的讲的那个事务，把enqueueUpdate方法执行了一遍，并且将component也当做参数传了进去（transaction.perform(callback, null, a, b, c, d, e)里面的参数callback就是enqueueUpdate，参数a就是component，这一步不熟悉的同学可以先去看下<a href="https://oychao.github.io/2017/09/25/react/16_transaction/" target="_blank" rel="noopener">参考1</a>）。</p>
+<p>到这里我们弄明白了，其实这一步就是发现setState并没有在更新策略中，但却被执行时，激活了一下更新策略，然后在默认更新策略事务（ReactDefaultBatchingStrategyTransaction）中继续执行enqueueUpdate，相当于多做了一步，然后又绕回来继续执行原来的逻辑（内部实例存入脏组件数组）。这么做和之前在事件中执行setState有什么区别呢？区别在于这时管理更新策略的引入是在setState函数内部，而不是执行事件处理的过程中，所以当setState执行全部完成时，整个更新策略事务就结束了，再下一次调用setState时，又得重新启动更新策略事务，所以异步操作（这里是setTimeout）中setState，状态就变成了同步效果了。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>总结一下，setState执行的关键步骤如下：</p>
+<ol>
+<li>React的更新策略已经被启动时（事件触发时）：<br>React响应事件处理 =&gt; 启动更新策略事务（绑定了wrapper） =&gt; 事务perform =&gt; <strong>setState =&gt; 获取内部实例 =&gt; 存储新的状态 =&gt; 发现更新策略事务已启动 =&gt; 将当前内部实例放入脏组件数组 =&gt; setState执行结束</strong> =&gt; 更新策略事务perform完毕 =&gt; <em>wrapper处理组件状态的更新</em></li>
+<li>React的更新策略没有被启动时（异步触发时）：<br><strong>setState =&gt; 获取内部实例 =&gt; 存储新的状态 =&gt; 发现更新策略事务未启动 =&gt; 启动更新策略事务（绑定了wrapper） =&gt; 事务perform =&gt; 将当前内部实例放入脏组件数组 =&gt; 更新策略事务perform完毕 =&gt; <em>wrapper处理组件状态的更新</em> =&gt; setState执行结束</strong></li>
+</ol>
+<p>以上就是setState更新状态的过程分析，所以下次如果有人问你，setState是异步还是同步，你千万不要轻易地回答是异步（或者是同步），而应该解释清楚，setState更新状态的过程。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://oychao.github.io/2017/09/25/react/16_transaction/" target="_blank" rel="noopener">React中的Transaction - 传不习乎</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/08/react/17_redux_source/" rel="next" title="Redux源码解析">
+                <i class="fa fa-chevron-left"></i> Redux源码解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/14/javascript/30_webpack_bundle_file/" rel="prev" title="webpack输出文件浅析">
+                webpack输出文件浅析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#调试准备"><span class="nav-number">2.</span> <span class="nav-text">调试准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#开始调试"><span class="nav-number">3.</span> <span class="nav-text">开始调试</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#事件、ReactDefaultBatchingStrategy、状态更新"><span class="nav-number">4.</span> <span class="nav-text">事件、ReactDefaultBatchingStrategy、状态更新</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如果不是事件触发的更新呢？"><span class="nav-number">5.</span> <span class="nav-text">如果不是事件触发的更新呢？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Riact是最近自己做的一个类React框架，目前只支持Hook形式的开发（个人非常喜欢Hook形式的组件）。框架开发的目的主要是为了学习，对于核心的模块还是打算写几篇总结。虚拟DOM的设计和实现是整个框架的核心，其中又以虚拟DOM的Diff算法最麻烦……">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Riact开发笔记之Diff算法篇">
+<meta property="og:url" content="http://yoursite.com/2019/02/15/react/20_riact_development_1/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="Riact是最近自己做的一个类React框架，目前只支持Hook形式的开发（个人非常喜欢Hook形式的组件）。框架开发的目的主要是为了学习，对于核心的模块还是打算写几篇总结。虚拟DOM的设计和实现是整个框架的核心，其中又以虚拟DOM的Diff算法最麻烦……">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/1/1d/LISDemo.gif">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.373Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Riact开发笔记之Diff算法篇">
+<meta name="twitter:description" content="Riact是最近自己做的一个类React框架，目前只支持Hook形式的开发（个人非常喜欢Hook形式的组件）。框架开发的目的主要是为了学习，对于核心的模块还是打算写几篇总结。虚拟DOM的设计和实现是整个框架的核心，其中又以虚拟DOM的Diff算法最麻烦……">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/1/1d/LISDemo.gif">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/02/15/react/20_riact_development_1/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Riact开发笔记之Diff算法篇 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/02/15/react/20_riact_development_1/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Riact开发笔记之Diff算法篇
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-02-15 00:18:00" itemprop="dateCreated datePublished" datetime="2019-02-15T00:18:00+08:00">2019-02-15</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">Riact是最近自己做的一个类React框架，目前只支持Hook形式的开发（个人非常喜欢Hook形式的组件）。框架开发的目的主要是为了学习，对于核心的模块还是打算写几篇总结。虚拟DOM的设计和实现是整个框架的核心，其中又以虚拟DOM的Diff算法最麻烦……</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p><a href="https://github.com/oychao/riact" target="_blank" rel="noopener">Riact</a>是最近自己做的一个类React框架，目前只支持Hook形式的开发（个人非常喜欢Hook形式的组件）。框架开发的目的主要是为了学习，对于核心的模块还是打算写几篇总结。虚拟DOM的设计和实现是整个框架的核心，其中又以虚拟DOM的Diff算法最麻烦，所以系列总结还是从这里开始着手。</p>
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><blockquote>
+<p>本文讨论的算法主要是带标记的列表之间的Diff算法（即带key的列表对比），整个树的逐层对比对于大多数同学来说都比较容易理解，这里也就不再讨论。</p>
+</blockquote>
+<p>在Riact开始实现之初，笔者曾经采用过React的虚拟DOM Diff算法，但随着开发的进行，笔者也对对市面上常见框架做了调研和对比，最后发现在这个方向做得最好的应该是<a href="https://infernojs.org/" target="_blank" rel="noopener">Inferno</a>框架。</p>
+<p>Inferno框架的虚拟DOM可以说优化到了极致，从编译阶段（定制化编译，对部分JSX进行静态编译）到对比阶段（Diff的节点类型对比直接使用位运算符进行操作）都比一般框架进行了大幅改进，包括在带标记的列表对比也不例外。</p>
+<p>Inferno采用了一种基于最长上升子序列的方式算法进行比对，时间复杂度为$\mathrm{O}(n\log n)​$，相比React和Vue的$\mathrm{O}(n)​$，这种算法可以得到最优解，即能够使真实DOM操作达到最小化。</p>
+<h2 id="问题描述"><a href="#问题描述" class="headerlink" title="问题描述"></a>问题描述</h2><p>下面我们来看一下该算法的具体实现过程。</p>
+<p>假定我们有如下列表需要更新。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码1</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br></pre></td></tr></table></figure>
+<p>计算出的结果应该是对<code>L1</code>的操作，由于这里的数据量较小，我们可以一眼看出，只需要进行如下操作就能实现我们的目的。</p>
+<ol>
+<li>移动<code>d</code>到<code>a</code>的前面。</li>
+</ol>
+<p>这样，我们只需要对其进行一次操作即可，但事实是，如果我们进行下面的操作，也可以达到目的。</p>
+<ol>
+<li>移动<code>a</code>到<code>d</code>的后面；</li>
+<li>移动<code>b</code>到<code>a</code>的后面；</li>
+<li>移动<code>c</code>到<code>b</code>的后面。</li>
+</ol>
+<blockquote>
+<p>上述过程逐步执行，如第一步执行完之后，<code>a</code>已经到了<code>d</code>后面去了。</p>
+</blockquote>
+<p>不难发现，这种情况下我们移动了三次，也许有同学会说怎么会有这么笨的算法，明明一次就行，非要三次。事实上，React就是这么干的，Vue虽然可以比较好地解决上述测试用例，但不少情况下也拿到的不是最优解（但它们计算出结果的速度更快）。</p>
+<h2 id="输入序列预处理"><a href="#输入序列预处理" class="headerlink" title="输入序列预处理"></a>输入序列预处理</h2><h3 id="消除两端相同序列"><a href="#消除两端相同序列" class="headerlink" title="消除两端相同序列"></a>消除两端相同序列</h3><p>在进入对比算法的关键过程之前，我们可以通过一些手段来降低关键算法部分的实际复杂度。</p>
+<p>假如我们输入的序列如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码2</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'x'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'e'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>, <span class="string">'y'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'x'</span>, <span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'y'</span>];</span><br></pre></td></tr></table></figure>
+<p>我们注意到两个列表的两端都存在相同的部分，即序列头部的<code>x</code>和序列尾部的<code>y</code>，这种情况下我们没必要让它们进入到后续的对比阶段，因为这个两个序列的对比可以简化为如下所示。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码3</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'e'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br></pre></td></tr></table></figure>
+<p>所以算法的第一步，就是筛去两端相同的部分。</p>
+<blockquote>
+<p>一个细节：trim掉了两个列表两端相同的节点，所有后续的操作都应该从头部被trim的位置开始，到尾部被trim的位置结束，而不应该新开数组。</p>
+</blockquote>
+<h3 id="删除旧的列表中的元素"><a href="#删除旧的列表中的元素" class="headerlink" title="删除旧的列表中的元素"></a>删除旧的列表中的元素</h3><p>在去除了两端相同元素之后，我们可以删掉新序列中不存在的旧序列元素。</p>
+<p>这里可以通过一个<code>Map</code>来记录<code>L2</code>中元素的和下标的对应关系。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码4</span></span><br><span class="line"><span class="comment">// 建立下标索引</span></span><br><span class="line"><span class="keyword">const</span> IM = <span class="keyword">new</span> <span class="built_in">Map</span>();</span><br><span class="line"><span class="keyword">let</span> i, len;</span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>, len = L2.length; i &lt; len; i++) &#123;</span><br><span class="line">  IM.set(L2[i], i);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后再通过新序列中元素，来确认哪些是需要删除的元素。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码5</span></span><br><span class="line"><span class="comment">// 删除新序列中不存在的旧序列元素</span></span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>, len = L1.length; i &lt; len; i++) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!IM.has(L1[i])) &#123;</span><br><span class="line">    <span class="comment">// 删除L1[i]</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这样问题就会被进一步简化，两个列表的对比最终变成了一开始<em>代码1</em>中的样子。</p>
+<p>接下来我们就可以进入正题了，这里我们需要先学习一个经典的动态规划问题及其解法，这就是最长上升子序列。</p>
+<h2 id="最长上升子序列"><a href="#最长上升子序列" class="headerlink" title="最长上升子序列"></a>最长上升子序列</h2><h3 id="最长上升子序列的概念"><a href="#最长上升子序列的概念" class="headerlink" title="最长上升子序列的概念"></a>最长上升子序列的概念</h3><p>在Inferno采用的Diff算法中，用到了经典的计算<a href="https://en.wikipedia.org/wiki/Longest_increasing_subsequence" target="_blank" rel="noopener">最长上升子序列（Longest Increasing Subsequence）</a>的算法。</p>
+<p>所谓的最长上升子序列，就是在一个序列中，求长度最长且顺序是升序的子序列。</p>
+<p>假设有序列如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表1</span></span><br><span class="line"><span class="comment">// 1, 5, 2, 4, 6, 0, 7</span></span><br></pre></td></tr></table></figure>
+<p>那么其最长上升子序列就是</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表2</span></span><br><span class="line"><span class="comment">// 1, 2, 4, 6, 7</span></span><br></pre></td></tr></table></figure>
+<p>如果对这个概念理解有问题的同学，可以去看一下<a href="https://en.wikipedia.org/wiki/Longest_increasing_subsequence" target="_blank" rel="noopener">参考3</a>。</p>
+<h3 id="为什么要使用它"><a href="#为什么要使用它" class="headerlink" title="为什么要使用它"></a>为什么要使用它</h3><p>在学习能得出最优解的算法之前，我们必须先弄明白为什么要这么做，这既能帮助我们理解Diff算法，又反过来能帮助我们学习最长上升子序列。</p>
+<p>其实对带标记列表的对比并计算操作结果的过程有点类似于计算其<a href="https://oychao.github.io/2018/09/26/algorithm/02_edit_distance/" target="_blank" rel="noopener">编辑距离</a>的过程，但和一般的词汇的编辑距离（只有新增，删除，有的也有替换）不同，DOM中还有移动的操作，我们必须最大化复用当前已经存在的节点，并使尽量多的节点不被移动。</p>
+<p>再加上对列表元素的操作过程实际上就是下标的进行操作，例如从<code>[&#39;a&#39;, &#39;b&#39;, &#39;c&#39;, &#39;d&#39;]</code>到<code>[&#39;d&#39;, &#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code>的过程其实就是：</p>
+<ol>
+<li>移动下标为<code>3</code>的元素到下标为<code>0</code>的前面。</li>
+</ol>
+<p><strong>所以求出新序列中元素在旧序列中对应的下标的最长上升子序列，并保证在最长上升子序列中的元素不被移动</strong>，就能保证最多的元素可复用并不被移动了。</p>
+<p>这句话可能有点绕，我们还是拿上面的例子讲解。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码6</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br><span class="line"><span class="keyword">const</span> IM = &#123;</span><br><span class="line">    d: <span class="number">0</span>,</span><br><span class="line">    a: <span class="number">1</span>,</span><br><span class="line">    b: <span class="number">2</span>,</span><br><span class="line">    c: <span class="number">3</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> IT = [ <span class="number">3</span> ,  <span class="number">0</span> ,  <span class="number">1</span> ,  <span class="number">2</span> ]; <span class="comment">// 新序列中元素在旧序列中对应的下标</span></span><br></pre></td></tr></table></figure>
+<p><code>IT</code>就是在新序列中元素在旧序列中对应的下标，其中<code>d</code>在原数组中下标是<code>3</code>，<code>a</code>在原数组中的下标是<code>0</code>，以此类推。</p>
+<blockquote>
+<p><code>IT</code>可以直接在代码5的基础上修改得到，如下所示。</p>
+</blockquote>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码7</span></span><br><span class="line"><span class="comment">// 对代码5进行修改如下</span></span><br><span class="line"><span class="keyword">const</span> IT = <span class="keyword">new</span> <span class="built_in">Array</span>(L2.length).fill(<span class="number">-1</span>); <span class="comment">// 先填充为-1，等循环结束时还是-1的元素，则是新元素。</span></span><br><span class="line"><span class="keyword">for</span> (i = <span class="number">0</span>, len = L1.length; i &lt; len; i++) &#123;</span><br><span class="line">  <span class="keyword">if</span> (!IM.has(L1[i])) &#123;</span><br><span class="line">    <span class="comment">// 删除L1[i]</span></span><br><span class="line">  &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">    IT[IM.get(L1[i])] = i;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>不难看出，<code>IT</code>的最长上升子序列是<code>[0, 1, 2]</code>，根据前文所述，只要保证旧序列中下标在这其中的元素不移动，就能使我们的操作最小化，也就是说<code>[&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code>不移动，即可保证操作最小化，而事实正是如此。</p>
+<h3 id="算法思想"><a href="#算法思想" class="headerlink" title="算法思想"></a>算法思想</h3><blockquote>
+<p>对这一步不太感兴趣的同学可以直接跳到后面<strong>移动和插入</strong>小节</p>
+</blockquote>
+<p>了解了$LIS​$的概念和为什么要求$LIS​$之后，现在我们来看具体的算法思想。</p>
+<p>对于给定的序列，我们将其进行遍历，并<strong>记录长度为$n$（$n \in \mathbb{N^*}$）的$LIS$的最后一个元素的最小值，将所有最小值组成的序列记为$M$，同时更新每一个元素作为当前已遍历序列的$LIS$中最后一个元素前一个元素的的下标，并该将下标组成的序列记为$L$。</strong></p>
+<p>这句话是我自己总结的，看起来很拗口（实际上也很拗口），但一步一步来，先放在这里，等这一小结结束的时候你可以再回来看几遍。</p>
+<p>先来看$M​$，长度为$n​$的$LIS​$最后一个元素的最小值所组成的序列。</p>
+<p>假设我们有如下序列。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表3</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br></pre></td></tr></table></figure>
+<p>遍历序列，第一个元素是<code>0</code>，此时长度为<code>1</code>的最长子序列就是<code>[0]</code>，记录其下标为<code>0</code>，这样$M​$的值就如下就是<code>[-1, 0]</code>，长度为<code>0</code>（$M​$中下标为<code>0</code>的元素）的最长子序列不存在或没有意义，我们将其记为<code>-1</code>，长度为<code>1</code>（$M​$中下标为<code>1</code>的$LIS​$元素）。</p>
+<p>再来看$L​$，$L​$的第$i​$个元素记录的是原序列中第$i​$个元素为结尾的$LIS​$的上一个元素的下标，以<code>0</code>为结尾的最长子序列是<code>[0]</code>，其上一个元素的下标不存在，所以记为<code>-1</code>，此时的结果如下所示。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表4</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1]</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0]</span></span><br></pre></td></tr></table></figure>
+<p>接着扫描到了<code>8</code>，通过查找$M$，此时的$LIS$是<code>[0]</code>，那<code>8</code>进入以后最长上升子序列应该是<code>[0, 8]</code>，所以$M$应该是<code>[-1, 0, 1]</code>（注意$M$是记录下标的序列）。</p>
+<p>而$L$则进一步更新，将<code>8</code>的上一个元素的下标记录下来，即<code>[-1, 0]</code></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表5</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1, 0]</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0,</span></span><br><span class="line"><span class="comment">//       1]</span></span><br></pre></td></tr></table></figure>
+<p>接下来扫描<code>4</code>，通过查找$M​$，我们得知了此时的$LIS​$是<code>[0, 8]</code>，而由于当前元素是<code>4</code>，比<code>8</code>小，为了保证$M​$的特性（其只存储最小值），所以此时的<code>4</code>可以替换<code>8</code>，$M​$变成了<code>[-1, 0, 2]</code>，而从$M​$中可以看出，$L​$中对应的前继元素还是<code>0</code>。</p>
+<p>所以此时的状态如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表6</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1, 0, 0]</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0,</span></span><br><span class="line"><span class="comment">//       2]</span></span><br></pre></td></tr></table></figure>
+<p>接下来扫描<code>12</code>，通过查找$M​$可知此时的$LIS​$是<code>[0, 4]</code>，当前的元素是<code>12</code>，大于<code>4</code>，所以可以将其下标直接接到尾部，即<code>[-1, 0, 2, 3]</code>，查阅此时的$M​$可知<code>3</code>的前继是<code>2</code>，所以$L​$应为<code>[-1, 0, 0, 2]</code>。</p>
+<p>状态如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表7</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1, 0, 0, 2]</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0,</span></span><br><span class="line"><span class="comment">//       2,</span></span><br><span class="line"><span class="comment">//       3]</span></span><br></pre></td></tr></table></figure>
+<p>这样一步一步扫描过去，最后可以得到整个$L​$和$M​$的结果如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表8</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的下标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1, 0, 0,  2, 0,  4, 4,  6, 0, 6, 8,  9, 8,  9,12, 13];</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0,</span></span><br><span class="line"><span class="comment">//       8,</span></span><br><span class="line"><span class="comment">//       12,</span></span><br><span class="line"><span class="comment">//       14,</span></span><br><span class="line"><span class="comment">//       13,</span></span><br><span class="line"><span class="comment">//       15]</span></span><br></pre></td></tr></table></figure>
+<p>现在我们知道了最终整个序列的$LIS$，长度是<code>6</code>（<code>M.length - 1</code>），我们从$M$的最后一个元素开始找起，顺着$L$，向前回溯，就得到了最后的结果。</p>
+<p>整个回溯过程如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 表9</span></span><br><span class="line"><span class="comment">// idx: [0, 1, 2,  3, 4,  5, 6,  7, 8, 9,10, 11,12, 13,14, 15]; // 对应的小标</span></span><br><span class="line"><span class="comment">// seq: [0, 8, 4, 12, 2, 10, 6, 14, 1, 9, 5, 13, 3, 11, 7, 15]; // 原序列</span></span><br><span class="line"><span class="comment">// L:  [-1, 0, 0, 2,  0,  4, 4,  6, 0, 6, 8,  9, 8,  9,12, 13];</span></span><br><span class="line"><span class="comment">// M:  [-1,</span></span><br><span class="line"><span class="comment">//       0,</span></span><br><span class="line"><span class="comment">//       8,</span></span><br><span class="line"><span class="comment">//       12,</span></span><br><span class="line"><span class="comment">//       14,</span></span><br><span class="line"><span class="comment">//       13,</span></span><br><span class="line"><span class="comment">//       15]</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// S用于记录结果，其长度是6，暂时记为[empty * 6]</span></span><br><span class="line"><span class="comment">// 我们先取M的最后一个元素作为回溯L的出发点，M的最后一个元素是15</span></span><br><span class="line"><span class="comment">// 找到seq中下标为15的元素，即15，将其替换S[5]</span></span><br><span class="line"><span class="comment">// 此时S为[empty * 5, 15]，同时发现L[15]等于13</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到seq中下标为13的元素，即11，将其替换S[4]</span></span><br><span class="line"><span class="comment">// 此时S为[empty * 4, 11, 15]，同时发现L[11]等于9</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到seq中下标为 9的元素，即 9，将其替换S[3]</span></span><br><span class="line"><span class="comment">// 此时S为[empty * 3, 9, 11, 15]，同时发现L[9]等于6</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到seq中下标为 6的元素，即 6，将其替换S[2]</span></span><br><span class="line"><span class="comment">// 此时S为[empty * 2, 6, 9, 11, 15]，同时发现L[6]等于4</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到seq中下标为 4的元素，即 2，将其替换S[1]</span></span><br><span class="line"><span class="comment">// 此时S为[empty, 2, 6, 9, 11, 15]，同时发现L[2]等于0</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 找到seq中下标为 0的元素，即 0，将其替换S[0]</span></span><br><span class="line"><span class="comment">// 此时S为[0, 2, 6, 9, 11, 15]，同时发现L[0]等于-1</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// 回溯结束，最终的得到的LIS为[0, 2, 6, 9, 11, 15]</span></span><br></pre></td></tr></table></figure>
+<p>整个LIS算法的过程就是这样，如果对此理解还有问题，可以先循环观察几遍下面的动图，或者直接查看<a href="https://en.wikipedia.org/wiki/Longest_increasing_subsequence" target="_blank" rel="noopener">wikipedia</a>这样有助于理解。</p>
+<blockquote>
+<p>为了方便理解，图中记录的是当前长度为$n$的所有最长子序列。</p>
+</blockquote>
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/1/1d/LISDemo.gif" alt="图1. 最长上升子序列算法过程"></p>
+<h3 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h3><p>以下是代码是$LIS$的TypeScript实现，注意下面的<code>for</code>循环中，我们略过了所有负数的处理（为什么会出现负数我们后续会讲到）。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码8</span></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * calculate longest increasing subsequence (only for positive numbers)</span></span><br><span class="line"><span class="comment"> * @param arr array of number</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> calcLis = <span class="function"><span class="keyword">function</span>(<span class="params">arr: <span class="built_in">Array</span>&lt;<span class="built_in">number</span>&gt;</span>): <span class="title">Array</span>&lt;<span class="title">number</span>&gt; </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> M: <span class="built_in">Array</span>&lt;<span class="built_in">number</span>&gt; = [<span class="number">-1</span>];</span><br><span class="line">  <span class="keyword">const</span> P: <span class="built_in">Array</span>&lt;<span class="built_in">number</span>&gt; = [];</span><br><span class="line">  <span class="keyword">const</span> S: <span class="built_in">Array</span>&lt;<span class="built_in">number</span>&gt; = [];</span><br><span class="line">  <span class="keyword">let</span> i: <span class="built_in">number</span>;</span><br><span class="line">  <span class="keyword">let</span> left: <span class="built_in">number</span>;</span><br><span class="line">  <span class="keyword">let</span> right: <span class="built_in">number</span>;</span><br><span class="line">  <span class="keyword">let</span> mid: <span class="built_in">number</span>;</span><br><span class="line">  <span class="keyword">let</span> len: <span class="built_in">number</span>;</span><br><span class="line">  <span class="keyword">for</span> (i = <span class="number">0</span>, len = arr.length; i &lt; len; i++) &#123;</span><br><span class="line">    <span class="comment">// skip negative numbers</span></span><br><span class="line">    <span class="keyword">if</span> (arr[i] &lt; <span class="number">0</span>) &#123;</span><br><span class="line">      <span class="keyword">continue</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    left = <span class="number">1</span>;</span><br><span class="line">    right = M.length;</span><br><span class="line">    <span class="keyword">while</span> (left &lt; right) &#123;</span><br><span class="line">      mid = <span class="built_in">Math</span>.floor((left + right) / <span class="number">2</span>);</span><br><span class="line">      <span class="keyword">if</span> (arr[M[mid]] &lt; arr[i]) &#123;</span><br><span class="line">        left = mid + <span class="number">1</span>;</span><br><span class="line">      &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">        right = mid;</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    M[left] = i;</span><br><span class="line">    P[i] = M[left - <span class="number">1</span>];</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  len = M.length - <span class="number">1</span>;</span><br><span class="line">  i = M[len];</span><br><span class="line">  <span class="keyword">while</span> (i !== <span class="number">-1</span>) &#123;</span><br><span class="line">    S[len-- - <span class="number">1</span>] = arr[i];</span><br><span class="line">    i = P[i];</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> S;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<h3 id="时间复杂度分析"><a href="#时间复杂度分析" class="headerlink" title="时间复杂度分析"></a>时间复杂度分析</h3><p>显然我们需要对整个序列进行遍历，而为了保证$M$中存储的永远是以当前元素为$LIS$结尾的最小值，我们每次都需要对$M$进行有序序列的查询（和替换，或者在尾部追加的）操作，这里我们使用时间复杂度为$\mathrm{O}(\log n)$的二分查找，所以整个算法最终的时间复杂度为$\mathrm{O}(n\log n)$。</p>
+<h2 id="移动和插入"><a href="#移动和插入" class="headerlink" title="移动和插入"></a>移动和插入</h2><h3 id="移动"><a href="#移动" class="headerlink" title="移动"></a>移动</h3><p>计算$LIS$的目的就是为了移动操作，因为我们的最终目的就是为了实现在$LIS$中的元素全部都可以不被移动，以达到最小移动操作的结果。</p>
+<p>但是如何实现呢？现在让我们再次回到<em>代码1</em>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码9</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br><span class="line"><span class="keyword">const</span> IT = [ <span class="number">3</span> ,  <span class="number">0</span> ,  <span class="number">1</span> ,  <span class="number">2</span> ]; <span class="comment">// 新序列中元素在旧序列中对应的下标</span></span><br><span class="line"><span class="keyword">const</span> LIS =      [<span class="number">0</span> ,  <span class="number">1</span> ,  <span class="number">2</span> ]; <span class="comment">// 求得的最长上升子序列</span></span><br></pre></td></tr></table></figure>
+<p>接下来我们将<code>IT</code>和<code>LIS</code>从尾部进行对比，为了知道我们移动到的目标位置，对比的步骤如下。</p>
+<ol>
+<li>从后向前遍历<code>IT</code>和<code>LIS</code>；</li>
+<li>如果当前<code>IT</code>元素和<code>LIS</code>元素相同，则不做任何操作，继续遍历两个表的前一个元素；</li>
+<li>当前访问的<code>IT</code>元素不等于<code>LIS</code>元素或者<code>LIS</code>元素已经不存在，则记录如下移动操作（将当前<code>IT</code>元素移动到当前<code>LIS</code>元素之前），继续遍历下一个<code>IT</code>元素，当前$LIS$元素不变；</li>
+<li>直到<code>IT</code>元素全部遍历结束。</li>
+</ol>
+<p>伪码描述如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 代码10</span><br><span class="line">j = LIS - 1, last = IT.length, patches = []</span><br><span class="line">for i in range IT.length to 0:</span><br><span class="line">  if (IT[i] == LIS[j] &amp;&amp; LIS[j] != NULL):</span><br><span class="line">    last = j</span><br><span class="line">    j -= 1</span><br><span class="line">  else:</span><br><span class="line">    patches.push(&apos;move &apos; + IT[i] + &apos; before &apos; + LIS[last])</span><br></pre></td></tr></table></figure>
+<h3 id="插入"><a href="#插入" class="headerlink" title="插入"></a>插入</h3><p>好了，到这里为止我们已经将算法的核心思想全部都介绍完了，但是有同学肯定注意到了，我们虽然讲了一堆，但是还有一个核心操作没有提到。我们有了删除，有了移动，但没有插入。</p>
+<blockquote>
+<p>再坚持一下，就差最后一步就结束了。</p>
+</blockquote>
+<p>假设两个列表的输入如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码11</span></span><br><span class="line"><span class="keyword">const</span> L1 = [<span class="string">'a'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>, <span class="string">'d'</span>];</span><br><span class="line"><span class="keyword">const</span> L2 = [<span class="string">'d'</span>, <span class="string">'a'</span>, <span class="string">'e'</span>, <span class="string">'b'</span>, <span class="string">'c'</span>];</span><br><span class="line"><span class="keyword">const</span> IT = [ <span class="number">3</span> ,  <span class="number">0</span> ,  <span class="number">-1</span>,  <span class="number">1</span> ,  <span class="number">2</span> ]; <span class="comment">// 新序列中元素在旧序列中对应的下标</span></span><br><span class="line"><span class="keyword">const</span> LIS =            [<span class="number">0</span>,  <span class="number">1</span> ,  <span class="number">2</span> ]; <span class="comment">// 求得的最长上升子序列</span></span><br></pre></td></tr></table></figure>
+<p>此时我们多了一个<code>L1</code>中没有的元素<code>e</code>，所以旧序列下标对应表中找不到该元素的下标，这里就用<code>-1</code>表示，这也就是为什么前文我们再$LIS$的计算过程中跳过对负数处理的原因，因为新元素不在我们不希望移动的元素之中，我们希望计算出来的$LIS$仍然是<code>[0, 1, 2]</code>，也就是<code>[&#39;a&#39;, &#39;b&#39;, &#39;c&#39;]</code>三个元素依然不需要被移动。</p>
+<p>那对于负数我们在移动的过程中怎么处理呢？为了得知插入的位置，这里我们需要记录上一个访问过的<code>IT</code>表中的非<code>-1</code>元素，这里需要引入一个<code>last</code>变量来记录它。</p>
+<p>过程如下。</p>
+<ol>
+<li>从后向前遍历<code>IT</code>和<code>LIS</code>；</li>
+<li>如果<code>IT</code>元素非<code>-1</code>，则记录其下标为<code>last</code>；<ol>
+<li>如果当前<code>IT</code>元素和<code>LIS</code>元素相同，之后遍历两个表的前一个元素；</li>
+<li>当前访问的<code>IT</code>元素不等于<code>LIS</code>元素或者<code>LIS</code>元素已经不存在，则记录如下移动操作（将当前<code>IT</code>元素移动到<code>last</code>元素之前），继续遍历下一个<code>IT</code>元素；</li>
+</ol>
+</li>
+<li>否则记录如下插入操作：将当前<code>L2</code>中下标为当前<code>IT</code>元素的项插入到<code>L1</code>中下标为<code>IT[last]</code>之前；</li>
+<li>直到<code>IT</code>元素全部遍历结束。</li>
+</ol>
+<p>伪代码如下。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">// 代码10</span><br><span class="line">j = LIS - 1, last = IT.length, patches = []</span><br><span class="line">for i in range IT.length to 0:</span><br><span class="line">  if IT[i] == -1:</span><br><span class="line">    patches.push(&apos;insert &apos; + L2[i] + &apos; before &apos; + L1[IT[last]]);</span><br><span class="line">  else:</span><br><span class="line">    if IT[i] == LIS[j] &amp;&amp; LIS[j] != NULL:</span><br><span class="line">      j -= 1</span><br><span class="line">    else:</span><br><span class="line">      patches.push(&apos;move &apos; + IT[i] + &apos; before &apos; + LIS[j])</span><br><span class="line">  last = IT[i] == -1 ? last : j</span><br></pre></td></tr></table></figure>
+<p>这样，加上一开始我们得到的删除操作，我们就拿到了所有的删除，移动，和插入操作了。整个带标记列表的对比算法到这里也就结束了。</p>
+<blockquote>
+<p>其实还有一个更新相同标记的节点的操作，该操作在发现新列表的中存在相同节点的时候就已经做了。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>本文详细记述了<a href="https://infernojs.org/" target="_blank" rel="noopener">InfernoJS</a>中实现的带标记列表的对比算法，相比React和Vue等框架，它牺牲了一定的时间复杂度并得出了最优解，但React和Vue之所采取现行的方式实现，是因为它们在时间复杂度和最优解之间做了权衡，从实际应用场景来考虑这些算法并没有绝对的对错，而Riact作为一个以学习为目的的项目，还是选择了实现难度略高一些的算法。</p>
+<p>整个算法的实现在<a href="https://github.com/oychao/riact" target="_blank" rel="noopener">Riact</a>中都可以找到，（放心，项目文件目录很简单，从文件的名字你就能很快找到你想要的），同时这里还给出了一版<a href="https://repl.it/@charlesouyang/keyed-list-diff-algorithm" target="_blank" rel="noopener">和框架无关的实现</a>（不确定是否需要翻墙）。</p>
+<p>整个算法的大体过程虽然已经给出了，但是实际上我们还是隐去了很多细节（上面的<code>patches</code>中只是用了一句话来描述算法的移动和插入操作），尤其是算法得出的结果到底以一种怎样的方式存储，旧的列表又怎样去应用这些结果，使其成为新的列表，这些内容我们将放到以后的文章中去讨论。</p>
+<blockquote>
+<p>最后留个悬念。显然，我们是不能用JavaScript中数组的<code>shift</code>，<code>unshift</code>，以及<code>splice</code>之类的方法的来操作这两个列表的。</p>
+</blockquote>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://github.com/oychao/riact" target="_blank" rel="noopener">oychao/riact - GitHub</a></li>
+<li><a href="https://infernojs.org/" target="_blank" rel="noopener">InfernoJS</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Longest_increasing_subsequence" target="_blank" rel="noopener">Longest Increasing Subsequence - wikipedia</a></li>
+<li><a href="https://oychao.github.io/2018/09/26/algorithm/02_edit_distance/" target="_blank" rel="noopener">最小编辑距离 - 传不习乎</a></li>
+<li><a href="https://github.com/livoras/blog/issues/13#issue-118253129" target="_blank" rel="noopener">深度剖析：如何实现一个 Virtual DOM 算法 - livoras</a></li>
+<li><a href="https://github.com/NervJS/nerv/issues/3" target="_blank" rel="noopener">diff算法原理概述 - yuche - NervJS</a></li>
+<li><a href="https://repl.it/@charlesouyang/keyed-list-diff-algorithm" target="_blank" rel="noopener">keyed list diff algorithm - charlesouyang - Repli.it</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/12/02/algorithm/04_monacha_algorithm/" rel="next" title="最大回文子串之Manacher算法">
+                <i class="fa fa-chevron-left"></i> 最大回文子串之Manacher算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/01/react/21_riact_development_2/" rel="prev" title="Riact开发笔记之Diff数据结构篇">
+                Riact开发笔记之Diff数据结构篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#问题描述"><span class="nav-number">3.</span> <span class="nav-text">问题描述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输入序列预处理"><span class="nav-number">4.</span> <span class="nav-text">输入序列预处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#消除两端相同序列"><span class="nav-number">4.1.</span> <span class="nav-text">消除两端相同序列</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#删除旧的列表中的元素"><span class="nav-number">4.2.</span> <span class="nav-text">删除旧的列表中的元素</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#最长上升子序列"><span class="nav-number">5.</span> <span class="nav-text">最长上升子序列</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#最长上升子序列的概念"><span class="nav-number">5.1.</span> <span class="nav-text">最长上升子序列的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么要使用它"><span class="nav-number">5.2.</span> <span class="nav-text">为什么要使用它</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法思想"><span class="nav-number">5.3.</span> <span class="nav-text">算法思想</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#代码实现"><span class="nav-number">5.4.</span> <span class="nav-text">代码实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#时间复杂度分析"><span class="nav-number">5.5.</span> <span class="nav-text">时间复杂度分析</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#移动和插入"><span class="nav-number">6.</span> <span class="nav-text">移动和插入</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#移动"><span class="nav-number">6.1.</span> <span class="nav-text">移动</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#插入"><span class="nav-number">6.2.</span> <span class="nav-text">插入</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

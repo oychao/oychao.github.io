@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="官方文档『Why React?』译文。React是做什么的，以及用户要做什么。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Thinking in React？">
+<meta property="og:url" content="http://yoursite.com/2016/04/12/react/03_thinking_in_react/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="官方文档『Why React?』译文。React是做什么的，以及用户要做什么。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://reactjs.org/static/thinking-in-react-mock-1071fbcc9eed01fddc115b41e193ec11-4dd91.png">
+<meta property="og:image" content="https://reactjs.org/static/thinking-in-react-components-eb8bda25806a89ebdc838813bdfa3601-82965.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.372Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Thinking in React？">
+<meta name="twitter:description" content="官方文档『Why React?』译文。React是做什么的，以及用户要做什么。">
+<meta name="twitter:image" content="https://reactjs.org/static/thinking-in-react-mock-1071fbcc9eed01fddc115b41e193ec11-4dd91.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/12/react/03_thinking_in_react/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Thinking in React？ | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/12/react/03_thinking_in_react/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Thinking in React？
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-04-12 22:53:00" itemprop="dateCreated datePublished" datetime="2016-04-12T22:53:00+08:00">2016-04-12</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">官方文档『Why React?』译文。React是做什么的，以及用户要做什么。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="原文"><a href="#原文" class="headerlink" title="原文"></a>原文</h3><p><a href="https://reactjs.org/docs/thinking-in-react.html" target="_blank" rel="noopener">Thinking in React - Peter Hunt</a></p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>在我看来，使用React是用JavaScript快速开发大型Web应用的最佳方式。我们在Facebook和Instagram中大规模应用React的效果很好。</p>
+<p>React的众多优点之一就是能让你重新认识你开发的应用时的过程，通过本文，我会一步一步向你展示用React创建一个可检索的产品数据列表的思路。</p>
+<h3 id="从一个原型设计开始"><a href="#从一个原型设计开始" class="headerlink" title="从一个原型设计开始"></a>从一个原型设计开始</h3><p>假设我们已经有一个JSON API和一个设计师做的原型设计。我们的设计师很明显不是很优秀因为我们的原型图长这个样子。</p>
+<p><img src="https://reactjs.org/static/thinking-in-react-mock-1071fbcc9eed01fddc115b41e193ec11-4dd91.png" alt></p>
+<p>我们的JSON API会返回类似如下格式的数据：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">[</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Sporting Goods"</span>, <span class="attr">price</span>: <span class="string">"$49.99"</span>, <span class="attr">stocked</span>: <span class="literal">true</span>, <span class="attr">name</span>: <span class="string">"Football"</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Sporting Goods"</span>, <span class="attr">price</span>: <span class="string">"$9.99"</span>, <span class="attr">stocked</span>: <span class="literal">true</span>, <span class="attr">name</span>: <span class="string">"Baseball"</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Sporting Goods"</span>, <span class="attr">price</span>: <span class="string">"$29.99"</span>, <span class="attr">stocked</span>: <span class="literal">false</span>, <span class="attr">name</span>: <span class="string">"Basketball"</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Electronics"</span>, <span class="attr">price</span>: <span class="string">"$99.99"</span>, <span class="attr">stocked</span>: <span class="literal">true</span>, <span class="attr">name</span>: <span class="string">"iPod Touch"</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Electronics"</span>, <span class="attr">price</span>: <span class="string">"$399.99"</span>, <span class="attr">stocked</span>: <span class="literal">false</span>, <span class="attr">name</span>: <span class="string">"iPhone 5"</span>&#125;,</span><br><span class="line">  &#123;<span class="attr">category</span>: <span class="string">"Electronics"</span>, <span class="attr">price</span>: <span class="string">"$199.99"</span>, <span class="attr">stocked</span>: <span class="literal">true</span>, <span class="attr">name</span>: <span class="string">"Nexus 7"</span>&#125;</span><br><span class="line">];</span><br></pre></td></tr></table></figure>
+<h3 id="第一步：把UI打散成组件层级"><a href="#第一步：把UI打散成组件层级" class="headerlink" title="第一步：把UI打散成组件层级"></a>第一步：把UI打散成组件层级</h3><p>你需要做的第一件事就是在原型图中围着每一个组件（和子组件）画矩形框并为组件命名。如果你是和设计师一起工作，他们可能已经把这一步做完了，直接去找他们商量就好。他们的Photoshop层名可能最后就是你的React组件名。</p>
+<p>但是你怎么确定组件的划分呢？答案和你是如何决定是否需要创建一个函数或者对象是一样的。其中的技巧之一就是<a href="https://reactjs.org/docs/thinking-in-react.html" target="_blank" rel="noopener">单一职责原则（single responsibility principle）</a>，即一个组件理想情况下应该只做一件事。如果组件的规模一直增长，它应该被分解成更小的子组件。</p>
+<p>介于你需要经常展现JSON数据模型给用户，所以你会发现如果模型建造正确的话，它会和UI会匹配得非常好。那是因为UI和数据模型倾向于黏着于相同的信息构造，也就是说把你把UI分解成组件的工作通常是微不足道的。将其分解成一堆能准确代表你数据模型中某部分的组件就好。</p>
+<p><img src="https://reactjs.org/static/thinking-in-react-components-eb8bda25806a89ebdc838813bdfa3601-82965.png" alt></p>
+<p>这里在我们简单的应用中我们有五个组件。我已经将每个组件代表的数据用斜体标注了出来。</p>
+<ol>
+<li>FilterableProductTable (橙色框)：表示整个示例；</li>
+<li>SearchBar (蓝色框)：获取所有用户输入；</li>
+<li>ProductTable (绿色框)：根据用户输入展示和筛选数据集；</li>
+<li>ProductCategoryRow (青绿色框)：展示每个类型头；</li>
+<li>ProductRow (红色框)：展示某行数据中的每个产品。</li>
+</ol>
+<p>如果你注意到了ProductTable，你会发现表头（包含”Name”和”Price”标签）并不能算独立的组件。这只是一种偏好，不同的做法（这里只指是否把表头算作一个组件）各有争议。在本例中，我将其作为ProductTable，是因为他是数据集渲染的一部分，而数据集渲染是ProductTable的职责。不管怎样，如果这个表头逐渐变得很复杂（i.e. 如果我们需要添加排序功能），那把ProductTableHeader设计成单独的组件就肯定是有意义的了。</p>
+<p>现在我们已经在我们的原型中鉴别出了所有组件，下面让我们把它们排进一个层级结构中。这一步很简单。原型中，在另一个组件中出现的组件应该作为子层出现在层级结构中：</p>
+<ul>
+<li>FilterableProductTable<ul>
+<li>SearchBar</li>
+<li>ProductTable<ul>
+<li>ProductCategoryRow</li>
+<li>ProductRow</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h3 id="第二步：用React先建造一个静态版本"><a href="#第二步：用React先建造一个静态版本" class="headerlink" title="第二步：用React先建造一个静态版本"></a>第二步：用React先建造一个静态版本</h3><iframe scrolling="no" width="100%" height="500" src="//jsfiddle.net/yun1vgqb/embedded/js,html,css,result/dark" frameborder="0" allowfullscreen></iframe>
+<p>现在你有组件层级结构了，是时候实现你的应用了。最简单的方法是先写一个实现你的数据模型且渲染UI但却不交互的版本。这里最好是把交互和渲染UI的实现各自分离开，由于创建一个静态版本需要敲很多代码而不太需要想太多，而添加交互需要考虑更多逻辑而不太需要敲代码。之后我们会看到为什么这么说。</p>
+<p>为了建造一个能渲染你的数据模型的应用的静态版本，你需要建造可复用其他组件且能通过props传递数据的组件。props是从父层传递数据到子层的一种方法。如果你很熟悉state，也千万别在写静态版本的时候用state。保留状态（state）只用于交互，也就是当数据一直在变化时才使用。由于这里只是一个静态版本，就别用状态了。</p>
+<p>你可以从上向下创建应用，也可以从下向上创建应用。即你可以从在层级结构中更高的组件开始创建（i.e.从FilterableProductTable开始），也可以从更低的组件开始（ProductRow）。一般在层级结构更单一的实例中，从上向下创建更简单，而在比较大的项目中，从下向上，创建和测试都更简单。</p>
+<p>在这一步的结尾，你会得到一个能渲染你的数据模型的可复用的组件库。由于这只是一个静态版本，这里的组件只有render()方法。层级结构顶层的组件（FilterableProductTable）会把你的数据模型当成一个属性。如果你对你底层的数据模型做了改变，并再次调用ReactDOM.render()，UI也会被更新。这里并没有什么地方特别难理解，很容易就能看出你的UI是怎样更新的以及知道在哪里做变化。React的单向数据流（也成为单向绑定）使一切都部件化并且变得快速。</p>
+<p>如果你在这一步需要帮助的话你只需要查看React文档即可。</p>
+<p><strong>稍微暂停一下：props vs state</strong></p>
+<p>在React中有两种『模型』数据：props和state。理解这两者的区别很关键；如果你不是很明白二者的区别的话，去看看<a href="https://reactjs.org/docs/state-and-lifecycle.html" target="_blank" rel="noopener">React官方文档</a>。</p>
+<h3 id="第三步：确定UI状态的最小（但完整）表述"><a href="#第三步：确定UI状态的最小（但完整）表述" class="headerlink" title="第三步：确定UI状态的最小（但完整）表述"></a>第三步：确定UI状态的最小（但完整）表述</h3><p>为了让你的UI能交互，你需要让你底层的数据模型能触发改变。React使用state解决了这个问题。</p>
+<p>为了正确地创建你的应用，你首先需要考虑你的应用所需的可变状态的最小集合。这里的关键在于DRY：Don’t Repeat Yourself（不创建重复组件）。想清楚你的应用所需的最小的表述以及其他实际需求。例如，如果你在创建一个任务列表组件，就紧紧围绕需要做的任务项去创建；别为任务数单独保存一个分离的状态变量。相反，当你需要渲染一个任务列表的任务数（总量）时，单纯地获取任务项数组的长度即可。</p>
+<p>仔细想想我们这个示例应用中的所有数据。我们有：</p>
+<ul>
+<li>产品的原始列表</li>
+<li>用户输入的检索关键字</li>
+<li>复选框的值</li>
+<li>筛选过的产品列表</li>
+</ul>
+<p>让我们每一个都过一遍，搞清楚哪一个是状态。这个过程就是对于每一类数据问以下三个问题：</p>
+<ol>
+<li>当前数据是否是父层通过属性（props）传递过来的？如果是，这类数据应该不是状态。</li>
+<li>当前数据是否时刻变动？如果不是，这类数据应该不是状态。</li>
+<li>当前数据是否可以通过对组件中的其他状态或者属性进行计算而得到？如果是，这类数据不是状态。</li>
+</ol>
+<p>产品的原始列表通过属性传入，所以它不是状态。检索关键字和复选框的值处于变动中，并且无法通过计算得到，所以它应该是是状态。最后，筛选过的产品列表也不是状态，因为它可以通过结合原始产品列表，检索关键字，以及复选框的值来计算得出。<br>所以最终我们的状态有：</p>
+<ul>
+<li>用户输入的检索关键字</li>
+<li>复选框的值</li>
+</ul>
+<h3 id="第四步：确定你的状态存放的位置"><a href="#第四步：确定你的状态存放的位置" class="headerlink" title="第四步：确定你的状态存放的位置"></a>第四步：确定你的状态存放的位置</h3><iframe scrolling="no" width="100%" height="500" src="//jsfiddle.net/zafjbw1e/embedded/js,html,css,result/dark" frameborder="0" allowfullscreen></iframe>
+<p>好了，目前我们已经确定了应用状态的最小集合。下一步，我们需要确定哪个控件拥有这些状态。</p>
+<p>记住：React专注于层级结构自顶向下的单向数据流。我们可能不会立刻清楚哪个控件应该拥有哪个状态。这对于初学者而言是最难理解的地方，所以跟随下属几个步骤，弄清楚这个问题。</p>
+<p>对于你的应用中的每个状态：</p>
+<ul>
+<li>确定每个组件根据目标状态来渲染一些东西。</li>
+<li>找顶层组件（原文中为common owner component，这里译为顶层组件，在层级结构中所有需要这个状态的组件的最顶层组件）。</li>
+<li>不是顶层组件拥有目标状态，就是层级结构中更高级别的其他组件拥有目标状态。</li>
+<li>如果你找不到一个有意义的组件来拥有目标状态，创建一个新的组件，该组件单独用来持有目标状态，把它添加到层级结构中某个比顶层组件更高层的地方。</li>
+</ul>
+<p>下面让我们把这些策略应用到我们的示例中：</p>
+<ul>
+<li>ProductTable需要基于状态来过滤产品列表，SearchBar需要展示检索关键字和复选框状态。</li>
+<li>顶层组件是FilterableProductTable。</li>
+<li>就组件定义而言，把检索关键字和复选框值放在FilterableProductTable中是合乎常理的。</li>
+</ul>
+<p>很好，所以我们已经决定了我们的状态应该放在FilterableProductTable。首先，给FilterableProductTable添加一个返回{filterText: ‘’, inStockOnly: false}的getInitialState()方法，用于反映你的应用的初始状态。然后，把filterText和inStockOnly作为属性传递给ProductTable和SearchBar。最后，用这些属性来筛选ProductTable和SearchBar中表单域的值的集合。</p>
+<p>你可以来看看应用将会怎样运作：设置filterText为”ball”，然后刷新你的应用。你会看到数据正确地刷新了。</p>
+<h3 id="第五步：添加反向数据流"><a href="#第五步：添加反向数据流" class="headerlink" title="第五步：添加反向数据流"></a>第五步：添加反向数据流</h3><iframe scrolling="no" width="100%" height="500" src="//jsfiddle.net/n47gckhr/embedded/js,html,css,result/dark" frameborder="0" allowfullscreen></iframe>
+<p>目前为止，我们已经创建一个拥有自顶向下的状态和属性的数据流向机能，且能正确渲染的应用。现在是时候支持另一个方向的数据流了：在FilterableProductTable层级结构深处的表单组件需要更新状态。</p>
+<p>React保证了数据流的清晰，这使你能更容易地理解你的程序是怎样工作的，但是相比传统的双向数据绑定，它需要你多敲一些代码。React提供一个名为ReactLink的扩展，来让这个模式能像双向绑定一样方便。但在本文中，我们还是让一切都保持清晰。</p>
+<p>如果你在当前版本的示例中输入检索关键字或者勾选复选框，你会发现React忽略了你的输入（原文意为在处理输入值时我们并不关心各种input，而是只关心组件的状态，所以说『忽略了你的输入』）。这是有意为之的，由于我们已经设定了检索关键字的值和从FilterableProductTable中传入状态恒等。</p>
+<p>让我们想一下我们希望发生什么。我们希望确定无论何时，当用户改变了表单，我们就更新状态为用户输入。由于组件应该更新自己所拥有的状态，FilterableProductTable会传一个回调函数给SearchBar，只要状态应该被更新，该回调函数就应该触发执行。我们可以用input的onChange事件来通知它。然后由FilterableProductTable传递回调函数会执行setState()函数，应用就能更新了。</p>
+<p>虽然这听起来有点复杂，但这里的代码量真的很少。而你的数据是如何在应用中是怎样流动的，一目了然。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>理想的话，本文应该教会了怎样用React创建组件和应用的理念。相比以前，你可能需要多敲一些代码，但请记住读的代码永远比写的代码多，而读这种多组件式的清晰的代码真的非常容易。一旦你开始创建大型的组件库，你会很欣赏这种多组件话和明晰化的代码，而有了代码重用，你代码的行数就会变少。:)</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://reactjs.org/docs/thinking-in-react.html" target="_blank" rel="noopener">Thinking in React? - React</a></li>
+<li><a href="https://reactjs.org/docs/hello-world.html" target="_blank" rel="noopener">Hello World - React</a></li>
+<li><a href="https://reactjs.org/docs/state-and-lifecycle.html" target="_blank" rel="noopener">State and Lifecycle - React</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/10/else/02_linux_command/" rel="next" title="一些实用的Linux命令">
+                <i class="fa fa-chevron-left"></i> 一些实用的Linux命令
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/15/react/04_interactive_and_dynamic_uis/" rel="prev" title="React交互动态UI">
+                React交互动态UI <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#原文"><span class="nav-number">1.</span> <span class="nav-text">原文</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">2.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#从一个原型设计开始"><span class="nav-number">3.</span> <span class="nav-text">从一个原型设计开始</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第一步：把UI打散成组件层级"><span class="nav-number">4.</span> <span class="nav-text">第一步：把UI打散成组件层级</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第二步：用React先建造一个静态版本"><span class="nav-number">5.</span> <span class="nav-text">第二步：用React先建造一个静态版本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第三步：确定UI状态的最小（但完整）表述"><span class="nav-number">6.</span> <span class="nav-text">第三步：确定UI状态的最小（但完整）表述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第四步：确定你的状态存放的位置"><span class="nav-number">7.</span> <span class="nav-text">第四步：确定你的状态存放的位置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#第五步：添加反向数据流"><span class="nav-number">8.</span> <span class="nav-text">第五步：添加反向数据流</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">9.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">10.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

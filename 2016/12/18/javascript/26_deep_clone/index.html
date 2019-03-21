@@ -1,0 +1,801 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="一些特殊情况下会需要深度复制出一个全新的对象（内存级别的复制），深复制有几种方法，各自有不同的使用场景和性能。此外Facebook的ImmutableJS也是一个很好的实践。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript中的常量和深复制">
+<meta property="og:url" content="http://yoursite.com/2016/12/18/javascript/26_deep_clone/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="一些特殊情况下会需要深度复制出一个全新的对象（内存级别的复制），深复制有几种方法，各自有不同的使用场景和性能。此外Facebook的ImmutableJS也是一个很好的实践。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/DeepClone.jpeg">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.364Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript中的常量和深复制">
+<meta name="twitter:description" content="一些特殊情况下会需要深度复制出一个全新的对象（内存级别的复制），深复制有几种方法，各自有不同的使用场景和性能。此外Facebook的ImmutableJS也是一个很好的实践。">
+<meta name="twitter:image" content="http://yoursite.com/images/DeepClone.jpeg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/12/18/javascript/26_deep_clone/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JavaScript中的常量和深复制 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/18/javascript/26_deep_clone/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JavaScript中的常量和深复制
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-12-18 00:05:00" itemprop="dateCreated datePublished" datetime="2016-12-18T00:05:00+08:00">2016-12-18</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">一些特殊情况下会需要深度复制出一个全新的对象（内存级别的复制），深复制有几种方法，各自有不同的使用场景和性能。此外Facebook的ImmutableJS也是一个很好的实践。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>一些特殊情况下会需要深度复制出一个全新的对象（内存级别的复制），深复制有几种方法，各自有不同的使用场景和性能。</p>
+<h3 id="多种深复制方式以及实验结果分析"><a href="#多种深复制方式以及实验结果分析" class="headerlink" title="多种深复制方式以及实验结果分析"></a>多种深复制方式以及实验结果分析</h3><p><a href="http://jsben.ch/" target="_blank" rel="noopener">JSBench</a>是一个测试JavaScript片段代码性能的网站，该网站会将输入的多片JavaScript代码的执行速度进行对比。</p>
+<p>假设需要对以下代码需要被深复制，先来看四种深复制的方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> foo = &#123;</span><br><span class="line">  a: <span class="string">"hello"</span>,</span><br><span class="line">  b: <span class="string">"world"</span>,</span><br><span class="line">  c: <span class="number">11</span>,</span><br><span class="line">  arr: [<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>],</span><br><span class="line">  child: &#123;</span><br><span class="line">    a: <span class="number">22</span>,</span><br><span class="line">    str: <span class="string">"whazzup"</span></span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>实践一：结合JSON.stringify()和JSON.parse()方法复制对象。</p>
+<p>这种方法的缺点是不能正确地处理日期格式，无法处理NaN等特殊数据。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bar1 = <span class="built_in">JSON</span>.parse(<span class="built_in">JSON</span>.stringify(foo));</span><br></pre></td></tr></table></figure>
+<p>实践二：使用jQuery.extend()方法复制对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bar2 = $.extend(<span class="literal">true</span>, &#123;&#125;, foo);</span><br></pre></td></tr></table></figure>
+<p>实践三：<a href="https://lodash.com/" target="_blank" rel="noopener">Lodash</a>是一个使用的JavaScript基本工具方法库。使用lodash.cloneDeep()方法复制对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bar3 = _.cloneDeep(foo, <span class="literal">true</span>);</span><br></pre></td></tr></table></figure>
+<p>实践四：使用angular.copy()方法复制对象。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> bar4 = angular.copy(foo);</span><br></pre></td></tr></table></figure>
+<p>使用JSBench多次实验后的结果排名均大同小异，最有效的方式是使用angular.copy()方法进行深复制，其次是lodash.clone()，再次是JSON.stringify()和JSON.parse()，最后是jQuery.extend()方法。</p>
+<p><img src="/images/DeepClone.jpeg" alt></p>
+<p>实际上从多次实验结果（仅仅从百分比来考虑的话）来看，Lodash和stringify差异均不大，stringify效果略优于Lodash。</p>
+<h3 id="变量和常量"><a href="#变量和常量" class="headerlink" title="变量和常量"></a>变量和常量</h3><p>ES6中引入了两个新的关键字，let用于声明变量，const用于声明常量。</p>
+<p>实际上在代码中的绝大多数变量都只是用来临时存储，曾经看到过国外几篇博客和一些StackOverflow的回答称，绝大多数情况下都应该使用const来定义常量。但是需要注意的是，const定义的基本类型虽然不会被改变，但const定义的对象是可以被改变的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> foo = <span class="number">5</span>;</span><br><span class="line">foo = <span class="number">6</span>; <span class="comment">// Error</span></span><br><span class="line"><span class="keyword">const</span> bar = &#123;</span><br><span class="line">  baz: <span class="number">5</span>,</span><br><span class="line">&#125;;</span><br><span class="line">bar.baz = <span class="number">6</span>;</span><br></pre></td></tr></table></figure>
+<p>有一种可行的方式是使用Object.freeze()方法固定住当前的属性和值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> foo = &#123;</span><br><span class="line">  baz: <span class="number">5</span>,</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">const</span> bar = <span class="built_in">Object</span>.freeze(foo);</span><br><span class="line">bar.baz = <span class="number">6</span>; <span class="comment">// 不会报错，但也没有改变值</span></span><br><span class="line"><span class="built_in">console</span>.log(bar.baz); <span class="comment">// 5</span></span><br></pre></td></tr></table></figure>
+<p>这种方法的缺点在于，他只能固定当前层的对象中保存着基本类型值得属性，如果有嵌套的对象存在的话，则需要递归进行freeze。</p>
+<p><strong>即便如此，在ES6中，对于let，var和const关键字的使用，个人建议尽量使用const，需要变量的时候再用let，至于var应该被彻底禁止。其实现在绝大多数现代浏览器对ES6都支持的非常好了，因此一般情况下的JavaScript也如此推荐，而需要兼容老版浏览器的情况下则尽量使用诸如babel之类的编译器。</strong></p>
+<h3 id="ImmutableJS"><a href="#ImmutableJS" class="headerlink" title="ImmutableJS"></a>ImmutableJS</h3><p>前面我们已经提到了实践中应该尽量使用const关键字来定义常量，然而即使是使用const关键字，如果定义的是对象的话也是可以改变其中的内容的，而要想固定一个对象则必须递归调用Object.freeze()方法对对象的每一层嵌入对象作处理。</p>
+<p>Facebook推出的ImmutableJS是不可变数据和深复制的一种非常好的实践和选择，它可以帮助我们解决深复制和常量的问题。</p>
+<blockquote>
+<p>跟踪状态的改变和维护状态是让应用开发变得困难的主要原因。使用不可变数据开发促使你以与以往不同的方式思考数据如何在你的应用中流动。</p>
+</blockquote>
+<p>以下是基本的示例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> Immutable <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"><span class="keyword">const</span> map1 = Immutable.Map(&#123;<span class="attr">foo</span>: <span class="number">1</span>, <span class="attr">bar</span>: <span class="number">2</span>&#125;);</span><br><span class="line"><span class="keyword">const</span> map2 = map1.set(<span class="string">'bar'</span>, <span class="number">3</span>);</span><br><span class="line"><span class="built_in">console</span>.log(map1.get(<span class="string">'bar'</span>)); <span class="comment">// 2</span></span><br><span class="line"><span class="built_in">console</span>.log(map2.get(<span class="string">'bar'</span>)); <span class="comment">// 3</span></span><br><span class="line"><span class="built_in">console</span>.log(map1 === map2); <span class="comment">// false</span></span><br></pre></td></tr></table></figure>
+<p>这里创建了一个Immutable.Map类型的数据map1，然后使用set()方法对map1进行了属性修改，并将返回值赋值了给了map2，但是从之后的输出结果可以看出，map1和map2实际上是两个完全不同的对象。</p>
+<p>实际上，如果同一层面上的数据都是不可变的，则深度复制就变得没有意义了，存在两个值完全相同地址不同的对象除了浪费内存意外毫无意义，因为所有的数据都是不可变的。所以除非手动创建，不然如果不修改Immutable对象的值，Immutable是不会返回一个新的内存的对象的。</p>
+<p>关于ImmutableJS，结合React和Redux使用是非常好的实践。具体推荐<a href="https://facebook.github.io/immutable-js/" target="_blank" rel="noopener">官网的文档</a>和<a href="https://auth0.com/blog/intro-to-immutable-js/" target="_blank" rel="noopener">这篇文章</a>。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://jsben.ch/" target="_blank" rel="noopener">JSBench</a></li>
+<li><a href="https://lodash.com/" target="_blank" rel="noopener">Lodash</a></li>
+<li><a href="https://facebook.github.io/immutable-js/" target="_blank" rel="noopener">ImmutableJS</a></li>
+<li><a href="https://auth0.com/blog/intro-to-immutable-js/" target="_blank" rel="noopener">Introduction to Immutable.js and Functional Programming Concepts - Sebastián Peyrott</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/14/javascript/25_interview_quesitons/" rel="next" title="精妙短小的JavaScript代码片段和题目">
+                <i class="fa fa-chevron-left"></i> 精妙短小的JavaScript代码片段和题目
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/25/work/03_rocketchat_oauth2/" rel="prev" title="RocketChat的OAuth2授权模块的坑">
+                RocketChat的OAuth2授权模块的坑 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多种深复制方式以及实验结果分析"><span class="nav-number">2.</span> <span class="nav-text">多种深复制方式以及实验结果分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#变量和常量"><span class="nav-number">3.</span> <span class="nav-text">变量和常量</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ImmutableJS"><span class="nav-number">4.</span> <span class="nav-text">ImmutableJS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

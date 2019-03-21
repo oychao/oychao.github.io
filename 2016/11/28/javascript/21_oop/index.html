@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="JavaScript的面向对象，是一种基于原型（prototype based）的面向对象。这对于很多从传统面向对象语言（C++，Java等）语言转入JavaScript的学习者而言，一开始是难以接受的（笔者自己就是），但实际上，要想能写出好的JavaScript程序，对原型链的理解是必不可少的。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JavaScript基于原型的面向对象编程">
+<meta property="og:url" content="http://yoursite.com/2016/11/28/javascript/21_oop/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="JavaScript的面向对象，是一种基于原型（prototype based）的面向对象。这对于很多从传统面向对象语言（C++，Java等）语言转入JavaScript的学习者而言，一开始是难以接受的（笔者自己就是），但实际上，要想能写出好的JavaScript程序，对原型链的理解是必不可少的。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.365Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JavaScript基于原型的面向对象编程">
+<meta name="twitter:description" content="JavaScript的面向对象，是一种基于原型（prototype based）的面向对象。这对于很多从传统面向对象语言（C++，Java等）语言转入JavaScript的学习者而言，一开始是难以接受的（笔者自己就是），但实际上，要想能写出好的JavaScript程序，对原型链的理解是必不可少的。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/28/javascript/21_oop/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>JavaScript基于原型的面向对象编程 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/28/javascript/21_oop/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">JavaScript基于原型的面向对象编程
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-11-28 19:38:00" itemprop="dateCreated datePublished" datetime="2016-11-28T19:38:00+08:00">2016-11-28</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">JavaScript的面向对象，是一种基于原型（prototype based）的面向对象。这对于很多从传统面向对象语言（C++，Java等）语言转入JavaScript的学习者而言，一开始是难以接受的（笔者自己就是），但实际上，要想能写出好的JavaScript程序，对原型链的理解是必不可少的。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="面向对象编程"><a href="#面向对象编程" class="headerlink" title="面向对象编程"></a>面向对象编程</h3><p>JavaScript的面向对象，是一种<strong>基于原型（prototype based）</strong>的面向对象。这对于很多从传统面向对象语言（C++，Java等）语言转入JavaScript的学习者而言，一开始是难以接受的（笔者自己就是），但实际上，要想能写出好的JavaScript程序，对<strong>原型链（prototype chain）</strong>的理解是必不可少的。</p>
+<p>本文并不打算详细介绍<strong>面向对象编程（Object-Oriented Programming）</strong>的基本概念（封装，继承，多态），而是通过对比传统的OOP，来引入JavaScript中的OOP。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// java code</span></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Worker</span> <span class="keyword">extends</span> <span class="title">Person</span></span>&#123;</span><br><span class="line">  <span class="keyword">private</span> String name;</span><br><span class="line">  <span class="keyword">private</span> <span class="keyword">int</span> age;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">Person</span><span class="params">(String name, <span class="keyword">int</span> age)</span> </span>&#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">    <span class="keyword">this</span>.name = name;</span><br><span class="line">    <span class="keyword">this</span>.age = age;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="keyword">public</span> <span class="title">work</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    System.out.println(<span class="string">"I'm working"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// setter ......</span></span><br><span class="line">  <span class="comment">// getter ......</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// java code</span></span><br><span class="line">...</span><br><span class="line">  Person person = <span class="keyword">new</span> Person(<span class="string">"Charles"</span>, <span class="number">25</span>);</span><br><span class="line">  person.sayHello(); <span class="comment">// this method is from Person class.</span></span><br><span class="line">  <span class="comment">// hello world</span></span><br><span class="line">  person.work();</span><br><span class="line">  <span class="comment">// I'm working</span></span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<p>上面两段Java代码，代表了一般面向对象语言中类的定义方式和特性，我们通过class关键字声明一个类，描述它的属性，构造函数，父类，行为方法等。然后我们再在需要的地方定义一个相关类的变量并实例化，再进行具体的操作。</p>
+<p>然而，在JavaScript中却有很大的出入，先入为主代入上面的观念将会对学习JavaScript的面向对象带来极大地误导。</p>
+<p><strong>JavaScript是一种基于原型（Prototype）的编程语言。基于原型的编程语言使用的是一种使用函数（function）作为类（class）的构造器（constructor）的面向对象编程语言。这句话也许听上去很绕口，没关系，因为想要理解JavaScript的面向对象，必须要先学习JavaScript中的原型。</strong></p>
+<h3 id="原型"><a href="#原型" class="headerlink" title="原型"></a>原型</h3><p>在JavaScript中，几乎所有对象都有一个原型对象（也有例外，如Object.prototype），当我们每定义一个对象，这个对象就有一个原型，指向他的父对象（Object.prototype指向null），我们可以通过对象的proto属性访问到自身的原型对象。</p>
+<p>来看如下示例代码。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> o = &#123;&#125;;</span><br><span class="line"><span class="built_in">console</span>.log(o.__proto__); <span class="comment">// Object.prototype</span></span><br></pre></td></tr></table></figure>
+<p>事实上在JavaScript中，当访问一个对象的属性时，对象会先从自身的属性中查找，如果没有就往自身的原型对象中查找，再没在再上一级，直到找到该属性或者找到最顶层才停止。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> o1 = &#123;<span class="attr">foo</span>: <span class="string">'foo'</span>&#125;;</span><br><span class="line"><span class="keyword">let</span> o2 = <span class="built_in">Object</span>.create(o1);</span><br><span class="line">o2.bar = <span class="string">'bar'</span>;</span><br><span class="line"><span class="built_in">console</span>.log(o2.bar); <span class="comment">// bar</span></span><br><span class="line"><span class="built_in">console</span>.log(o2.foo); <span class="comment">// foo</span></span><br><span class="line"><span class="built_in">console</span>.log(o2.__proto__); <span class="comment">// Object &#123;foo: "foo"&#125;</span></span><br></pre></td></tr></table></figure>
+<p>上面代码中首先需要解释的是Object.create()函数，该函数会以自己的参数对象为原型，创建一个新的对象并返回。也就是说我们的第二行代码创建了一个新的对象并赋值给了o2，且o2的原型对象是o1。实时上我们后面的输出结果也验证了这一点。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// o2 -&gt; o1 -&gt; Object.prototype -&gt; null</span></span><br></pre></td></tr></table></figure>
+<p>o2的原型是o1，更进一步地，o1的原型是Object.prototype。此外对于函数，数组，字符串，数字等和其他特殊对象的原型对象，留待读者自己去进一步探索。</p>
+<p>以上就是最基本的原型知识，即在JavaScript中，每一个对象都有一个自己的原型（Object.prototype除外）。</p>
+<h3 id="构造器"><a href="#构造器" class="headerlink" title="构造器"></a>构造器</h3><p>了解了原型之后，我们来涉及一点我们熟悉的面向对象的知识。在JavaScript中，一种定义对象的方式就是通过调用构造器方法。构造器就是一个普通的函数，不过当调用它时在前面加上new关键字，它就成了一个构造器函数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> Person = <span class="function"><span class="keyword">function</span> (<span class="params">firstName</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.firstName = firstName;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Person instantiated'</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">let</span> person1 = <span class="keyword">new</span> Person(<span class="string">'Alice'</span>); <span class="comment">// Person instantiated</span></span><br><span class="line"><span class="keyword">let</span> person2 = <span class="keyword">new</span> Person(<span class="string">'Bob'</span>); <span class="comment">// Person instantiated</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'person1 is '</span> + person1.firstName); <span class="comment">// person1 is Alice</span></span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'person2 is '</span> + person2.firstName); <span class="comment">// person2 is Bob</span></span><br></pre></td></tr></table></figure>
+<p>在上述代码中，先定义了一个构造器Person，该构造器接收一个参数，作为Person的名字。然后我们通过new关键字，调用了构造器，实例化了两个Person，分别传入了各自的参数。<strong>注意当我们使用new关键字时，构造器中的this指向新创建的对象。</strong>因此在得到的返回结果中，我们可以访问对象各自的属性。</p>
+<p>但目前『Person类』只是有一个自己的『成员属性』，还没有方法，这个时候我们就要用到我们刚刚提到的原型了。上文提到过，当一个对象在不存在自有属性时，它就会向上一级询问。我们来看一下person1和person2的原型指向的是什么。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">console</span>.log(person1.__proto__); <span class="comment">// Object &#123;constructor: function(firstName) ...&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(person1.__proto__ === person2.__proto__); <span class="comment">// true</span></span><br><span class="line"><span class="built_in">console</span>.log(person1.__proto__ === Person.prototype); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<p>从第一行可以看出person1的原型对象也是一个对象，从第二行可以看出person1和person2的两个对象的原型是同一个对象，从第三行可以看出这两个对象的原型就是Person.prototype。</p>
+<p>这是JavaScript中的规定，当通过new关键字调用构造器（即这里的Person）创建出对象时，所有对象的原型都指向构造器.prototype（即这里的Person.prototype）。</p>
+<p>我们完全可以把类的方法定义在Person.prototype上。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Person.prototype.sayHello = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`Hello, I\'m <span class="subst">$&#123;<span class="keyword">this</span>.firstName&#125;</span>`</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>有思考过的读者可能会想：可是这又与我们的定义方法有什么关系呢？既然所有的对象访问的都是同一个原型，那岂不是方法也是共享的？就像一般的面向对象语言中的静态方法一样？</p>
+<p>确实所有对象都访问的是同一个原型对象，但是JavaScript中还有另一个bug，就是this指针。</p>
+<p><strong>在JavaScript中，this指针指向当前的操作对象。</strong></p>
+<p>就这么简单地把问题都解决了，当我们访问Person.prototype中的方法时，this指针指向我们当前的对象。我们来看实验结果。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">person1.sayHello(); <span class="comment">// Hello, I'm Alice</span></span><br><span class="line">person2.sayHello(); <span class="comment">// Hello, I'm Bob</span></span><br></pre></td></tr></table></figure>
+<h3 id="继承"><a href="#继承" class="headerlink" title="继承"></a>继承</h3><p><strong>继承（Inheritance）</strong>是OOP的另一个重要性质。在JavaScript中，继承同样是基于原型来实现的。</p>
+<p>这里直接来看MDN官网的示例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Person构造器</span></span><br><span class="line"><span class="keyword">var</span> Person = <span class="function"><span class="keyword">function</span>(<span class="params">firstName</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">this</span>.firstName = firstName;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 为Person.prototype添加一些方法</span></span><br><span class="line">Person.prototype.walk = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'I am walking!'</span>);</span><br><span class="line">&#125;;</span><br><span class="line">Person.prototype.sayHello = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`Hello, I'm <span class="subst">$&#123;<span class="keyword">this</span>.firstName&#125;</span>`</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 定义Student构造器</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Student</span>(<span class="params">firstName, subject</span>) </span>&#123;</span><br><span class="line">  <span class="comment">// 调用父构造器，保证父构造器执行时this指针当前构造器中的当前对象。</span></span><br><span class="line">  Person.call(<span class="keyword">this</span>, firstName);</span><br><span class="line">  <span class="comment">// Student特有属性</span></span><br><span class="line">  <span class="keyword">this</span>.subject = subject;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 创建Student.prototype对象，该对象应该继承自Person.prototype</span></span><br><span class="line"><span class="comment">// 这里一个常见的错误就是将其继承自new Person()，请注意应该继承自Person.prototype。</span></span><br><span class="line">Student.prototype = <span class="built_in">Object</span>.create(Person.prototype);</span><br><span class="line"><span class="comment">// 设置Student.prototype.constructor指向为Student。</span></span><br><span class="line"><span class="comment">// 这里原本如此，但是上一步把这个给覆盖掉了，这里再修改回去</span></span><br><span class="line">Student.prototype.constructor = Student;</span><br><span class="line"><span class="comment">// 『重写』sayHello方法。</span></span><br><span class="line">Student.prototype.sayHello = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">`Hello, I'm <span class="subst">$&#123;<span class="keyword">this</span>.firstName&#125;</span>. I'm studying <span class="subst">$&#123;<span class="keyword">this</span>.subject&#125;</span>.`</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 为Student类添加sayGoodBye方法。</span></span><br><span class="line">Student.prototype.sayGoodBye = <span class="function"><span class="keyword">function</span>(<span class="params"></span>)</span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Goodbye!'</span>);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="comment">// 示例用法。</span></span><br><span class="line"><span class="keyword">var</span> student1 = <span class="keyword">new</span> Student(<span class="string">'Janet'</span>, <span class="string">'Applied Physics'</span>);</span><br><span class="line">student1.sayHello();   <span class="comment">// Hello, I'm Janet. I'm studying Applied Physics.</span></span><br><span class="line">student1.walk();       <span class="comment">// I am walking!</span></span><br><span class="line">student1.sayGoodBye(); <span class="comment">// Goodbye!</span></span><br><span class="line"><span class="comment">// 检查一下实例类型是否正确。</span></span><br><span class="line"><span class="built_in">console</span>.log(student1 <span class="keyword">instanceof</span> Person);  <span class="comment">// true </span></span><br><span class="line"><span class="built_in">console</span>.log(student1 <span class="keyword">instanceof</span> Student); <span class="comment">// true</span></span><br></pre></td></tr></table></figure>
+<p>上面代码很清晰，我们来逐行解释。</p>
+<p>首先我们定义了一个Person的构造器，该构造器接收一个firstName的参数，且其原型拥有两个方法，分别是walk()和sayHello()。</p>
+<p>现在我们需要一个Student类的构造器，它要继承自Person，很明显，继承需要将属性和方法都继承过来。</p>
+<p>先来看属性的继承。创建当前的Student对象时，this指针即指向的新创建的对象，因此我们可以用call方法，将this指针传递给Person构造器，让Person构造器为我们当前创建的新的Student对象完成Person属性的初始化，这个过程相当于其他语言中的super方法。属性继承完成之后，我们再开始初始化自由属性。</p>
+<p>再来看方法的继承。Person的方法都存在于Person.prototype当中，自然Student的方法也需要一套一模一样的方法过来。Student的方法肯定也是存在于Student.prototype之中的，Student需要继承Person，所以很明显，Student.prototype需要继承Person.prototype。</p>
+<p>我们调用Object.create()方法，将创建一个新的继承自Person.prototype的对象，并赋值给Student.prototype。但这样做却把Student.prototype.constructor给覆盖掉了（一个构造器的prototype的constructor对象总是指向自身），很简单，我们再将其赋值回去就行了。</p>
+<p>我们还可以重写sayHello()方法，从本文一开始的原型的知识我们可以知道，当Student.prototype中有sayHello属性时，Student类型的实例就不会访问到Person.prototype中的sayHello属性了。因此重写只需要在Student.prototype上添加sayHello方法就可以了。</p>
+<p>当然我们还可以为Student.prototype添加新的其他方法。</p>
+<p>实际上，如果读完本小节，我们脑中有一个完整的原型链模型，就说明我们已经彻底理解了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// person -&gt; Person.prototype -&gt; Object.prototype -&gt; null</span></span><br><span class="line"><span class="comment">// student -&gt; Student.prototype -&gt; Person.prototype -&gt; Object.prototype -&gt; null</span></span><br></pre></td></tr></table></figure>
+<h3 id="封装和多态"><a href="#封装和多态" class="headerlink" title="封装和多态"></a>封装和多态</h3><p>在上一节中，Student不需要知道Person的walk方法是怎么实现的，但是Student类型的对象依然能调用walk方法，除非我们需要重写它，否则Student不需要显式地定义walk方法。这就是封装。（在其他语言中将属性经常设置为private或者protected，虽然在JavaScript中可以模拟实现，但是这并不是OOP的必要条件）</p>
+<h4 id="使用闭包实现私有属性"><a href="#使用闭包实现私有属性" class="headerlink" title="使用闭包实现私有属性"></a>使用闭包实现私有属性</h4><p>闭包能限定作用域，因此借用闭包来实现私有属性的效果。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Point</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> _x = x, _y = y;</span><br><span class="line">  <span class="keyword">this</span>.setX = <span class="function"><span class="params">x</span> =&gt;</span> _x = x;</span><br><span class="line">  <span class="keyword">this</span>.setY = <span class="function"><span class="params">y</span> =&gt;</span> _y = y;</span><br><span class="line">  <span class="keyword">this</span>.getX = <span class="function"><span class="params">()</span> =&gt;</span> _x;</span><br><span class="line">  <span class="keyword">this</span>.getY = <span class="function"><span class="params">()</span> =&gt;</span> _y;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> p = <span class="keyword">new</span> Point(<span class="number">1</span>, <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+<h4 id="使用Symbol实现私有属性"><a href="#使用Symbol实现私有属性" class="headerlink" title="使用Symbol实现私有属性"></a>使用Symbol实现私有属性</h4><p>还可以借用之前在学习过的ES6的Symbol实现对象的私有属性。由于WeakMap对键只持有弱引用，且引用必须为对象，键值无法遍历，因此如果把当前对象当成键，把属性放入一个对象中作为值，存在WeakMap中，则这些属性只能通过当前对象本身去访问。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> map = <span class="keyword">new</span> <span class="built_in">WeakMap</span>();</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">interval</span>(<span class="params">obj</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">if</span>(!map.has(obj)) &#123;</span><br><span class="line">    map.set(obj, &#123;&#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> map.get(obj);</span><br><span class="line">&#125;;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">Point</span>(<span class="params">x, y</span>) </span>&#123;</span><br><span class="line">  interval(<span class="keyword">this</span>).x = x;</span><br><span class="line">  interval(<span class="keyword">this</span>).y = y;</span><br><span class="line">&#125;</span><br><span class="line">Point.prototype.setX = <span class="function"><span class="keyword">function</span>(<span class="params">x</span>) </span>&#123; interval(<span class="keyword">this</span>).x = x &#125;;</span><br><span class="line">Point.prototype.setY = <span class="function"><span class="keyword">function</span>(<span class="params">y</span>) </span>&#123; interval(<span class="keyword">this</span>).y = y &#125;;</span><br><span class="line">Point.prototype.getX = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="keyword">return</span> interval(<span class="keyword">this</span>).x &#125;;</span><br><span class="line">Point.prototype.getY = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123; <span class="keyword">return</span> interval(<span class="keyword">this</span>).y &#125;;</span><br><span class="line"><span class="keyword">let</span> p = <span class="keyword">new</span> Point(<span class="number">1</span>, <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+<p>不同的类可以定义同名的属性和方法，方法的作用范围从属于某个具体定义它们的类，实际上，两个相同类型的对象也可以有不同方法的实现，JavaScript这种特指本身就是多态的体现。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>在刚结束的ES6系列总结中，提到class关键字只是个语法糖（实际上还是基于原型实现），虽然笔者强烈推荐使用ES6的class关键字，但是对于JavaScript的进阶者而言，底层的实现也是必不可少的。</p>
+<p>本文可能有些地方讲述的不是很清楚，也许会给读者带来困惑，笔者强烈推荐下面的两篇参考，关于JavaScript的基于原型的面向对象，里面有更详尽的表述。</p>
+<p>不过在学习JavaScript基于原型的面向对象之前，还是希望读者对原型链，this指针，Function.prototype.call()方法等基本知识有足够的理解，没有这些基础确实是无法理解JavaScript基于原型的OOP的。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Introduction_to_Object-Oriented_JavaScript" target="_blank" rel="noopener">Introduction to Object-Oriented JavaScript - MDN</a></li>
+<li><a href="https://www.amazon.cn/JavaScript-David-Flanagan/dp/B00E593MTS/ref=tmm_kin_swatch_0?_encoding=UTF8&amp;qid=1480331087&amp;sr=8-2https://developer.mozilla.org/en-US/Add-ons/SDK/Guides/Contributor_s_Guide/Private_Properties" target="_blank" rel="noopener">JavaScript权威指南（原书第6版） - Amazon</a></li>
+<li>[Private Properties - MDN][3]</li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/28/javascript/20_es6_conclusion/" rel="next" title="ES6学习笔记系列总结">
+                <i class="fa fa-chevron-left"></i> ES6学习笔记系列总结
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/29/javascript/22_prototype/" rel="prev" title="JavaScript原型链">
+                JavaScript原型链 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#面向对象编程"><span class="nav-number">1.</span> <span class="nav-text">面向对象编程</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#原型"><span class="nav-number">2.</span> <span class="nav-text">原型</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#构造器"><span class="nav-number">3.</span> <span class="nav-text">构造器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#继承"><span class="nav-number">4.</span> <span class="nav-text">继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#封装和多态"><span class="nav-number">5.</span> <span class="nav-text">封装和多态</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#使用闭包实现私有属性"><span class="nav-number">5.1.</span> <span class="nav-text">使用闭包实现私有属性</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用Symbol实现私有属性"><span class="nav-number">5.2.</span> <span class="nav-text">使用Symbol实现私有属性</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

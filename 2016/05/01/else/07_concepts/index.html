@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="并发vs.并行，异步vs.同步，非阻塞vs.阻塞，死锁vs.饥饿vs.活锁，竞争条件......">
+<meta name="keywords" content="其他">
+<meta property="og:type" content="article">
+<meta property="og:title" content="几个基本概念">
+<meta property="og:url" content="http://yoursite.com/2016/05/01/else/07_concepts/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="并发vs.并行，异步vs.同步，非阻塞vs.阻塞，死锁vs.饥饿vs.活锁，竞争条件......">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.351Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="几个基本概念">
+<meta name="twitter:description" content="并发vs.并行，异步vs.同步，非阻塞vs.阻塞，死锁vs.饥饿vs.活锁，竞争条件......">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/05/01/else/07_concepts/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>几个基本概念 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/05/01/else/07_concepts/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">几个基本概念
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-05-01 01:43:00" itemprop="dateCreated datePublished" datetime="2016-05-01T01:43:00+08:00">2016-05-01</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">并发vs.并行，异步vs.同步，非阻塞vs.阻塞，死锁vs.饥饿vs.活锁，竞争条件......</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="并发vs-并行"><a href="#并发vs-并行" class="headerlink" title="并发vs.并行"></a>并发vs.并行</h3><p>并发和并行是互相相关的概念，但是还是有一些细微的区别。并发是两个或者多个任务在进行中，虽然他们不是真的在同时进行。举例的话，这个可以通过时间切片的方法实现，即把任务切割成多个部分，并混合在一起序列化运行。相反，并行就是真的能同时运行。</p>
+<h3 id="异步vs-同步"><a href="#异步vs-同步" class="headerlink" title="异步vs.同步"></a>异步vs.同步</h3><p>如果一个方法不返回值或者抛出异常，这个方法的调用点就不能往下运行，那这个调用这个方法就是同步的。相反，一个异步调用允许调用者在执行有限的步骤后继续执行，并且方法的结束是信号化的，这种信号化通过一些附加机制实现（这些机制可能是一个注册的回调函数，一个Future，一个消息等）。</p>
+<p>一个同步API可能使用阻塞来实现同步，但这不是必要的。一个密集CPU任务可能也会引起类似的阻塞行为。一般而言，由于异步API保证系统可以继续执行，所以其更受偏好。Actor天然就是异步的：一个Actor可以在发出一条消息后，不许要等待消息真地发出去即可继续执行后续工作。</p>
+<h3 id="非阻塞vs-阻塞"><a href="#非阻塞vs-阻塞" class="headerlink" title="非阻塞vs.阻塞"></a>非阻塞vs.阻塞</h3><p>如果某个线程的延迟可以无限期地延迟其他其他线程，我们就说这是阻塞。一个直观的例子是，一个资源可以一直被一个线程排他地占用。如果一个线程无限期地占有某个资源（例如意外运行了一个死循环）而其他线程一直等着资源而不能往下执行。与之相对，非阻塞就是没有线程能无限期地延迟其他线程。</p>
+<p>由于当系统包含阻塞操作时，并不能在细节上保证系统的整体动作可继续执行，所以相比阻塞操作，一般都选择非阻塞操作。</p>
+<h3 id="死锁vs-饥饿vs-活锁"><a href="#死锁vs-饥饿vs-活锁" class="headerlink" title="死锁vs.饥饿vs.活锁"></a>死锁vs.饥饿vs.活锁</h3><p>当各个参与者都在等待其他参与者达到一个能让自己继续执行的特定状态时，死锁就会发生。因为他们之中任何一个参与者在其他参与者没有达到一个特定状态之前都不能继续执行，这时所有相关的子系统都会抛锚。死锁与阻塞关系很近，因为在死锁中，一个参与者线程也能无限期延迟其他线程。</p>
+<p>在死锁的情况中，没有一个参与者能继续往下执行，在与之相对地就有饥饿，当饥饿发生时有参与者可以继续执行，但是可能会有一个或者多个参与者不能执行。一种典型的情况是相比优先级更低的任务一直选择高优先级的任务朴素的调度算法。如果输入的高优先级任务的数量一直很高，则优先级较低的任务永远不会被完成。</p>
+<p>活锁和死锁有些类似，也是没有一个参与者可以继续执行。不同的地方在于死锁是各个参与者处于一个一直在等待其他参与者的冻结状态中，活锁是参与者在持续地改变他们的状态。一个示例情况是，当两个参与者有两个一样的可用资源。他们各自都尝试获取资源，但是他们同时也检查是否有别人需要这个资源。如果资源被其他参与者请求了，他们就尝试获取另一个实例或资源。不走运的情况下，可能会发生两个参与者在两个资源间『反弹』，永远在获得它，但永远屈服于另一个参与者。</p>
+<h3 id="竞争条件"><a href="#竞争条件" class="headerlink" title="竞争条件"></a>竞争条件</h3><p>一个事件集的假定序列可能被外在非决定性结果侵犯，我们称这种情况为竞争条件。竞争条件经常发生在多线程有一个共有的状态，且线程对状态的操作可能会被干扰，从而引发意料之外的行为。这是一个一般的情况，竞争条件并不一定要一个共享的状态。例如客户端发送无序的包（如UDP报文）P1，P2到服务器。由于包可能走不同的路由，服务器可能先收到P2再收到P1。若果消息没有包含他们的发送顺序的信息，服务器决定的包的顺序就可能是一个不同的顺序。根据包的含义，这也可能的引发竞争条件。</p>
+<h3 id="非阻塞保证-进行条件"><a href="#非阻塞保证-进行条件" class="headerlink" title="非阻塞保证(进行条件)"></a>非阻塞保证(进行条件)</h3><p>之前小节中说了，由于如死锁的危险，减少吞吐量之类的原因，阻塞是不受欢迎的。在接下来的章节中我们讨论几种不同能力非阻塞的特性。</p>
+<h3 id="等待自由"><a href="#等待自由" class="headerlink" title="等待自由"></a>等待自由</h3><p>如果方法每次调用都保证能在有限步骤内完成的话，这种方法就称为等待自由方法。如果一个方法界定为等待自由，那该方法能在有限步骤内完成。</p>
+<p>这个定义表明了等待自由方法永远非阻塞，因此死锁不可能发生。此外，由于每个参与者都可以在有限步骤的调用后（当调用结束）继续运行，自由等待方法也不会发生饥饿。</p>
+<h3 id="锁自由"><a href="#锁自由" class="headerlink" title="锁自由"></a>锁自由</h3><p>锁自由是一种比等待自由弱一点的特性。在锁自由调用中，部分方法在有限步骤内完成是极其经常的。这个定义表明死锁在锁自由中是不可能的。另一方面，保证部分调用在有限步骤内结束并不保证所有调用最终都能结束。也就是说，锁自由不足以保证不发生饥饿。</p>
+<h3 id="堵塞自由"><a href="#堵塞自由" class="headerlink" title="堵塞自由"></a>堵塞自由</h3><p>堵塞自由是这里讨论的最弱的非阻塞保证。如果一个方法有一个时间点是在隔离中执行（其他线程没有步骤，例如被挂起），则其被称为堵塞自由方法，它能在有限步骤内执行完成。所有的锁自由对象都是堵塞自由，但反过来则未必。</p>
+<p>乐观并发控制（OCC）方法一般都是堵塞自由。OCC是所有的参与者都尝试在一个共享对象上执行自己的操作，但如果一个参与者发现和其他参与者有冲突，它就会回滚修改，然后根据一些日程规划再一次尝试。如果在某个时间点某个参与者是唯一一个在尝试的，该操作就会成功。</p>
+<p>###文献推荐</p>
+<ol>
+<li>The Art of Multiprocessor Programming, M. Herlihy and N Shavit, 2008. ISBN 978-0123705914</li>
+<li>Java Concurrency in Practice, B. Goetz, T. Peierls, J. Bloch, J. Bowbeer, D. Holmes and D. Lea, 2006. ISBN 978-0321349606</li>
+</ol>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://doc.akka.io/docs/akka/2.4.4/general/terminology.html" target="_blank" rel="noopener">Terminology, Concepts - Akka</a></li>
+</ol>
+<p>[2]: </p>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/其他/" rel="tag"># 其他</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/21/else/06_nginx_proxy/" rel="next" title="使用nginx做反向代理">
+                <i class="fa fa-chevron-left"></i> 使用nginx做反向代理
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/05/04/java/01_lambda/" rel="prev" title="Java 8 Lambda学习笔记">
+                Java 8 Lambda学习笔记 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#并发vs-并行"><span class="nav-number">1.</span> <span class="nav-text">并发vs.并行</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#异步vs-同步"><span class="nav-number">2.</span> <span class="nav-text">异步vs.同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非阻塞vs-阻塞"><span class="nav-number">3.</span> <span class="nav-text">非阻塞vs.阻塞</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#死锁vs-饥饿vs-活锁"><span class="nav-number">4.</span> <span class="nav-text">死锁vs.饥饿vs.活锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#竞争条件"><span class="nav-number">5.</span> <span class="nav-text">竞争条件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#非阻塞保证-进行条件"><span class="nav-number">6.</span> <span class="nav-text">非阻塞保证(进行条件)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#等待自由"><span class="nav-number">7.</span> <span class="nav-text">等待自由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#锁自由"><span class="nav-number">8.</span> <span class="nav-text">锁自由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#堵塞自由"><span class="nav-number">9.</span> <span class="nav-text">堵塞自由</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">10.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

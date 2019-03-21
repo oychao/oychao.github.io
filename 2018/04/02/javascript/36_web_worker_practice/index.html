@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前段时间做了个区块链的前端演示Demo，为了能够更好地演示真实的挖矿效果，Demo中引入了Web Worker，采用一个线程作为一个矿工的形式去模拟挖矿，本文记录一下使用Web Worker过程中遇到的一些注意事项，以及个人认为比较好的实践。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Web Worker的一些实践">
+<meta property="og:url" content="http://yoursite.com/2018/04/02/javascript/36_web_worker_practice/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="前段时间做了个区块链的前端演示Demo，为了能够更好地演示真实的挖矿效果，Demo中引入了Web Worker，采用一个线程作为一个矿工的形式去模拟挖矿，本文记录一下使用Web Worker过程中遇到的一些注意事项，以及个人认为比较好的实践。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.359Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Web Worker的一些实践">
+<meta name="twitter:description" content="前段时间做了个区块链的前端演示Demo，为了能够更好地演示真实的挖矿效果，Demo中引入了Web Worker，采用一个线程作为一个矿工的形式去模拟挖矿，本文记录一下使用Web Worker过程中遇到的一些注意事项，以及个人认为比较好的实践。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/04/02/javascript/36_web_worker_practice/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Web Worker的一些实践 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/04/02/javascript/36_web_worker_practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Web Worker的一些实践
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-04-02 22:05:00" itemprop="dateCreated datePublished" datetime="2018-04-02T22:05:00+08:00">2018-04-02</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">前段时间做了个区块链的前端演示Demo，为了能够更好地演示真实的挖矿效果，Demo中引入了Web Worker，采用一个线程作为一个矿工的形式去模拟挖矿，本文记录一下使用Web Worker过程中遇到的一些注意事项，以及个人认为比较好的实践。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>前段时间做了个<a href="https://oychao.github.io/demos/blockchain/" target="_blank" rel="noopener">区块链的前端演示Demo</a>，为了能够更好地演示真实的挖矿效果，Demo中引入了Web Worker，采用一个线程作为一个矿工的形式去模拟挖矿，本文记录一下使用Web Worker过程中遇到的一些注意事项，以及个人认为比较好的实践。</p>
+<h3 id="Web-Worker简介及基本用法"><a href="#Web-Worker简介及基本用法" class="headerlink" title="Web Worker简介及基本用法"></a>Web Worker简介及基本用法</h3><p>每一个JavaScript程序员在第一节课看简介的时候就知道，JavaScript是单线程的。大多数时候我们都需要用回调的方式来写异步的代码，由于其底层依然是基于事件轮询的，也就意味着JavaScript不适合做复杂而耗时的运算，比如一些人工智能的算法，或者基于PoW机制的区块链的区块运算等。</p>
+<p>但这种情况随着HTML5在现代浏览器中的普及而有所改观，HTML5中的Web Worker就为浏览器环境下的JavaScript提供了一种多线程机制，虽然高强度的密集型计算还有待考验，但Web Worker的出现确实让前端人员多了一个选择。</p>
+<p>由于对视图的异步操作会带来各种各样的冲突问题，因此HTML5规定Web Worker没有Window对象，因此它不能操作DOM，这使得它的能力大大受限，但也更加安全，总地来说，Web Worker适用的场景主要是一些需要前端做大量计算的场合，当这些计算无法避免时，正确地使用Web Worker能有效地避免页面假死的现象。</p>
+<p>我们先来看一下Web Worker的基本用法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// worker.js</span></span><br><span class="line">onmessage = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Message received from main script: '<span class="subst">$&#123;e.data&#125;</span>'.`</span>);</span><br><span class="line">    postMessage(<span class="string">'Message received.'</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">const</span> w = <span class="keyword">new</span> Worker(<span class="string">'worker.js'</span>);</span><br><span class="line">w.postMessage(<span class="string">'hello worker'</span>); <span class="comment">// send a message to worker</span></span><br><span class="line">w.onmessage = <span class="function"><span class="keyword">function</span>(<span class="params">e</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`Message received from worker: '<span class="subst">$&#123;e.data&#125;</span>'`</span>)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- index.html --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">script</span> <span class="attr">src</span>=<span class="string">"./index.js"</span>&gt;</span><span class="undefined"></span><span class="tag">&lt;/<span class="name">script</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>worker.js有一个<code>onmessage</code>处理事件和一个用于发消息的<code>postMessage</code>的全局函数，当收到主线程发来的消息时，<code>onmessage</code>会被自动触发执行，我们可以通过<code>e.data</code>获得发送过来的数据。</p>
+<p>在index.js中，我们使用Worker创建了一个对象，注意Worker构造函数接收的参数是Worker文件的路径，获得Worker对象之后，具体的操作和worker.js类似，只是这里的<code>postMessage</code>和<code>onmessage</code>都是属于Worker对象的方法。</p>
+<p>可以看出Web Worker的基本用法并不复杂，当然还有Web Worker之间的消息传递（MessageChannel），Web Worker的关闭（主线程中<code>w.terminate()</code>或者Worker中的<code>close()</code>）等使用细节，读者可以根据需要去查阅<a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers" target="_blank" rel="noopener">MDN的相关资料</a>。</p>
+<h3 id="在Webpack构建的工程中使用Web-Worker"><a href="#在Webpack构建的工程中使用Web-Worker" class="headerlink" title="在Webpack构建的工程中使用Web Worker"></a>在Webpack构建的工程中使用Web Worker</h3><p>显然，如果我们只能通过上述的形式使用Web Worker，是很难将其放到现代前端工程项目中来管理的，比如Webpack中模块化的管理，我们需要在Web Worker中也能用到各种模块，并且最好能直接通过引入的方式将Worker文件导入并创建Web Worker对象。</p>
+<p>我在遇到这个问题的时候，最开始想的是将Web Worker以字符串的形式引入到相关模块中（既然Worker构造函数接收的参数是worker文件的路径，那肯定也有某种方式能通过字符串来创建Worker），实际上也确实存在这样的方法，我们可以通过Blob和URL的方式，将字符串创建为一个类文件对象，通过这种形式将该对象传递给Worker构造函数，从而创建对象。</p>
+<p>示例代码如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> workerStr = <span class="string">'self.onmessage = e =&gt; &#123; console.log(e.data); postMessage("hi!"); &#125;;'</span>;</span><br><span class="line"><span class="keyword">const</span> blob = <span class="keyword">new</span> Blob([workerStr], &#123; <span class="attr">type</span>: <span class="string">'application/javascript'</span> &#125;);</span><br><span class="line"><span class="keyword">const</span> worker = <span class="keyword">new</span> Worker(URL.createObjectURL(blob));</span><br><span class="line">worker.onmessage = <span class="function"><span class="params">e</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">`message received from worker: <span class="subst">$&#123;e.data&#125;</span>`</span>);</span><br><span class="line">worker.postMessage(<span class="string">'message from main thread.'</span>);</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// message from main thread.</span></span><br><span class="line"><span class="comment">// message received from worker: hi!</span></span><br></pre></td></tr></table></figure>
+<p>但是这种方式依然不能满足我们的要求，首先，将逻辑全部手动转成字符串本身比较难受，虽然可以通过读文件的方式去实现，但是总觉得这种方式太过原始；其次，就算通过读文件的方式，我们依然没有办法在Worker中利用其它模块的代码，也就是是说不能引入文件。</p>
+<p>上面两个问题确实处理起来很麻烦，不过笔者经过一番调查，发现强大的JavaScript社区早就为我们提供了解决方案，Webpack有一个名叫<a href="https://github.com/webpack-contrib/worker-loader/blob/master/src/workers/InlineWorker.js" target="_blank" rel="noopener">worker-loader</a>的三方插件完美地解决了上述两个问题。</p>
+<p>worker-loader的使用方式如下：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> Worker <span class="keyword">from</span> <span class="string">'worker-loader!./your-worker.js'</span>;</span><br><span class="line"><span class="keyword">const</span> worker = <span class="keyword">new</span> Worker();</span><br><span class="line">worker.postMessage();</span><br><span class="line">worker.onmessage = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// do something.</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>当然，除了内联使用Webpack插件，我们也可以将其写在webpack.config.js配置文件里，具体的使用方法，读者可以在<a href="https://github.com/webpack-contrib/worker-loader/blob/master/src/workers/InlineWorker.js" target="_blank" rel="noopener">参考2</a>中找到具体信息。</p>
+<p>实际上，worker-loader的底层实现也就是利用上面的转成字符串的方法，只不过关于模块化的处理，Webpack已经帮它做了，而该插件的主要工作就是将Worker代码包装成一个特定类，该类被实例化之后只返回特定文件中的Worker新建出来的对象，这点我们从上述代码中可以看得出来，<code>new Worker()</code>的时候，这里并没有传入一个路径，说明这个并不是原生的那个Worker对象，而是被worker-loader包装过的一个对象。</p>
+<p>无论如何，有了worker-loader这个插件，我们完全可以像写普通的模块文件那样写Worker文件，也可以直接在Worker文件中引入其他模块，这极大地方便了代码的可维护性和可扩展性。</p>
+<h3 id="Web-Worker异步逻辑的优化"><a href="#Web-Worker异步逻辑的优化" class="headerlink" title="Web Worker异步逻辑的优化"></a>Web Worker异步逻辑的优化</h3><h4 id="最直观的策略模式"><a href="#最直观的策略模式" class="headerlink" title="最直观的策略模式"></a>最直观的策略模式</h4><p>很明显，直接调用postMessage和onmessage这两个方法太原始了，异步接口比较多的情况下，线程通信管理起来会很麻烦，为了能够更方便和规范地使用Web Worker，我们需要做一点点简单的封装。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// worker.js</span></span><br><span class="line"><span class="keyword">const</span> apiManager = &#123;</span><br><span class="line">    sayHello() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'hello world'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    echo(world) &#123;</span><br><span class="line">    	postMessage(<span class="string">`message received from worker: <span class="subst">$&#123;world&#125;</span>`</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// more APIs.</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">onmessage = <span class="function"><span class="params">e</span> =&gt;</span> <span class="keyword">void</span>(apiManager[e.data.type].call(<span class="keyword">this</span>, e.data.payload));</span><br></pre></td></tr></table></figure>
+<p>这里将Web Worker中的所有用于对接外部线程（这里只有主线程）的接口都通过策略模式管理起来了，这样做的好处就是能直接在主线程中调用指定Web Worker中的逻辑模块（即apiManager中的方法），当然，为了配合Web Worker，主线程中也应该做一些相应的改变。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> Worker <span class="keyword">from</span> <span class="string">'worker-loader!./worker.js'</span>;</span><br><span class="line"><span class="keyword">const</span> worker = <span class="keyword">new</span> Worker();</span><br><span class="line">worker.postMessage(&#123;</span><br><span class="line">    type: <span class="string">'echo'</span>,</span><br><span class="line">    payload: <span class="string">'world'</span>,</span><br><span class="line">&#125;);</span><br><span class="line">worker.onmessage = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">`message from worker: <span class="subst">$&#123;e.data&#125;</span>`</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>现在，我们可以通过给<code>worker.postMessage</code>指定符合格式的参数，来实现调用Web Worker中暴露出来的API了。</p>
+<p>但是这种方式仍然有些问题，<code>echo</code>方法返回到主线程中的信息处理起来依然很原始，仔细一想，这个场景不就像AJAX一样吗，我们能不能用下面这种形式来调用Web Worker中的逻辑模块呢？</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">worker.postMessage(action, result =&gt; &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种形式明显更舒服，原生的postMessage肯定是不支持这种方式的，因此我们可以继续考虑进一步封装，使用回调的方式来优化代码。</p>
+<h4 id="基于回调的方式"><a href="#基于回调的方式" class="headerlink" title="基于回调的方式"></a>基于回调的方式</h4><p>修改后的代码量稍微多了一点，不过也并不算复杂，主线程的逻辑修改如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> Worker <span class="keyword">from</span> <span class="string">'worker-loader!./worker.js'</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(worker) &#123;</span><br><span class="line">        <span class="keyword">this</span>.callbacks = &#123;&#125;;</span><br><span class="line">        <span class="keyword">this</span>.worker = worker;</span><br><span class="line">        <span class="keyword">this</span>.worker.onmessage = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">const</span> &#123; id, result, &#125; = e.data;</span><br><span class="line">            <span class="keyword">this</span>.callbacks[id].call(<span class="keyword">this</span>, result);</span><br><span class="line">            <span class="keyword">delete</span> callbacks[id];</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    postMessage(action, callback) &#123;</span><br><span class="line">        <span class="keyword">const</span> id = WorkerManager.msgId++;</span><br><span class="line">        <span class="keyword">this</span>.worker.postMessage(<span class="built_in">Object</span>.assign(&#123; id, &#125;, action));</span><br><span class="line">        <span class="keyword">this</span>.callbacks[id] = callback;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">WorkerManager.msgId = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> worker = <span class="keyword">new</span> WorkerManager(<span class="keyword">new</span> Worker());</span><br><span class="line">worker.postMessage(&#123;</span><br><span class="line">    type: <span class="string">'echo'</span>,</span><br><span class="line">    payload: <span class="string">'world'</span>,</span><br><span class="line">&#125;, result =&gt; <span class="keyword">void</span>(<span class="built_in">console</span>.log(<span class="string">`message from worker: <span class="subst">$&#123;result&#125;</span>`</span>)));</span><br></pre></td></tr></table></figure>
+<p>这里的<code>WorkerManager</code>的<code>postMessage</code>通过代理原生的postMessage，给每一次发送的消息都加了一个<code>id</code>字段，这个字段记录了回调函数的在<code>callbacks</code>对应的键，当Web Worker处理完成并返回的时候，也需要带上这个<code>id</code>，<code>WorkerManager</code>就能找到对应的回调函数了。</p>
+<p>下面是Web Worker的修改。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// worker.js</span></span><br><span class="line"><span class="keyword">const</span> handleMessage = <span class="function">(<span class="params">handler</span>) =&gt;</span> &#123;</span><br><span class="line">    onmessage = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">        <span class="keyword">const</span> &#123; id, type, payload, &#125; = e.data;</span><br><span class="line">        <span class="keyword">const</span> result = handler.call(<span class="keyword">this</span>, &#123; type, payload, &#125;);</span><br><span class="line">        postMessage(&#123; id, result, &#125;);</span><br><span class="line">    &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> apiManager = &#123;</span><br><span class="line">    sayHello() &#123;</span><br><span class="line">        <span class="built_in">console</span>.log(<span class="string">'hello world'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    echo(world) &#123;</span><br><span class="line">    	<span class="keyword">return</span> <span class="string">`message received from worker: <span class="subst">$&#123;world&#125;</span>`</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">// more APIs.</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line">handleMessage(<span class="function">(<span class="params">&#123; type, payload, &#125;</span>) =&gt;</span> apiManager[type].call(<span class="keyword">this</span>, payload));</span><br></pre></td></tr></table></figure>
+<p>这样，通过中间添加一层处理消息<code>id</code>的逻辑，就能实现记录记录回应异步调用的处理函数，从而实现Web Worker的回调，也就是能直接使用<code>worker.postMessage(aciton, callback)</code>的形式了。</p>
+<h4 id="使用Promise"><a href="#使用Promise" class="headerlink" title="使用Promise"></a>使用Promise</h4><p>有的同学可能会说，这都2018年了，还在用回调实在是太过时了，至少都得来个Promise吧。确实，不过有了Callback，Promise还会远吗？</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// index.js</span></span><br><span class="line"><span class="keyword">import</span> Worker <span class="keyword">from</span> <span class="string">'worker-loader!./worker.js'</span>;</span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">WorkerManager</span> </span>&#123;</span><br><span class="line">    <span class="keyword">constructor</span>(worker) &#123;</span><br><span class="line">        <span class="keyword">this</span>.callbacks = &#123;&#125;;</span><br><span class="line">        <span class="keyword">this</span>.worker = worker;</span><br><span class="line">        <span class="keyword">this</span>.worker.onmessage = <span class="function"><span class="params">e</span> =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">const</span> &#123; id, result, &#125; = e.data;</span><br><span class="line">            <span class="keyword">this</span>.callbacks[id].call(<span class="keyword">this</span>, result);</span><br><span class="line">            <span class="keyword">delete</span> callbacks[id];</span><br><span class="line">        &#125;;</span><br><span class="line">    &#125;</span><br><span class="line">    postMessage(action) &#123;</span><br><span class="line">        <span class="keyword">const</span> id = WorkerManager.msgId++;</span><br><span class="line">        <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">            <span class="keyword">this</span>.worker.postMessage(<span class="built_in">Object</span>.assign(&#123; id, &#125;, action));</span><br><span class="line">            <span class="keyword">this</span>.callbacks[id] = <span class="function"><span class="params">result</span> =&gt;</span> &#123;</span><br><span class="line">                resolve(result);</span><br><span class="line">            &#125;;</span><br><span class="line">        &#125;);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line">WorkerManager.msgId = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> worker = <span class="keyword">new</span> WorkerManager(<span class="keyword">new</span> Worker());</span><br><span class="line">worker.postMessage(&#123;</span><br><span class="line">    type: <span class="string">'echo'</span>,</span><br><span class="line">    payload: <span class="string">'world'</span>,</span><br><span class="line">&#125;).then(<span class="function"><span class="params">result</span> =&gt;</span> <span class="keyword">void</span>(<span class="built_in">console</span>.log(<span class="string">`message from worker: <span class="subst">$&#123;result&#125;</span>`</span>)));</span><br></pre></td></tr></table></figure>
+<p>以上是修改后的index.js，而worker.js不需要做修改，这样就大功告成了。</p>
+<p>这里顺便说一下回调函数改Promise的方法，记住要将形如：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">asyncFunc</span> (<span class="params">args, callback</span>) </span>&#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">    callback();</span><br><span class="line">&#125;</span><br><span class="line">asyncFunc(<span class="string">'hello'</span>, () =&gt; &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>的函数改成Promise形式。首先去掉callback，然后返回一个Promise，Promise中合适的地方要resolve和reject，将原来的callback放到then中去处理，有参数的记得加上参数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">asyncFunc</span> (<span class="params">args</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        <span class="comment">// do something</span></span><br><span class="line">        resolve();</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line">asyncFunc(<span class="string">'hello'</span>).then(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// do something</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>关于使用Promise的形式去优化Web Worker的调用逻辑就简单介绍到这里，注意本文只是提供了一个简单实现的思路，并没有对错误进行处理，也只支持一个参数（payload参数，可以将其作为对象添加多个属性），实际使用的过程中还需要考虑更多细节。</p>
+<p>那么，有没有这样一个库，能够让我们不用自己去造轮子，直接体验使用Promise处理Web Worker的好处呢？实际上在写区块链演示Demo的时候，这些坑我都踩过了，<a href="https://github.com/nolanlawson/promise-worker" target="_blank" rel="noopener">promise-worker</a>提供了一个比较完整的实现，而<a href="https://github.com/dumbmatter/promise-worker-bi" target="_blank" rel="noopener">promise-worker-bi</a>则更进一步，能够从Web Worker中以同样的形式反向调用主线程中的逻辑。</p>
+<h3 id="一个浏览器端的多线程比特币的演示Demo"><a href="#一个浏览器端的多线程比特币的演示Demo" class="headerlink" title="一个浏览器端的多线程比特币的演示Demo"></a>一个浏览器端的多线程比特币的演示Demo</h3><p><a href="https://oychao.github.io/demos/blockchain/" target="_blank" rel="noopener">一个简单的比特币原型（区块链示例）</a></p>
+<p>关于区块链的一些基础知识，不在本文的讨论范围之内，有时间的话回头会再开一篇文章讲讲区块链的一些基本知识以及上面示例实现的一些细节。</p>
+<p>项目的<a href="https://github.com/oychao/blockchain-demo" target="_blank" rel="noopener">源码</a>我也放到GitHub上去了，感兴趣的同学可以去提Issue或者发邮件交流交流。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>本文主要总结了一下Web Worker在使用过程中，个人认为不错的一些实践，虽然并不涉及更复杂以及完善的用法（比如Worker和Worker之间的通信），但是目前我个人用Web Worker用得还比较少，所以本文就算是踩坑的整理吧，也希望以后能看到全面且深度利用Web Worker的有意思的开源框架或项目。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/API/Web_Workers_API/Using_web_workers" target="_blank" rel="noopener">Using Web Workers - Web API - MDN</a></li>
+<li><a href="https://github.com/webpack-contrib/worker-loader/blob/master/src/workers/InlineWorker.js" target="_blank" rel="noopener">webpack-contrib/worker-loader - GitHub</a></li>
+<li><a href="https://github.com/nolanlawson/promise-worker" target="_blank" rel="noopener">nolanlawson/promise-worker - GitHub</a></li>
+<li><a href="https://github.com/dumbmatter/promise-worker-bi" target="_blank" rel="noopener">dumbmatter/promise-worker-bi - GitHub</a></li>
+<li><a href="https://oychao.github.io/demos/blockchain/" target="_blank" rel="noopener">Blockchain Demo - 传不习乎</a></li>
+<li><a href="https://github.com/oychao/blockchain-demo" target="_blank" rel="noopener">oychao/blockchain-demo - GitHub</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/03/27/javascript/35_async_await/" rel="next" title="async await和co库深入浅出">
+                <i class="fa fa-chevron-left"></i> async await和co库深入浅出
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/09/16/else/15_gitolite/" rel="prev" title="GitoLite在Ubuntu下的安装">
+                GitoLite在Ubuntu下的安装 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-Worker简介及基本用法"><span class="nav-number">2.</span> <span class="nav-text">Web Worker简介及基本用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#在Webpack构建的工程中使用Web-Worker"><span class="nav-number">3.</span> <span class="nav-text">在Webpack构建的工程中使用Web Worker</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Web-Worker异步逻辑的优化"><span class="nav-number">4.</span> <span class="nav-text">Web Worker异步逻辑的优化</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#最直观的策略模式"><span class="nav-number">4.1.</span> <span class="nav-text">最直观的策略模式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#基于回调的方式"><span class="nav-number">4.2.</span> <span class="nav-text">基于回调的方式</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#使用Promise"><span class="nav-number">4.3.</span> <span class="nav-text">使用Promise</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个浏览器端的多线程比特币的演示Demo"><span class="nav-number">5.</span> <span class="nav-text">一个浏览器端的多线程比特币的演示Demo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

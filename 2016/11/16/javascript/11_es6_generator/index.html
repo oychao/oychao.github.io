@@ -1,0 +1,792 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="生成器（Generator）是ES6中重要的特性之一，其行为不同于以往的普通函数。在上一篇总结中我们已经见到了生成器的基本应用，本文将进行进一步的讨论。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6学习笔记9：生成器函数">
+<meta property="og:url" content="http://yoursite.com/2016/11/16/javascript/11_es6_generator/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="生成器（Generator）是ES6中重要的特性之一，其行为不同于以往的普通函数。在上一篇总结中我们已经见到了生成器的基本应用，本文将进行进一步的讨论。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.362Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES6学习笔记9：生成器函数">
+<meta name="twitter:description" content="生成器（Generator）是ES6中重要的特性之一，其行为不同于以往的普通函数。在上一篇总结中我们已经见到了生成器的基本应用，本文将进行进一步的讨论。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/16/javascript/11_es6_generator/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ES6学习笔记9：生成器函数 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/16/javascript/11_es6_generator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ES6学习笔记9：生成器函数
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-11-16 22:47:00" itemprop="dateCreated datePublished" datetime="2016-11-16T22:47:00+08:00">2016-11-16</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">生成器（Generator）是ES6中重要的特性之一，其行为不同于以往的普通函数。在上一篇总结中我们已经见到了生成器的基本应用，本文将进行进一步的讨论。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="生成器函数"><a href="#生成器函数" class="headerlink" title="生成器函数"></a>生成器函数</h3><p>生成器对象（Generator Object）是一种『运行，暂停，运行，暂停，…，运行，结束』的模式，其中每次暂停都会生成一个值。生成器对象由生成器函数（Generator Function）返回创建。</p>
+<p>先来一个简单的例子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 生成器函数</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">gen</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// 生成器对象</span></span><br><span class="line"><span class="keyword">let</span> it = gen();</span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 1, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 2, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 3, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: undefined, done: true&#125;</span></span><br></pre></td></tr></table></figure>
+<p>注意上面生成器函数的定义方式，不同于上一篇总结中的定义方式，这里我们把号放在了函数名前，而上一篇总结中放到了function关键字后，实际上这两种方式都是合法的，在这里我们推荐使用函数名前加号，这样表示生成器函数实际上还是一种函数，只不过是一种特殊的函数。</p>
+<h3 id="return关键字"><a href="#return关键字" class="headerlink" title="return关键字"></a>return关键字</h3><p>在生成器函数中，同样也是可以使用return关键字的。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">gen</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">yield</span> <span class="number">2</span>;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">3</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> it = gen();</span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 1, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 2, done: false&#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(it.next()); <span class="comment">// &#123;value: 3, done: true&#125;</span></span><br></pre></td></tr></table></figure>
+<p>注意这里最后一行在返回数字3之后，done的值直接为done，而不是之前的必须等到生成一个undefined才得到done。</p>
+<p>此外在实际使用过程中并不推荐在生成器函数中使用return关键字，因为在大多数情形中生成器函数都是在一个循环中生成值，因此return返回的值可能永远不能获取。</p>
+<h3 id="yield关键字"><a href="#yield关键字" class="headerlink" title="yield关键字"></a>yield关键字</h3><p><strong>yield关键字会生成一个值，同时下一次调用next()传入的值将替代上一次的yield表达式，如果yield不显式生成值，则会生成undefined，如果next()不传入任何值，则该yield表达式将被undefined替代。</strong></p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注意这里foo不是一个生成器函数</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params">x</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">"x: "</span> + x);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">bar</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">yield</span>; <span class="comment">// 这里暂停</span></span><br><span class="line">    foo( <span class="keyword">yield</span> ); <span class="comment">// 第二次暂停等待传入值</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">let</span> it = bar();</span><br><span class="line">it.next(); <span class="comment">// &#123;value: undefined, done: false&#125;</span></span><br><span class="line">it.next(); <span class="comment">// &#123;value: undefined, done: false&#125;</span></span><br><span class="line">it.next(<span class="string">'test'</span>); <span class="comment">// &#123;value: undefined, done: true&#125;，同时控制台输出"x: test"</span></span><br></pre></td></tr></table></figure>
+<p>请读者再把上面解释yield特性的加粗段落再读一遍，结合上述代码充分理解一下：</p>
+<p>首先我们定义了一个普通函数<code>foo()</code>，该函数做最简单的传值输出；</p>
+<p>然后我们定义了生成器函数<code>bar()</code>，还生成器一共依次生成两个值，由于未显示声明任何值，因此都是返回undefined；</p>
+<p>后续代码中我们生成了一个生成器对象，并依次调用了三次<code>next()</code>，关于三次调用<code>next()</code>的结果，很好理解，所有返回值都是<code>undefined</code>，第三次<code>done</code>表示已经生成结束。但是我们注意到第三次调用<code>next()</code>时，调用了foo()函数，<code>yield</code>关键字会生成一个值，同时下一次调用<code>next()</code>传入的值将替代上一次的<code>yield</code>表达式，第一次调用时不发生任何事，第二次调用时我们没有传入任何值，因此一个yield表达式的值就是<code>undefined</code>，但是第三次调用时我们传入了<code>&#39;test&#39;</code>，所以第二个yield表达式的值就是<code>&#39;test&#39;</code>，生成器继续执行，即<code>foo(&#39;test&#39;)</code></p>
+<p>上面的文字有些绕口，为了更好地理解yield，我们再举一个例子来理解yield关键字。</p>
+<h3 id="生成器对象和生成器函数"><a href="#生成器对象和生成器函数" class="headerlink" title="生成器对象和生成器函数"></a>生成器对象和生成器函数</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> *<span class="title">foo</span>(<span class="params">x</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">var</span> y = <span class="number">2</span> * (<span class="keyword">yield</span> (x + <span class="number">1</span>));</span><br><span class="line">    <span class="keyword">var</span> z = <span class="keyword">yield</span> (y / <span class="number">3</span>);</span><br><span class="line">    <span class="keyword">return</span> (x + y + z);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">var</span> it = foo( <span class="number">5</span> );</span><br><span class="line"><span class="comment">// 注意第一次调用即使传了值也会被丢弃</span></span><br><span class="line"><span class="built_in">console</span>.log( it.next() );       <span class="comment">// &#123; value:6, done:false &#125;</span></span><br><span class="line"><span class="built_in">console</span>.log( it.next( <span class="number">12</span> ) );   <span class="comment">// &#123; value:8, done:false &#125;</span></span><br><span class="line"><span class="built_in">console</span>.log( it.next( <span class="number">13</span> ) );   <span class="comment">// &#123; value:42, done:true &#125;</span></span><br></pre></td></tr></table></figure>
+<p>注意，生成器函数的也是可以传值的，这里传值的用法并不与普通函数有任何区别。</p>
+<p>我们对最后三行逐行进行分析：</p>
+<p>第一次<code>it.next()</code>时，一开始传入的初始值为5，生成器函数中的第一次<code>yield(x + 1)</code>生成的是<code>6</code>，这个毫无疑问；</p>
+<p>第二次<code>it.next(12)</code>，传入了<code>12</code>，<code>12</code>替换了的第一个<code>yield</code>表达式，因此y的值变成了<code>2 * 12</code>也就是<code>24</code>，因此第二次生成的值是<code>yield(y / 3)</code>也就是<code>8</code>；</p>
+<p>第三次<code>it.next(13)</code>，传入<code>13</code>，<code>13</code>替换第二个<code>yield</code>表达式，因此z等于<code>13</code>，因此第三次生成的值是<code>yield(x + y + z)</code>，<code>5 + 24 + 13</code>即<code>42</code>。</p>
+<h3 id="结合for-of使用"><a href="#结合for-of使用" class="headerlink" title="结合for of使用"></a>结合for of使用</h3><p>需要注意的是，在绝大多数情况下，生成器函数都是循环生成值，并结合for of使用，具体可以查阅[参考3]中<strong>生成器对象和生成器函数</strong>小节中的斐波那契数列例子。</p>
+<h3 id="知识点总结"><a href="#知识点总结" class="headerlink" title="知识点总结"></a>知识点总结</h3><ol>
+<li>理解生成器的概念；</li>
+<li>充分理解yield关键字，知道在生成器中yield和return的区别；</li>
+<li>熟练结合for of使用生成器。</li>
+</ol>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://babeljs.io/docs/learn-es2015/" target="_blank" rel="noopener">BabelJS - Learn ES2015</a></li>
+<li><a href="https://davidwalsh.name/es6-generators" target="_blank" rel="noopener">The Basics Of ES6 Generators - About Kyle Simpson</a></li>
+<li><a href="https://oychao.github.io/2016/11/15/javascript/10_es6_for_of/" target="_blank" rel="noopener">ES6学习笔记8：迭代器和for of - 传不习乎</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/15/javascript/10_es6_for_of/" rel="next" title="ES6学习笔记8：迭代器和for of">
+                <i class="fa fa-chevron-left"></i> ES6学习笔记8：迭代器和for of
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/18/javascript/12_es6_comprehensions/" rel="prev" title="ES6学习笔记10：数组推导式">
+                ES6学习笔记10：数组推导式 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#生成器函数"><span class="nav-number">1.</span> <span class="nav-text">生成器函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#return关键字"><span class="nav-number">2.</span> <span class="nav-text">return关键字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#yield关键字"><span class="nav-number">3.</span> <span class="nav-text">yield关键字</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成器对象和生成器函数"><span class="nav-number">4.</span> <span class="nav-text">生成器对象和生成器函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#结合for-of使用"><span class="nav-number">5.</span> <span class="nav-text">结合for of使用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#知识点总结"><span class="nav-number">6.</span> <span class="nav-text">知识点总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

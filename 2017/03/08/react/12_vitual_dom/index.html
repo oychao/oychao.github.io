@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="译文，虚拟DOM和DOM的不同。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="虚拟DOM和DOM的不同">
+<meta property="og:url" content="http://yoursite.com/2017/03/08/react/12_vitual_dom/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="译文，虚拟DOM和DOM的不同。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://reactkungfu.com/assets/images/the-difference-between-virtual-dom-and-dom/header.png">
+<meta property="og:image" content="http://reactkungfu.com/assets/images/the-difference-between-virtual-dom-and-dom/meme.jpg">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.371Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="虚拟DOM和DOM的不同">
+<meta name="twitter:description" content="译文，虚拟DOM和DOM的不同。">
+<meta name="twitter:image" content="http://reactkungfu.com/assets/images/the-difference-between-virtual-dom-and-dom/header.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/03/08/react/12_vitual_dom/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>虚拟DOM和DOM的不同 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/03/08/react/12_vitual_dom/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">虚拟DOM和DOM的不同
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-03-08 20:35:00" itemprop="dateCreated datePublished" datetime="2017-03-08T20:35:00+08:00">2017-03-08</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">译文，虚拟DOM和DOM的不同。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong><a href="http://reactkungfu.com/2015/10/the-difference-between-virtual-dom-and-dom/" target="_blank" rel="noopener">原文：The difference between Virtual DOM and DOM - Bartosz Krajka</a></strong></p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>React直接在首页上标榜虚拟DOM，这个特性应该很厉害。</p>
+<p><img src="http://reactkungfu.com/assets/images/the-difference-between-virtual-dom-and-dom/header.png" alt></p>
+<p>那么问题来了，『虚拟DOM』到底是个什么鬼？</p>
+<h3 id="DOM"><a href="#DOM" class="headerlink" title="DOM"></a>DOM</h3><p>先直接说一下，DOM意思是<strong>文档对象模型（Dcoument Object Model）</strong>，它是一个结构化文本的抽象。对于Web开发者，这个文本是一段HTML代码，DOM也就被叫做HTML DOM。HTML的元素在DOM中变成了节点。</p>
+<p>所以，HTML是一段文本，DOM就是这段文本在内存中的表示。</p>
+<blockquote>
+<p>可以对比一个程序的一个进程实例。对于一个程序，可以存在多个进程，就像一段同样的HTML可以有多个DOM一样。（例：同一个页面被多个tab加载）。</p>
+</blockquote>
+<p>在HTML DOM中提供了遍历和修改节点的接口（API）。像<em>getElementById</em>或者<em>removeChild</em>这样的方法。我们一般使用JavaScript来操作DOM，这是因为……好吧，天知道为什么。:)</p>
+<p>所以，只要我们想要动态修改网页的内容的时候，我们就修改DOM。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> item = <span class="built_in">document</span>.getElementById(<span class="string">"myLI"</span>);</span><br><span class="line">item.parentNode.removeChild(item);</span><br></pre></td></tr></table></figure>
+<p>所谓<em>document</em>就是根节点的抽象，而<em>getElementById</em>，<em>parentNode</em>和<em>emoveChild</em>则是HTML DOM API中的方法。</p>
+<h3 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h3><p>HTML DOM永远都是HTML文档结构所允许的树结构。树结构很不错，我们可以相当容易地遍历树。但是悲剧地是，容易遍历不代表快速遍历。</p>
+<p>这个年代的DOM树都很巨大，既然我们越来越被推向动态Web应用（单页应用 - SPA），我们需要连续不断地大量地修改DOM树，这个确实是性能和开发的一个大问题。</p>
+<blockquote>
+<p>顺便说一句，我自己参与过一个源码超过5GB的网站。这个比一般的更难。</p>
+</blockquote>
+<p>考虑一个由数千个DIV组成的DOM。记住，我们是现代Web开发者，我们的应用是单页应用！我又一大堆处理事件方法——点击，提交，输入等，一个典型的类jQuery事件处理就像下面所描述的那样：</p>
+<ul>
+<li>寻找所有和某事件相关的节点</li>
+<li>如果需要的话，对其更新</li>
+</ul>
+<p>该做法有如下两个问题：</p>
+<ol>
+<li>真的很难管理。假设你需要对一个事件处理方法进行微调。如果你丢失了上下文，你不得不钻源码钻得很深以知道到底发生了些什么事。很费时间，且很容易出问题。</li>
+<li>很没效率。我们真的需要这些手动查询（节点）的结果吗？也许我们可以做的更聪明一点，辨别出哪些节点是需要被更新的。</li>
+</ol>
+<p>强调一下，React是来解决问题的。第一个问题的答案是表述式（declarativeness）。相比类似手动遍历DOM树这种低层技术，你只需要声明一个组件应该怎么展现。React来为你做低层工作——实现工作表层下的HTML DOM API方法。React不需要你担心这个问题——最终，组件就像你声明的那样。</p>
+<p>但是这并没有解决性能问题。而这也正是虚拟DOM发威的地方。</p>
+<h3 id="虚拟DOM"><a href="#虚拟DOM" class="headerlink" title="虚拟DOM"></a>虚拟DOM</h3><p>首先 - 虚拟DOM不是React发明的，但是React用了它且免费提供。</p>
+<p>虚拟DOM是HTML DOM的抽象。它是轻量的，是从浏览器特定（Browser-specific，这里意指特定的浏览器需要特定的实现）实现细节中提取出来的。由于DOM本身就已经是一个抽象了，所以虚拟DOM，实际上，是一个抽象的抽象。</p>
+<p><img src="http://reactkungfu.com/assets/images/the-difference-between-virtual-dom-and-dom/meme.jpg" alt></p>
+<p>也许把虚拟DOM当做React的本地和简化版的HTML DOM更好。它允许React跳过既慢又限于特定浏览器的真实DOM操作，以在这个抽象世界中做自己的计算。</p>
+<p>常规DOM和虚拟DOM二者并没有什么大的不同。这也是为什么React代码的JSX部分可以看起来几乎跟纯HTML很像的原因。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> CommentBox = React.createClass(&#123;</span><br><span class="line">  render: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div className=<span class="string">"commentBox"</span>&gt;</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">          Hello, world! I am a CommentBox.</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>在大多数情况下，当你有一段HTML代码且想要将其写成一个React组件时，你只需要做这个。</p>
+<ol>
+<li>在render方法中返回HTML代码；</li>
+<li>将class属性替换成className属性，因为class在JavaScript中是一个保留关键字。</li>
+</ol>
+<p>二者之间还有一些，相当细微的区别。</p>
+<ul>
+<li>虚拟DOM的这些属性不在真实的DOM中出现——key，ref和dangerouslySetInnerHTML。<a href="https://facebook.github.io/react/docs/special-non-dom-attributes.html" target="_blank" rel="noopener">查看更多</a></li>
+<li>React范的DOM引入了<a href="https://facebook.github.io/react/docs/dom-differences.html" target="_blank" rel="noopener">一些限制</a></li>
+</ul>
+<h3 id="ReactElement-vs-ReactComponent"><a href="#ReactElement-vs-ReactComponent" class="headerlink" title="ReactElement vs ReactComponent"></a>ReactElement vs ReactComponent</h3><p>当讨论虚拟DOM时，明白React元素和React组件的区别是很重要的。</p>
+<h4 id="ReactElement"><a href="#ReactElement" class="headerlink" title="ReactElement"></a>ReactElement</h4><p>这是React中的主类型。在React官方文档中有：</p>
+<blockquote>
+<p>一个ReactElement是一个轻量的，无状态的，不可变的，DOM元素的虚拟表示。</p>
+</blockquote>
+<p><strong>ReactElement存在于虚拟DOM中。</strong>在这里它们构成了基本的节点。其不可变性使其更易于和快速比较和更新。这也是React性能优越的原因之一。</p>
+<p>那么<em>ReactElement</em>具体是什么呢？答案是几乎所有的的HTML标签——<em>div</em>，<em>table</em>，<em>strong</em>等，只要你想用，<a href="https://facebook.github.io/react/docs/tags-and-attributes.html" target="_blank" rel="noopener">这里</a>查看整个列表。</p>
+<p>一旦定义，ReactElement可以被渲染到真实DOM中去。之后React就停止了对element的控制。他们可以使慢的，普通的DOM节点。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> root = React.createElement(<span class="string">'div'</span>);</span><br><span class="line">ReactDOM.render(root, <span class="built_in">document</span>.getElementById(<span class="string">'example'</span>));</span><br><span class="line"><span class="comment">// If you are surprised by the fact that `render` </span></span><br><span class="line"><span class="comment">// comes from `ReactDOM` package, see the Post Scriptum.</span></span><br></pre></td></tr></table></figure>
+<p>JSX编译HTML标签到ReactElement中。所以上面的代码等同于。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> root = <span class="xml"><span class="tag">&lt;<span class="name">div</span> /&gt;</span>;</span></span><br><span class="line"><span class="xml">ReactDOM.render(root, document.getElementById('example'));</span></span><br></pre></td></tr></table></figure>
+<p>强调一遍——<strong>ReactElement是React式虚拟DOM的基本元素。</strong>且他们是无状态的，因此看上去对程序员可能没什么用。我们可能宁愿写类class的HTML代码片段，带有诸如变量常量的代码片段——是吧？所以我们需要下面的东西。</p>
+<h4 id="ReactComponent"><a href="#ReactComponent" class="headerlink" title="ReactComponent"></a>ReactComponent</h4><p><em>ReactComponent</em>和<em>ReactElement</em>的区别在于，<em>ReactComponent</em>是有状态的。</p>
+<p>我们一般使用<em>React.createClass</em>方法来定义一个<em>ReactElement</em>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> CommentBox = React.createClass(&#123;</span><br><span class="line">  render: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div className=<span class="string">"commentBox"</span>&gt;</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">          Hello, world! I am a CommentBox.</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>从渲染方法中返回的类HTML块可以有状态。最棒的是（我估计你已经知道了，这也是React厉害的原因），无论状态何时发生改变，组件都会重新渲染。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> Timer = React.createClass(&#123;</span><br><span class="line">  getInitialState: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;<span class="attr">secondsElapsed</span>: <span class="number">0</span>&#125;;</span><br><span class="line">  &#125;,</span><br><span class="line">  tick: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.setState(&#123;<span class="attr">secondsElapsed</span>: <span class="keyword">this</span>.state.secondsElapsed + <span class="number">1</span>&#125;);</span><br><span class="line">  &#125;,</span><br><span class="line">  componentDidMount: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">this</span>.interval = setInterval(<span class="keyword">this</span>.tick, <span class="number">1000</span>);</span><br><span class="line">  &#125;,</span><br><span class="line">  componentWillUnmount: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    clearInterval(<span class="keyword">this</span>.interval);</span><br><span class="line">  &#125;,</span><br><span class="line">  render: <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div&gt;</span><br><span class="line">        &lt;div&gt;</span><br><span class="line">          Seconds Elapsed: &#123;<span class="keyword">this</span>.state.secondsElapsed&#125;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p><em>ReactComponent</em>是一个设计动态HTML的极优秀的工具。它没有访问虚拟DOM的权限，但可以轻易地转换为<em>ReactElement</em>。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> element = React.createElement(MyComponent);</span><br><span class="line"><span class="comment">// or equivalently, with JSX</span></span><br><span class="line"><span class="keyword">var</span> element = <span class="xml"><span class="tag">&lt;<span class="name">MyComponent</span> /&gt;</span>;</span></span><br></pre></td></tr></table></figure>
+<h3 id="有意义的部分"><a href="#有意义的部分" class="headerlink" title="有意义的部分"></a>有意义的部分</h3><p><em>ReactComponent</em>很易于管理，应该被大量使用。但是他们也没有访问虚拟DOM的权限，而且我们需要对虚拟DOM做一些操作。</p>
+<p>当<em>ReactComponent</em>在改变状态时，我们希望尽可能少的改变真实DOM。所以React就是这么做的。<em>ReactComponent</em>会被转换成<em>ReactElement</em>。现在<em>ReactElement</em>可以被插入虚拟DOM中，易于快速比较和更新。具体是怎么做的呢？好吧，这部分是diff算法的工作。关键点是，<strong>这种做法比在比较和修改真实DOM更快</strong>。</p>
+<p><strong>当React知道了diff的时候，它会在转换成低层的（HTML DOM）代码，这里作用的目标就是真实DOM了</strong>。这些代码会根据不同的浏览器进行相关的优化。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>虚拟DOM真的是主页中夸的那样吗？我觉得是的。在实践中React的性能是绝对好的，而虚拟DOM也是功不可没。</p>
+<p>PS. 当React0.14发布的时候，React的DOM相关的部分从React包中抽取出来了。现在有一个独立的包叫react-dom。详情见最新的<a href="https://facebook.github.io/react/blog/2015/10/07/react-v0.14.html#two-packages-react-and-react-dom" target="_blank" rel="noopener">changelog</a>。</p>
+<p>PS. In case you didn’t notice - since the last week, when React 0.14 was released, the DOM-related parts of React were extracted from the react package. Now there is a separate package react-dom. You can read more in the newest changelog.</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://reactkungfu.com/2015/10/the-difference-between-virtual-dom-and-dom/" target="_blank" rel="noopener">The difference between Virtual DOM and DOM - Bartosz Krajka</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/03/04/react/11_whitespace_in_jsx/" rel="next" title="React中的空格">
+                <i class="fa fa-chevron-left"></i> React中的空格
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/03/15/react/13_reconciliation/" rel="prev" title="React在虚拟DOM和DOM的协调">
+                React在虚拟DOM和DOM的协调 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DOM"><span class="nav-number">2.</span> <span class="nav-text">DOM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#问题"><span class="nav-number">3.</span> <span class="nav-text">问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#虚拟DOM"><span class="nav-number">4.</span> <span class="nav-text">虚拟DOM</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ReactElement-vs-ReactComponent"><span class="nav-number">5.</span> <span class="nav-text">ReactElement vs ReactComponent</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#ReactElement"><span class="nav-number">5.1.</span> <span class="nav-text">ReactElement</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#ReactComponent"><span class="nav-number">5.2.</span> <span class="nav-text">ReactComponent</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#有意义的部分"><span class="nav-number">6.</span> <span class="nav-text">有意义的部分</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">7.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

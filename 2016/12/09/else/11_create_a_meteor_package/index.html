@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="前两天开发了一个Meteor包，用于OAuth2登陆的客户端，具体OAuth2的认证逻辑之后再开另一篇笔记记录。第一次造Meteor的轮子，先记录一下开发流程。">
+<meta name="keywords" content="其他">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何创建一个Meteor包">
+<meta property="og:url" content="http://yoursite.com/2016/12/09/else/11_create_a_meteor_package/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="前两天开发了一个Meteor包，用于OAuth2登陆的客户端，具体OAuth2的认证逻辑之后再开另一篇笔记记录。第一次造Meteor的轮子，先记录一下开发流程。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.351Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何创建一个Meteor包">
+<meta name="twitter:description" content="前两天开发了一个Meteor包，用于OAuth2登陆的客户端，具体OAuth2的认证逻辑之后再开另一篇笔记记录。第一次造Meteor的轮子，先记录一下开发流程。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/12/09/else/11_create_a_meteor_package/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>如何创建一个Meteor包 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/12/09/else/11_create_a_meteor_package/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">如何创建一个Meteor包
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-12-09 08:50:00" itemprop="dateCreated datePublished" datetime="2016-12-09T08:50:00+08:00">2016-12-09</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">前两天开发了一个Meteor包，用于OAuth2登陆的客户端，具体OAuth2的认证逻辑之后再开另一篇笔记记录。第一次造Meteor的轮子，先记录一下开发流程。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="关于Meteor包和Atmosphere"><a href="#关于Meteor包和Atmosphere" class="headerlink" title="关于Meteor包和Atmosphere"></a>关于Meteor包和Atmosphere</h3><p>Meteor是底层是基于Nodejs构建的，Meteor本身就提供了对所有Npm包的支持，程序员完全可以像在一般的Node项目中那样使用NPM包。而<a href="https://atmospherejs.com/" target="_blank" rel="noopener">Atmosphere</a>是一个分享和管理Meteor包的平台，类似于Node的<a href="https://www.npmjs.com/" target="_blank" rel="noopener">npmjs</a>。</p>
+<p>每次我们需要在新的工程中新加新的Meteor包时，我们只需要在工程目录下输入：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor add your_meteor_package</span><br></pre></td></tr></table></figure>
+<p>也可以直接编辑工程目录下的/.meteor/packages文件。</p>
+<p>之后每次启动程序，Meteor都会为我们检查一遍包的依赖。Meteor的包使用起来和NPM包一样方便。</p>
+<p>新建一个包以及包的默认目录结构</p>
+<p>当然有的时候我们也可以创建和发布自己的Meteor包，为开源社区做出自己得贡献。首先你需要一个Meteor账号，可以在Meteor官网中注册一个，注意官网中的用户名是唯一不可修改的，用户名将作为第三方包的命名的一部分。</p>
+<p>在命令行下创建一个包，并进入该目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor create --package meteor_username:package-name</span><br></pre></td></tr></table></figure>
+<p>注意包名的构成，是由meteor账户名加冒号加包名构成的，这种设计极大程度上避免了宝命名的冲突。</p>
+<p>我们来看一个实际的例子，假设我们要创建一个hello-world的包，这里以笔者的meteor账户为例（注：这里的例子并没有被发布到Atmosphere上，仅仅作讲解用）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor create --package charlesoy:hello-world</span><br></pre></td></tr></table></figure>
+<p>进入目录。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">cd</span> hello-world</span><br></pre></td></tr></table></figure>
+<p>查看包的基本结构。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">README.md       hello-world-tests.js    hello-world.js      package.js</span><br></pre></td></tr></table></figure>
+<p>在Meteor的最新版本中（1.4.2.3），一个新的包就包含了这四个最基本的文件。这四个文件的作用也一目了然。</p>
+<p>README.md就是文档，当然我们可以在package.js文件中指定具体的README的目录，发布后文档中的内容将显示在Atmosphere中你的包的详情页面中。一个好的有用的包应该提供详细的文档供使用者查阅，建议发布仔细编写README文件。</p>
+<p>hello-world-tests.js是测试文件，测试代码在这里编写，当然我们也可以使用多个测试文件。</p>
+<p>hello-world.js是我们的包的文件，包的逻辑代码写在这里，我们也可以（一般都）有多个编写逻辑代码的文件。</p>
+<p>package.js是用来描述我们包的信息的文件，Meteor会根据该文件的信息组织和构建一个新的包。</p>
+<h3 id="package-js详解"><a href="#package-js详解" class="headerlink" title="package.js详解"></a>package.js详解</h3><p>接下来我们来详细说明一下package.js包，使用vim或者其他编辑工具打开package.js包。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">Package.describe(&#123;</span><br><span class="line">  name: <span class="string">'charlesoy:hello-world'</span>,</span><br><span class="line">  version: <span class="string">'0.0.1'</span>,</span><br><span class="line">  summary: <span class="string">''</span>,</span><br><span class="line">  git: <span class="string">''</span>,</span><br><span class="line">  documentation: <span class="string">'README.md'</span></span><br><span class="line">&#125;);</span><br><span class="line">Package.onUse(<span class="function"><span class="keyword">function</span>(<span class="params">api</span>) </span>&#123;</span><br><span class="line">  api.versionsFrom(<span class="string">'1.4.2.3'</span>);</span><br><span class="line">  api.use(<span class="string">'ecmascript'</span>);</span><br><span class="line">  api.mainModule(<span class="string">'hello-world.js'</span>);</span><br><span class="line">&#125;);</span><br><span class="line">Package.onTest(<span class="function"><span class="keyword">function</span>(<span class="params">api</span>) </span>&#123;</span><br><span class="line">  api.use(<span class="string">'ecmascript'</span>);</span><br><span class="line">  api.use(<span class="string">'tinytest'</span>);</span><br><span class="line">  api.use(<span class="string">'charlesoy:hello-world'</span>);</span><br><span class="line">  api.mainModule(<span class="string">'hello-world-tests.js'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>上面就是Meteor为我们创建的默认的包的组织结构信息。一共包含了三个模块，Package.describe()方法用来描述包的基本信息；Package.onUse()方法用来描述包的一些依赖和执行环境信息；Package.onTest()方法用来描述测试环境信息。</p>
+<h4 id="Package-describe-方法"><a href="#Package-describe-方法" class="headerlink" title="Package.describe()方法"></a>Package.describe()方法</h4><p>首先我们来看Package.describe()方法。</p>
+<p>该方法接收一个对象作为参数，对象必须提供name，version，summary，git，和documentation五个属性。name表示包的名字，version表示包的版本，summary表示包的一句话的精炼总结，git填写该包的github地址，documentation表示包的文档的路径。</p>
+<p>一般而言，我们主要需要编写的就是summary和git两个属性，以下是示例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">Package.describe(&#123;</span><br><span class="line">  name: <span class="string">'charlesoy:hello-world'</span>,</span><br><span class="line">  version: <span class="string">'0.0.1'</span>,</span><br><span class="line">  summary: <span class="string">'A hello world meteor package'</span>,</span><br><span class="line">  git: <span class="string">'https://github.com/CharlesOy/helloWolrd'</span>, <span class="comment">// doesn't exist</span></span><br><span class="line">  documentation: <span class="string">'README.md'</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h4 id="Package-onUse-方法"><a href="#Package-onUse-方法" class="headerlink" title="Package.onUse()方法"></a>Package.onUse()方法</h4><p>Package.onUse()方法是我们包的核心。</p>
+<p>该方法接收了一个函数作为参数，该函数需要提供一个api的参数。api有一些方法用于描述包依赖和执行环境的信息。</p>
+<p>来看一个编写好了的Package.onUse()方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">Package.onUse(<span class="function"><span class="keyword">function</span>(<span class="params">api</span>) </span>&#123;</span><br><span class="line">  api.versionsFrom(<span class="string">'1.4.2.3'</span>);</span><br><span class="line">  api.use(<span class="string">'ecmascript'</span>);</span><br><span class="line">  api.use([</span><br><span class="line">    <span class="string">'meteorhacks:picker'</span>,</span><br><span class="line">  ], [</span><br><span class="line">    <span class="string">'server'</span>,</span><br><span class="line">  ]);</span><br><span class="line">  api.use(<span class="string">'random'</span>, <span class="string">'client'</span>);</span><br><span class="line">  api.mainModule(<span class="string">'server/main.js'</span>, <span class="string">'server'</span>);</span><br><span class="line">  api.mainModule(<span class="string">'client/main.js'</span>, <span class="string">'client'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>api.versionsFrom()方法表示当前包支持从哪个版本开始的Meteor。</p>
+<p>api.use()方法表示的依赖Meteor包的依赖，该方法接收了三个参数，第一个表示依赖的Meteor包名，可以指定具体版本的包名，第二个参数表示需要执行的环境（e.g., ‘server’, ‘client’, ‘web.browser’, ‘web.cordova’），一个或多个环境的情况下参数可以以数组的形式，单个环境可以直接传入，第三个参数描述了一些具体的加载和依赖的行为。详情见<a href="https://docs.meteor.com/api/packagejs.html#PackageAPI-use" target="_blank" rel="noopener">API</a>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">README.md   client      imports     package.js  server      test</span><br></pre></td></tr></table></figure>
+<p>我们知道Meteor是一个存在client和server两种不同代码环境的框架，分别在浏览器端和服务器端执行。这里我们把浏览器的代码都放在client文件夹下，服务器的代码都放在server文件夹下，imports文件夹中主要存放通用代码，test文件夹存放测试代码。</p>
+<p>很明显我们服务器端的入口在server/main.js，而浏览器的入口在client/main.js下。</p>
+<h4 id="Package-onTest-方法"><a href="#Package-onTest-方法" class="headerlink" title="Package.onTest()方法"></a>Package.onTest()方法</h4><p>Package.onTest()方法的使用类似Package.onUse()方法，不过该方法用于描述测试环境。</p>
+<p>api.mainModule()方法指定了代码的执行入口。</p>
+<p>在这里的例子中，为了更好的组织我们的代码，我们创建了四个文件夹这里我们把我们的目录修改了一下，分别是client，imports，server，和test。</p>
+<h4 id="Npm-depends-方法"><a href="#Npm-depends-方法" class="headerlink" title="Npm.depends()方法"></a>Npm.depends()方法</h4><p>实际上除了上述三个必要的方法，还有一个很重要的可选方法，Npm.depends()方法。</p>
+<p>Package.onUse()方法中描述的依赖都是Meteor包的依赖，Npm.depends()方法用于描述Npm的依赖。</p>
+<p>假设我们需要依赖lodash包（一个实用的基础工具包）并指定版本，我们可以这样写：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">Npm.depends(&#123;</span><br><span class="line">  lodash: <span class="string">'4.17.2'</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<h3 id="hello-world包"><a href="#hello-world包" class="headerlink" title="hello-world包"></a>hello-world包</h3><p>下面我们来编写我们的hello-world包，一个简单的逻辑，如果引入了该包，我们可以在浏览器中访问当前工程的根目录下的/hello_world路径，并返回Hello World到浏览器。</p>
+<p>在上面的依赖中我们添加了依赖meteorhacks:picker，该包用于实现WebHook功能，这里我们完成一个简单地返回Hello World到浏览器的逻辑。</p>
+<p>在server/main.js文件下编辑：</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// server/main.js</span></span><br><span class="line"><span class="keyword">import</span> &#123;Picker&#125; <span class="keyword">from</span> <span class="string">'meteor/meteorhacks:picker'</span>;</span><br><span class="line">Picker.route(<span class="string">'/hello_world'</span>, (params, req, res) =&gt; &#123;</span><br><span class="line">  res.end(<span class="string">'Hello World'</span>);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>为了系统测试，我们需要一个信的Meteor系统，为了将我们的包添加到新的测试工程中，可以将新的包整个目录直接放到新工程的packages目录下，也可以通过建立软链接的方式。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ln -s /PATH/TO/hello-world /PATH/TO/YOUR/METEOR/PROJECT/packages/hello-world</span><br></pre></td></tr></table></figure>
+<p>然后在工程的根目录下添加包：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor add charlesoy:hello-world</span><br></pre></td></tr></table></figure>
+<p>运行。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor</span><br></pre></td></tr></table></figure>
+<p>访问<a href="http://localhost:3000/hello_world。就能看到hello-world。" target="_blank" rel="noopener">http://localhost:3000/hello_world。就能看到hello-world。</a></p>
+<h3 id="发布和更新到Atmosphere"><a href="#发布和更新到Atmosphere" class="headerlink" title="发布和更新到Atmosphere"></a>发布和更新到Atmosphere</h3><p>在编写并测试完Meteor包之后，下一步就是发布。发布的命令很简单，meteor publish命令用于发布包。</p>
+<p>在包的根目录下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor publish --create</span><br></pre></td></tr></table></figure>
+<p>上述命令用于发布的新的或新的版本的包（比如我们的包已经发布了0.0.2版本了）。</p>
+<p>发布完之后就可以在Atmosphere上搜索到我们的新包了。</p>
+<p>如果需要更新当前已发布的包的最新版本的一些细微的细节（比如我们只做了一点细微的代码调整，或者只修改了README等，在不想发布新的版本时候），可以：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">meteor publish --update</span><br></pre></td></tr></table></figure>
+<p>这样Atmosphere上最新的版本的包也会被修改。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>以上就是开发的Meteor包的需要知道的基本知识点和一般过程。</p>
+<p>总结步骤就是：</p>
+<ol>
+<li>初始化；</li>
+<li>编写包的基本信息；</li>
+<li>编写逻辑代码；</li>
+<li>测试工作；</li>
+<li>发布。</li>
+</ol>
+<p>注意本文中的charlesoy:hello-world并没有发布到Atmosphere上，有兴趣的读者可以实现并发布更多实用和有意思的包，希望更多的人能为Meteor开源社区做更多的贡献。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://guide.meteor.com/writing-atmosphere-packages.html" target="_blank" rel="noopener">Adding an existing project to GitHub using the command line - GitHub</a></li>
+<li><a href="https://atmospherejs.com/i/publishing" target="_blank" rel="noopener">Publish Packages - Atmosphere</a></li>
+<li><a href="https://themeteorchef.com/recipes/writing-a-package/" target="_blank" rel="noopener">Writing a Package - TheMeteorChef</a></li>
+<li><a href="https://atmospherejs.com/" target="_blank" rel="noopener">Atmosphere</a></li>
+<li><a href="https://www.npmjs.com/" target="_blank" rel="noopener">NPM</a></li>
+<li><a href="https://www.meteor.com/sign-up" target="_blank" rel="noopener">Meteor Account</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/其他/" rel="tag"># 其他</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/12/08/else/10_push_repository_to_github/" rel="next" title="添加一个已有项目到GitHub">
+                <i class="fa fa-chevron-left"></i> 添加一个已有项目到GitHub
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/13/javascript/24_variable_hoisting/" rel="prev" title="JavaScript中的变量提升">
+                JavaScript中的变量提升 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#关于Meteor包和Atmosphere"><span class="nav-number">1.</span> <span class="nav-text">关于Meteor包和Atmosphere</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#package-js详解"><span class="nav-number">2.</span> <span class="nav-text">package.js详解</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Package-describe-方法"><span class="nav-number">2.1.</span> <span class="nav-text">Package.describe()方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Package-onUse-方法"><span class="nav-number">2.2.</span> <span class="nav-text">Package.onUse()方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Package-onTest-方法"><span class="nav-number">2.3.</span> <span class="nav-text">Package.onTest()方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Npm-depends-方法"><span class="nav-number">2.4.</span> <span class="nav-text">Npm.depends()方法</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#hello-world包"><span class="nav-number">3.</span> <span class="nav-text">hello-world包</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#发布和更新到Atmosphere"><span class="nav-number">4.</span> <span class="nav-text">发布和更新到Atmosphere</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">5.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">6.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

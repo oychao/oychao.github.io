@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="总结一下ES6这一系列的文章，包括自己的一些感悟，不足的地方和后续工作。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ES6学习笔记系列总结">
+<meta property="og:url" content="http://yoursite.com/2016/11/28/javascript/20_es6_conclusion/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="总结一下ES6这一系列的文章，包括自己的一些感悟，不足的地方和后续工作。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.361Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ES6学习笔记系列总结">
+<meta name="twitter:description" content="总结一下ES6这一系列的文章，包括自己的一些感悟，不足的地方和后续工作。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/28/javascript/20_es6_conclusion/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>ES6学习笔记系列总结 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/28/javascript/20_es6_conclusion/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">ES6学习笔记系列总结
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-11-28 07:48:00" itemprop="dateCreated datePublished" datetime="2016-11-28T07:48:00+08:00">2016-11-28</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">总结一下ES6这一系列的文章，包括自己的一些感悟，不足的地方和后续工作。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="为什么又开始学习JS"><a href="#为什么又开始学习JS" class="headerlink" title="为什么又开始学习JS"></a>为什么又开始学习JS</h3><p>如果从本科时候还写过几个很烂的CMS静态前端模板开始算起，我也算是个（伪）资深Web开发了（如果写几个最基本的HTML页面也算的话）。</p>
+<p>写前端静态模板的那个年代，仍然有大量要求兼容IE第几版本的需求（好消息是现在Edge出现了，终于连微软自己都抛弃IE了）。各个浏览器之间的差异仍然很大，而有的时候这些差异并非是浏览器设计实现上优劣的差异，而仅仅是各大厂商希望占有市场的因素造成的。</p>
+<p>当时我一直认为，程序员花大量的时间去研究这些东西，只是为了各个浏览器都显示同一个效果，是一件很愚蠢的事情。</p>
+<p>于是当时我放弃了学习JavaScript，转而走进了后端的世界。在Java和PHP热火朝天的背景下我也没能免俗，投入了Java Web的世界中。</p>
+<p>两年的自学效果虽不能说完全没有，但是收获甚微，一来缺少真正的实战项目，自己花时间精力去学的那一些框架，总是不能深刻地理解，不能很好地理解也就不能很好的记忆，于是便出现了记了忘，忘了记这种循环。效率太低，收获甚微。二来研究生在读，也并非全力在学习，最后的结果就是成了一个Github搬运工。</p>
+<p>由于工作和毕业阴差阳错，不仅毕业延期了，近一年来技术上的成长也是浑浑噩噩。</p>
+<p>今年四月份的时候，接触到了Facebook的React，在解决了毕业要求的期刊论文之后，又看到了基于Node的Meteor，深深地被React这种控件化的前端开发和Meteor这种基于响应式数据的后端开发所触动。而此前各大浏览器的很多差异都已经被统一或者被一些中间层的库屏蔽掉了。而且JavaScript不仅吃前后端，甚至非关系型数据库方面也占有一席之地，另外如果配上React Native，更是对移动端也在虎视眈眈。</p>
+<p>当然，最重要的是我目前工作上也用的是React + Meteor，因此是时候重新把JavaScript重新捡起来了。</p>
+<h3 id="关于ES6"><a href="#关于ES6" class="headerlink" title="关于ES6"></a>关于ES6</h3><p>ES6的出现确实让JavaScript的开发舒服了很多，虽然各个开发环境下还是存在兼容性问题，不过引入中间编译器（Babel等）可以很好地解决这些问题。</p>
+<p>学好ES6还是需要很多JavaScript的基础，比如最典型的class关键字，class关键字本身只是JavaScript基于原型的面向对象的一个语法糖，其本质仍然是和ES5一样。我在class那篇笔记中并没有详细写关于原型链的详细介绍。</p>
+<p>ES6相比之前的JavaScript，既有像let和var的区别这样的细节改动，也有像模块这样的重量级引入；既有class这样拥有诸多议论的关键字，也有像模板字面量这样的非常实用的语法糖。</p>
+<p>总地来讲，ES6还是极大地增加了JavaScript开发的便捷性，但如果需要用好ES6，扎实的JavaScript语言基础，是必不可少的。</p>
+<h3 id="写在最后"><a href="#写在最后" class="headerlink" title="写在最后"></a>写在最后</h3><p>在开始写这一系列的笔记的时候，我也几乎可以算是从零开始学习，之前虽然碰到过几个特性，但都是知其然不知其所以然。整一个系列的笔记总结写下来，我自己也学习收获了很多，比如一开始只是想通过学习Babel来简单总结一下ES6的一些特性，后来发现Babel官方的ES6教程只是蜻蜓点水，内容实在太少，于是又加入了一些新的参考。</p>
+<p>中后期的笔记大多数主要参考来自MDN，而Babel反倒成了次要。随着在网上找的权威的文档和前辈们写的总结越来越多，我甚至怀疑是否还有写这些东西的必要，毕竟我这些东西跟其他的一比几乎毫无价值。</p>
+<p>但转念一想，这些总结最重要的读者并不是别人，而是我自己，我需要时不时回来看看这些东西，跟别人比写得不好没关系，重要的是我每次来看，都能回想起一些知识点，这个是最重要的。</p>
+<p>也因此，这个系列的总结一开始叫『ES6特性简介』，最后改成了『ES6学习笔记』。</p>
+<p>最后，关于笔记中一些不足的地方，我后续还会修改和增删内容。</p>
+<h3 id="推荐文档"><a href="#推荐文档" class="headerlink" title="推荐文档"></a>推荐文档</h3><ol>
+<li><a href="https://babeljs.io/docs/learn-es2015/" target="_blank" rel="noopener">BabelJS - Learn ES2015</a></li>
+<li><a href="https://developer.mozilla.org/en-US/" target="_blank" rel="noopener">MDN</a></li>
+<li><a href="http://es6.ruanyifeng.com/" target="_blank" rel="noopener">ECMAScript 6 入门 - 阮一峰</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/27/javascript/19_es6_else/" rel="next" title="ES6学习笔记17：其他特性">
+                <i class="fa fa-chevron-left"></i> ES6学习笔记17：其他特性
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/28/javascript/21_oop/" rel="prev" title="JavaScript基于原型的面向对象编程">
+                JavaScript基于原型的面向对象编程 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#为什么又开始学习JS"><span class="nav-number">1.</span> <span class="nav-text">为什么又开始学习JS</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#关于ES6"><span class="nav-number">2.</span> <span class="nav-text">关于ES6</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#写在最后"><span class="nav-number">3.</span> <span class="nav-text">写在最后</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#推荐文档"><span class="nav-number">4.</span> <span class="nav-text">推荐文档</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

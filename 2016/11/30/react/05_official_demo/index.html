@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="看到React官方Demo更新了，React的笔记也好久没写了，虽然说从今年四月份开始自学React也半年了，但中间各种个人原因基本上四月份到九月份都是停放着没动过了，而且四月份的那几篇笔记也就是翻译了几篇官网的文章，理解也不够深刻。实际上满打满算也就学了两个月，正好趁着这次教程更新，笔记系列重新写过，接下来一段时间好好弄弄ReactJS和React Native的学习。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React学习笔记：官方Demo">
+<meta property="og:url" content="http://yoursite.com/2016/11/30/react/05_official_demo/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="看到React官方Demo更新了，React的笔记也好久没写了，虽然说从今年四月份开始自学React也半年了，但中间各种个人原因基本上四月份到九月份都是停放着没动过了，而且四月份的那几篇笔记也就是翻译了几篇官网的文章，理解也不够深刻。实际上满打满算也就学了两个月，正好趁着这次教程更新，笔记系列重新写过，接下来一段时间好好弄弄ReactJS和React Native的学习。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.373Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React学习笔记：官方Demo">
+<meta name="twitter:description" content="看到React官方Demo更新了，React的笔记也好久没写了，虽然说从今年四月份开始自学React也半年了，但中间各种个人原因基本上四月份到九月份都是停放着没动过了，而且四月份的那几篇笔记也就是翻译了几篇官网的文章，理解也不够深刻。实际上满打满算也就学了两个月，正好趁着这次教程更新，笔记系列重新写过，接下来一段时间好好弄弄ReactJS和React Native的学习。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/11/30/react/05_official_demo/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React学习笔记：官方Demo | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/11/30/react/05_official_demo/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React学习笔记：官方Demo
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-11-30 08:32:00" itemprop="dateCreated datePublished" datetime="2016-11-30T08:32:00+08:00">2016-11-30</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">看到React官方Demo更新了，React的笔记也好久没写了，虽然说从今年四月份开始自学React也半年了，但中间各种个人原因基本上四月份到九月份都是停放着没动过了，而且四月份的那几篇笔记也就是翻译了几篇官网的文章，理解也不够深刻。实际上满打满算也就学了两个月，正好趁着这次教程更新，笔记系列重新写过，接下来一段时间好好弄弄ReactJS和React Native的学习。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="TicTacToe游戏"><a href="#TicTacToe游戏" class="headerlink" title="TicTacToe游戏"></a>TicTacToe游戏</h3><p>看到React官方Demo更新了，React的笔记也好久没写了，虽然说从今年四月份开始自学React也半年了，但中间各种个人原因基本上四月份到九月份都是停放着没动过了，而且四月份的那几篇笔记也就是翻译了几篇官网的文章，理解也不够深刻。实际上满打满算也就学了两个月，正好趁着这次教程更新，笔记系列重新写过，接下来一段时间好好弄弄ReactJS和React Native的学习。</p>
+<p>新版的教程编写的是一个简单的TicTacToe游戏，笔者依照对原文的理解，自己从头开发了一遍教程的小程序，实际代码与官网有细微区别，但大体差不多。此外涉及一些细节为什么这么做的深层次原因这里不做详细解释（如为什么把状态都放到顶层组件中，为什么使用无状态函数式组件等），不然这篇笔记就太长了，有兴趣的读者可以自己去官网或者找在资料寻找答案。</p>
+<p>先直接看程序效果。</p>
+<iframe scrolling="no" width="100%" height="500" src="//jsfiddle.net/8t9hzbpu/embedded/result/dark" frameborder="0" allowfullscreen></iframe>
+<p>首先，整个游戏（Game）肯定是一个大组件，这个游戏组件不仅包括整个大棋盘，还包括整个游戏的一些状态和动作（稍微复杂一点的设计会把右边的游戏信息也设计成一个组件甚至多个组件，不过这里参照官网，就一并放在Game组件中了）。</p>
+<p>其次，棋盘（Board）也可以设计成一个组件，棋盘需要维护棋盘中的每一个方格（Square），最后就是方格，是我们最小的组件，小方格需要负责显示棋子并且是下棋事件的直接响应者。</p>
+<ul>
+<li>Game</li>
+<li>Board</li>
+<li>Square</li>
+</ul>
+<p>在React老版的教程中，有推荐大规模的应用采取从小到大的组件编写方式，小规模的话从大到小编写，笔者自己的经验是一律从小到大编写应用，因为这样直观上更容易关注当前在做的工作（这个因人而异，或者实际项目中听项目经理的）。</p>
+<h3 id="无状态函数式组件"><a href="#无状态函数式组件" class="headerlink" title="无状态函数式组件"></a>无状态函数式组件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Square组件</span></span><br><span class="line"><span class="keyword">let</span> Square = <span class="function">(<span class="params">props</span>) =&gt;</span> (</span><br><span class="line">  &lt;button className=<span class="string">"square"</span> onClick=&#123;props.handleClick&#125;&gt;</span><br><span class="line">    &#123;props.player&#125;</span><br><span class="line">  &lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">);</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Board组件</span></span><br><span class="line"><span class="keyword">let</span> Board = <span class="function">(<span class="params">props</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> squares = props.squares.map(<span class="function">(<span class="params">val, idx</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;Square key=&#123;val + idx&#125; player=&#123;val&#125;</span><br><span class="line">              handleClick=&#123;</span><br><span class="line">                () =&gt; &#123;</span><br><span class="line">                  props.handleClick(idx);</span><br><span class="line">                &#125;</span><br><span class="line">              &#125;/&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;);</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    &lt;div className=<span class="string">"board"</span>&gt;</span><br><span class="line">      &#123;squares&#125;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">  );</span></span><br><span class="line"><span class="regexp">&#125;</span></span><br></pre></td></tr></table></figure>
+<p>这里采用了无状态函数式组件（Stateless Functional Component）编写Square和Board组件，它们被分离成了独立的可重用的UI组件，这样的组件几乎没有任何业务逻辑，自身的事件接口也通过React组件属性的方式完全交给了父级组件。</p>
+<p>可以看到Square和Board都只有最基本的渲染绘制UI的逻辑，没有业务逻辑在这里。Square接收两个参数，player用于显示当前下棋者的棋子类型（O还是X），handleClick用于处理点击该Square（即下棋）的事件，这个逻辑也由上层传入。</p>
+<h3 id="Game组件"><a href="#Game组件" class="headerlink" title="Game组件"></a>Game组件</h3><figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Game</span> <span class="keyword">extends</span> <span class="title">React</span>.<span class="title">Component</span> </span>&#123;</span><br><span class="line">  <span class="keyword">constructor</span>() &#123;</span><br><span class="line">    <span class="keyword">super</span>();</span><br><span class="line">    <span class="keyword">this</span>.handleClick = <span class="keyword">this</span>.handleClick.bind(<span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">let</span> curIsX = <span class="literal">false</span>;</span><br><span class="line">    <span class="keyword">let</span> history = [<span class="built_in">Array</span>(<span class="number">9</span>).fill(<span class="literal">null</span>)];</span><br><span class="line">    <span class="keyword">let</span> winner = <span class="literal">null</span>;</span><br><span class="line">    <span class="keyword">let</span> curStep = <span class="number">1</span>;</span><br><span class="line">    <span class="keyword">this</span>.state = &#123;</span><br><span class="line">      curIsX,</span><br><span class="line">      history,</span><br><span class="line">      winner,</span><br><span class="line">      curStep,</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">  render() &#123;</span><br><span class="line">    <span class="keyword">const</span> &#123;curIsX, history, winner, curStep&#125; = <span class="keyword">this</span>.state;</span><br><span class="line">    <span class="keyword">const</span> boardState = history[curStep - <span class="number">1</span>];</span><br><span class="line">    <span class="keyword">let</span> historySteps = history.map(<span class="function">(<span class="params">val, idx</span>) =&gt;</span> (</span><br><span class="line">      &lt;li key=&#123;idx&#125;&gt;</span><br><span class="line">        &lt;a href=<span class="string">"javascript:;"</span> onClick=&#123;() =&gt; &#123;</span><br><span class="line">          <span class="keyword">this</span>.jumpTo(idx);</span><br><span class="line">        &#125;&#125;&gt;</span><br><span class="line">          # &#123;idx === 0 ? "Game Start" : `Step $&#123;idx&#125;`&#125;</span><br><span class="line">        &lt;<span class="regexp">/a&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>li&gt;</span><br><span class="line">    ));</span><br><span class="line">    <span class="keyword">let</span> status = <span class="string">`Next Player: <span class="subst">$&#123;curIsX ? <span class="string">'X'</span> : <span class="string">'O'</span>&#125;</span>`</span>;</span><br><span class="line">    status = winner ? <span class="string">`Winner is <span class="subst">$&#123;winner&#125;</span>`</span> : status;</span><br><span class="line">    <span class="keyword">return</span> (</span><br><span class="line">      &lt;div&gt;</span><br><span class="line">        &lt;Board squares=&#123;boardState&#125;</span><br><span class="line">               handleClick=&#123;<span class="keyword">this</span>.handleClick&#125;/&gt;</span><br><span class="line">        &lt;div style=&#123;&#123;<span class="attr">float</span>: <span class="string">'left'</span>&#125;&#125;&gt;</span><br><span class="line">          &lt;h5&gt;&#123;status&#125;&lt;<span class="regexp">/h5&gt;</span></span><br><span class="line"><span class="regexp">          &lt;ol style=&#123;&#123;paddingLeft: 20&#125;&#125;&gt;</span></span><br><span class="line"><span class="regexp">            &#123;historySteps&#125;</span></span><br><span class="line"><span class="regexp">          &lt;/</span>ol&gt;</span><br><span class="line">        &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>div&gt;</span><br><span class="line">    );</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="comment">// ...</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>构造方法中一共有四个状态：curIsX用于判断当前棋手（X或者O）；history用来记录历史状态；winner用来记录赢家（未结束则为null）；curStep用于记录当前处理历史状态的具体位置；一般情况下是history最新状态；但是当执行回到历史的某个状态的逻辑；curStep就指向该状态的位置。</p>
+<p>注意history初始状态只有一个元素，该元素是一个长度为9的一维数组，所有值均为空，一次代表棋盘上的9个小方格的状态。</p>
+<p>具体到render方法中，我们看到Board组件获取历史的最新状态，并将该状态交给了Board，此外还讲handleClick方法交给了Board，之前的代码中我们已经看到Board会进一步把handleClick交给Square。</p>
+<p>然后我们还绘制了历史状态，并给历史状态加了点击事件，分别响应不同参数的jumpTo方法。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line">handleClick(index) &#123;</span><br><span class="line">  <span class="keyword">let</span> &#123;curIsX, history, winner, curStep&#125; = <span class="keyword">this</span>.state;</span><br><span class="line">  <span class="keyword">if</span> (curStep === <span class="number">10</span> || winner !== <span class="literal">null</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'Game Over.'</span>);</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">let</span> boardState = <span class="built_in">JSON</span>.parse(<span class="built_in">JSON</span>.stringify(history[curStep - <span class="number">1</span>]));</span><br><span class="line">  <span class="keyword">if</span>(boardState[index] != <span class="literal">null</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  boardState[index] = curIsX ? <span class="string">'X'</span> : <span class="string">'O'</span>;</span><br><span class="line">  winner = Game.calcWinner(boardState);</span><br><span class="line">  curIsX = curIsX ? <span class="literal">false</span> : <span class="literal">true</span>;</span><br><span class="line">  history.splice(curStep++, <span class="number">10</span>, boardState);</span><br><span class="line">  <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">    curIsX,</span><br><span class="line">    history,</span><br><span class="line">    winner,</span><br><span class="line">    curStep,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line">jumpTo(index) &#123;</span><br><span class="line">  <span class="keyword">let</span> &#123;curIsX, history, winner, curStep&#125; = <span class="keyword">this</span>.state;</span><br><span class="line">  <span class="keyword">const</span> boardState = history[index];</span><br><span class="line">  winner = Game.calcWinner(boardState);</span><br><span class="line">  curIsX = index % <span class="number">2</span> === <span class="number">1</span></span><br><span class="line">  curStep = index + <span class="number">1</span>;</span><br><span class="line">  <span class="keyword">this</span>.setState(&#123;</span><br><span class="line">    curIsX,</span><br><span class="line">    winner,</span><br><span class="line">    curStep,</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">static</span> calcWinner(boardState) &#123;</span><br><span class="line">  <span class="keyword">const</span> patterns = [</span><br><span class="line">    [<span class="number">0</span>, <span class="number">1</span>, <span class="number">2</span>],</span><br><span class="line">    [<span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>],</span><br><span class="line">    [<span class="number">6</span>, <span class="number">7</span>, <span class="number">8</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">3</span>, <span class="number">6</span>],</span><br><span class="line">    [<span class="number">1</span>, <span class="number">4</span>, <span class="number">7</span>],</span><br><span class="line">    [<span class="number">2</span>, <span class="number">5</span>, <span class="number">8</span>],</span><br><span class="line">    [<span class="number">0</span>, <span class="number">4</span>, <span class="number">8</span>],</span><br><span class="line">    [<span class="number">2</span>, <span class="number">4</span>, <span class="number">6</span>],</span><br><span class="line">  ];</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">let</span> pattern <span class="keyword">of</span> patterns) &#123;</span><br><span class="line">    <span class="keyword">if</span> (boardState[pattern[<span class="number">0</span>]] === boardState[pattern[<span class="number">1</span>]]</span><br><span class="line">      &amp;&amp; boardState[pattern[<span class="number">0</span>]] === boardState[pattern[<span class="number">2</span>]]</span><br><span class="line">      &amp;&amp; boardState[pattern[<span class="number">0</span>]] != <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="built_in">console</span>.log(<span class="string">`The winner is <span class="subst">$&#123;boardState[pattern[<span class="number">0</span>]]&#125;</span>.`</span>);</span><br><span class="line">      <span class="keyword">return</span> boardState[pattern[<span class="number">0</span>]];</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="literal">null</span>;</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// ...</span></span><br></pre></td></tr></table></figure>
+<p>除了handleClick和jumpTo两个方法以外，还有一个静态方法calcWinner，该方法用于判断当前步骤是否产生赢家，如有则返回赢家，否则返回空值。下面来依次解释三个方法。</p>
+<p>handleClick负责处理一次下棋事件，首先判断游戏是否结束，包括棋盘是否已经全部下满（当前步骤已经到了第10步）和是否已经有赢家，如果是则抛出错误（Game Over），否则进行下一步逻辑；之后深度复制一个棋盘当前状态，将当前棋子写入对应的位置后，加入历史状态的下一个位置中（curStep），并且清楚这之后的所有历史状态（即清空未来状态，这么做主要是为了处理紧接在jumpTo函数之后的下棋事件）；然后更新下一步棋的棋手（curIsX）；最后更新状态。</p>
+<p>jumpTo接收一个参数，代表跳转到的历史状态的下标，然后获取该历史状态，计算是否有赢家（有可能会跳到一个已经有赢家的历史步骤，即有赢家的一局的最后一步），并更新下一步棋的棋手（curIsX）；最后更新状态。</p>
+<p>最后的calcWinner最直观，该方法接受一个棋盘状态作为参数，方法中初始设定好了所有可能赢的状态，将所有赢棋的状态和棋盘状态遍历匹配后看是否有结果，有的话返回赢家，否则返回空值。</p>
+<h3 id="所有代码"><a href="#所有代码" class="headerlink" title="所有代码"></a>所有代码</h3><iframe scrolling="no" width="100%" height="500" src="//jsfiddle.net/8t9hzbpu/embedded/js,html,css,result/dark" frameborder="0" allowfullscreen></iframe>
+<p>以上是所有代码；此外还有本站的一个<a href="https://oychao.github.io/demo/react/" target="_blank" rel="noopener">示例网页</a>。</p>
+<p>对比之前的那篇<a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Think in React</a>，这次的TicTacToe游戏Demo更侧重无状态函数式组件的使用，以及组件状态存储位置的抬升（<a href="https://facebook.github.io/react/tutorial/tutorial.html#lifting-state-up" target="_blank" rel="noopener">Lifting State Up</a>），状态不可变的使用等。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://facebook.github.io/react/docs/components-and-props.html" target="_blank" rel="noopener">Components and Props - React</a></li>
+<li><a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Think in React - React</a></li>
+<li><a href="https://oychao.github.io/demo/react/" target="_blank" rel="noopener">React Demo - OuyangChao GitHub</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/29/javascript/22_prototype/" rel="next" title="JavaScript原型链">
+                <i class="fa fa-chevron-left"></i> JavaScript原型链
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/02/react/06_component_life_cycle/" rel="prev" title="React学习笔记：组件生命周期">
+                React学习笔记：组件生命周期 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#TicTacToe游戏"><span class="nav-number">1.</span> <span class="nav-text">TicTacToe游戏</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#无状态函数式组件"><span class="nav-number">2.</span> <span class="nav-text">无状态函数式组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Game组件"><span class="nav-number">3.</span> <span class="nav-text">Game组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#所有代码"><span class="nav-number">4.</span> <span class="nav-text">所有代码</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="介绍如何使用Supervisor管理Linux进程，Supervisor是一款常用的监控类UNIX系统进程的工具，通过写简单的配置文件就能将我们的程序Deamon化。">
+<meta name="keywords" content="其他">
+<meta property="og:type" content="article">
+<meta property="og:title" content="使用Supervisor管理Linux进程">
+<meta property="og:url" content="http://yoursite.com/2016/04/19/else/04_supervisor_introduction/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="介绍如何使用Supervisor管理Linux进程，Supervisor是一款常用的监控类UNIX系统进程的工具，通过写简单的配置文件就能将我们的程序Deamon化。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.352Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="使用Supervisor管理Linux进程">
+<meta name="twitter:description" content="介绍如何使用Supervisor管理Linux进程，Supervisor是一款常用的监控类UNIX系统进程的工具，通过写简单的配置文件就能将我们的程序Deamon化。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/04/19/else/04_supervisor_introduction/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>使用Supervisor管理Linux进程 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/04/19/else/04_supervisor_introduction/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">使用Supervisor管理Linux进程
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-04-19 00:32:00" itemprop="dateCreated datePublished" datetime="2016-04-19T00:32:00+08:00">2016-04-19</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">介绍如何使用Supervisor管理Linux进程，Supervisor是一款常用的监控类UNIX系统进程的工具，通过写简单的配置文件就能将我们的程序Deamon化。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>什么是Supervisor？</p>
+<blockquote>
+<p>Supervisor is a client/server system that allows its users to monitor and control a number of processes on UNIX-like operating systems.</p>
+</blockquote>
+<blockquote>
+<p>It shares some of the same goals of programs like launchd, daemontools, and runit. Unlike some of these programs, it is not meant to be run as a substitute for init as “process id 1”. Instead it is meant to be used to control processes related to a project or a customer, and is meant to start like any other program at boot time.</p>
+</blockquote>
+<p>译文。</p>
+<blockquote>
+<p>Supervisor是一个允许用户监控类UNIX操作系统上若干进程的C/S系统。</p>
+</blockquote>
+<blockquote>
+<p>它虽然有一些类似于launchd，daemontools，以及runit的功能。但不像这些程序，它并不是以替身的形式运行的。相反它意在用于控制与一个工程或者一个资源消耗者相关的进程，当然它跟其他程序一样也是随系统启动而启动。</p>
+</blockquote>
+<h3 id="Ubuntu下安装Supervisor"><a href="#Ubuntu下安装Supervisor" class="headerlink" title="Ubuntu下安装Supervisor"></a>Ubuntu下安装Supervisor</h3><p>以root身份，运行以下命令。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; apt-get install supervisor</span><br></pre></td></tr></table></figure>
+<p>启动服务即可。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">&gt; supervisord</span><br><span class="line"><span class="comment"># 也可以输入service supervisor restart</span></span><br></pre></td></tr></table></figure>
+<h3 id="一个简单的Shell"><a href="#一个简单的Shell" class="headerlink" title="一个简单的Shell"></a>一个简单的Shell</h3><p>为了演示，我们写了如下Shell脚本（/home/test/long.sh）。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">do</span></span><br><span class="line">    <span class="comment"># Echo current date to stdout</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">'date'</span></span><br><span class="line">    <span class="comment"># Echo 'error!' to stderr</span></span><br><span class="line">    <span class="built_in">echo</span> <span class="string">'error!'</span> &gt;<span class="variable">$2</span></span><br><span class="line">    sleep 1</span><br><span class="line"><span class="keyword">done</span></span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; chmod +x /home/<span class="built_in">test</span>/long.sh</span><br></pre></td></tr></table></figure>
+<p>运行long.sh。会输出当前时间和『error!』字符串。这就是我们要交给Supervisor管理的Shell脚本。</p>
+<h3 id="Supervisor配置"><a href="#Supervisor配置" class="headerlink" title="Supervisor配置"></a>Supervisor配置</h3><p>Supervisor的默认配置文件是/etc/supervisor/supervisord.conf，同时，默认包含了/etc/supervisor/conf.d/路径下的所有.conf文件。</p>
+<p>这里我们添加一个新的配置文件：/etc/supervisor/conf.d/long_script.conf文件，如下所示。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">[program:long_script]</span><br><span class="line">command=/home/test/long.sh</span><br><span class="line">autostart=true</span><br><span class="line">autorestart=true</span><br><span class="line">stderr_logfile=/home/test/long.err.log</span><br><span class="line">stdout_logfile=/home/test/long.out.log</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">[program:long_script]</span><br><span class="line">command=/home/test/long.sh</span><br></pre></td></tr></table></figure>
+<p>Supervisor管理的程序名为long_script。<br>脚本路径是/home/test/long.sh，Supervisor会去运行它。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">autostart=true</span><br><span class="line">autorestart=true</span><br></pre></td></tr></table></figure>
+<p>autostart表示程序是否随系统启动而启动。<br>autorestart表示程序是否一停止了就立刻再启动。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">stderr_logfile=/home/test/long.err.log</span><br><span class="line">stdout_logfile=/home/test/long.out.log</span><br></pre></td></tr></table></figure>
+<p>这两个文件是我们输出的日志文件。</p>
+<h3 id="启动Supervisor"><a href="#启动Supervisor" class="headerlink" title="启动Supervisor"></a>启动Supervisor</h3><p>配置文件创建好了之后，我们可以用supervisorctl命令告诉Supervisor新的程序已经添加好了。首先我们先告知Supervisor看看在/etc/supervisor/conf.d/路径下有没有新建或者更新的配置文件。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; supervisorctl reread</span><br></pre></td></tr></table></figure>
+<p>然后更新这些变化。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">&gt; supervisorctl update</span><br></pre></td></tr></table></figure>
+<p>如果不出意外的话能应该成功看到结果了。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt; tail /home/<span class="built_in">test</span>/long.out.log</span><br><span class="line">Tue Apr 19 15:30:09 CST 2016</span><br><span class="line">Tue Apr 19 15:30:10 CST 2016</span><br><span class="line">Tue Apr 19 15:30:11 CST 2016</span><br><span class="line">Tue Apr 19 15:30:12 CST 2016</span><br><span class="line">Tue Apr 19 15:30:13 CST 2016</span><br><span class="line">Tue Apr 19 15:30:14 CST 2016</span><br><span class="line">Tue Apr 19 15:30:15 CST 2016</span><br><span class="line">Tue Apr 19 15:30:16 CST 2016</span><br><span class="line">Tue Apr 19 15:30:17 CST 2016</span><br><span class="line">Tue Apr 19 15:30:18 CST 2016</span><br></pre></td></tr></table></figure>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">&gt; tail /home/<span class="built_in">test</span>/long.err.log</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br><span class="line">error!</span><br></pre></td></tr></table></figure>
+<h3 id="几个常见的命令"><a href="#几个常见的命令" class="headerlink" title="几个常见的命令"></a>几个常见的命令</h3><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">supervisorctl <span class="built_in">help</span> <span class="comment"># 帮助文档，输出所有命令列表；也可指定命令，查看具体帮助文档，如：supervisorctl help reread。</span></span><br><span class="line">supervisorctl reread <span class="comment"># 重新读入配置，查看是否有变化。</span></span><br><span class="line">supervisorctl update <span class="comment"># 更新配置，根据新的配置启动新的程序或对已有进程进行其他操作。</span></span><br><span class="line">supervisorctl reload <span class="comment"># 重启Supervisor。</span></span><br><span class="line">supervisorctl start PROGRAM_NAME <span class="comment"># 启动名为PROGRAM_NAME的程序。</span></span><br><span class="line">supervisorctl stop PROGRAM_NAME <span class="comment"># 关闭名为PROGRAM_NAME的程序。</span></span><br><span class="line">supervisorctl status <span class="comment"># 查看所有程序状态列表。</span></span><br><span class="line">supervisorctl <span class="comment"># 进入Supervisor控制台，在控制台下上述命令同样使用，控制台下需要把前面的supervisorctl删掉，直接输入reread，update……退出时输入quit。</span></span><br></pre></td></tr></table></figure>
+<h3 id="一点使用心得"><a href="#一点使用心得" class="headerlink" title="一点使用心得"></a>一点使用心得</h3><p>Supervisor的日志文件路径在/var/log/supervisor/路径下。</p>
+<p>Supervisor是一个C/S结构的程序，也就是说可以通过远程直接控制服务器上又Supervisor管理的程序，笔者对Supervisor这方面并不了解，不过出于安全考虑，笔者习惯不使用Supervisor的远程管理功能，通过SSH连接服务器后再对Supervisor管理的程序进行操作。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://supervisord.org/" target="_blank" rel="noopener">Supervisor: A Process Control System</a></li>
+<li><a href="https://www.digitalocean.com/community/tutorials/how-to-install-and-manage-supervisor-on-ubuntu-and-debian-vps" target="_blank" rel="noopener">How To Install and Manage Supervisor on Ubuntu and Debian VPS</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/其他/" rel="tag"># 其他</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/04/17/javascript/01_js_event_delegation/" rel="next" title="JavaScript事件委托">
+                <i class="fa fa-chevron-left"></i> JavaScript事件委托
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/04/20/else/05_samba/" rel="prev" title="架设Samba服务器">
+                架设Samba服务器 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Ubuntu下安装Supervisor"><span class="nav-number">2.</span> <span class="nav-text">Ubuntu下安装Supervisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一个简单的Shell"><span class="nav-number">3.</span> <span class="nav-text">一个简单的Shell</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Supervisor配置"><span class="nav-number">4.</span> <span class="nav-text">Supervisor配置</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#启动Supervisor"><span class="nav-number">5.</span> <span class="nav-text">启动Supervisor</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#几个常见的命令"><span class="nav-number">6.</span> <span class="nav-text">几个常见的命令</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一点使用心得"><span class="nav-number">7.</span> <span class="nav-text">一点使用心得</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">8.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

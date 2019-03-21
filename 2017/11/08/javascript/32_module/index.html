@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="CommonJS是JavaScript模块化的主流规范之一，NodeJS中的模块就是采用的该规范。为了更好的理解CommonJS，我们可以在浏览器端实现一个简单的符合其规范的小工具。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CommonJS模块化浏览器端实践">
+<meta property="og:url" content="http://yoursite.com/2017/11/08/javascript/32_module/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="CommonJS是JavaScript模块化的主流规范之一，NodeJS中的模块就是采用的该规范。为了更好的理解CommonJS，我们可以在浏览器端实现一个简单的符合其规范的小工具。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.360Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CommonJS模块化浏览器端实践">
+<meta name="twitter:description" content="CommonJS是JavaScript模块化的主流规范之一，NodeJS中的模块就是采用的该规范。为了更好的理解CommonJS，我们可以在浏览器端实现一个简单的符合其规范的小工具。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/11/08/javascript/32_module/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>CommonJS模块化浏览器端实践 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/11/08/javascript/32_module/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">CommonJS模块化浏览器端实践
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-11-08 23:03:00" itemprop="dateCreated datePublished" datetime="2017-11-08T23:03:00+08:00">2017-11-08</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">CommonJS是JavaScript模块化的主流规范之一，NodeJS中的模块就是采用的该规范。为了更好的理解CommonJS，我们可以在浏览器端实现一个简单的符合其规范的小工具。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>CommonJS是JavaScript模块化的主流规范之一，NodeJS中的模块就是采用的该规范。为了更好的理解CommonJS，我们可以在浏览器端实现一个简单的符合其规范的小工具。</p>
+<h3 id="JS模块"><a href="#JS模块" class="headerlink" title="JS模块"></a>JS模块</h3><h4 id="CommonJS规范简介"><a href="#CommonJS规范简介" class="headerlink" title="CommonJS规范简介"></a>CommonJS规范简介</h4><p>在CommonJS中，每一个文件就是一个模块，在模块中的变量，函数，类等都是私有的，除了指定方式以外，不能在其他模块中被访问。</p>
+<p>每个模块中都有几个重要的模块变量，分别是module，exports和require。</p>
+<ol>
+<li>module对象代表当前模块，里面存储了当前模块的相关信息；</li>
+<li>exports是module的属性之一，也是模块变量，它用于在模块中导出内容（对象，函数，类等），它作为对外输出的接口，如果有其他模块引如了当前模块，exports中的内容就能被获取；</li>
+<li>require用于引入其他模块的内容，通过require可以引入其他模块导出的内容。</li>
+</ol>
+<p>以上就是CommonJS中最重要的几个模块变量，除此之外还有一些其他变量，但是最常用的就是这些，实际上，一个模块系统实现这部分的规范就能满足绝大多数应用场景的要求了。</p>
+<h4 id="其他模块规范"><a href="#其他模块规范" class="headerlink" title="其他模块规范"></a>其他模块规范</h4><p>除了CommonJS之外，还有一些其他的模块规范，包括AMD规范（常用于浏览器端异步加载），CMD规范（SeaJS遵循的规范），感兴趣的同学可以自己去了解这些规范。</p>
+<h3 id="实现和简单应用"><a href="#实现和简单应用" class="headerlink" title="实现和简单应用"></a>实现和简单应用</h3><p>简单了解了CommonJS规范之后，我们可以考虑实现一个在浏览器端的简单的雏形模块库。</p>
+<p>对于模块而言，最终的要是能将各个模块分离开来，我们很容易就能想到，JavaScript的函数作用域可以屏蔽相互间的访问，为了实现相关的效果，我们必须用上函数作用域。下面整个CommonJS部分规范的基本模块库的实现。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> <span class="built_in">require</span> = <span class="function">(<span class="params">path</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> <span class="built_in">module</span> = <span class="built_in">require</span>.module[path];</span><br><span class="line">  <span class="keyword">if</span> (!<span class="built_in">module</span>) &#123;</span><br><span class="line">    <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">`Module <span class="subst">$&#123;path&#125;</span> not registered.`</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">if</span> (<span class="built_in">module</span>.exports) &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="built_in">module</span>.exports;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">module</span>.exports = &#123;&#125;;</span><br><span class="line">  <span class="built_in">module</span>.func.call(<span class="literal">null</span>, <span class="built_in">module</span>, <span class="built_in">module</span>.exports, <span class="built_in">require</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">module</span>.exports;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">require</span>.module = &#123;&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">require</span>.register = <span class="function">(<span class="params">path, func</span>) =&gt;</span> &#123;</span><br><span class="line">  <span class="built_in">require</span>.module[path] = &#123;</span><br><span class="line">    func,</span><br><span class="line">    exports: <span class="literal">null</span></span><br><span class="line">  &#125;;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="built_in">require</span>.init = <span class="function"><span class="params">fn</span> =&gt;</span> &#123;</span><br><span class="line">  fn.call(<span class="literal">null</span>, <span class="built_in">require</span>);</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>require函数，接收一个参数，用于在模块中引入其他模块，如果被引入的模块不存在， 则抛出错误，如果模块已经被调用过一次，则直接返回缓存的模块返回结果，否则，执行模块内容。</p>
+<p>require.module用于缓存每一个模块的相关信息，包括模块的导出对象，模块的导入路径等。</p>
+<p>require.register用于注册模块，所有的模块都要通过这个函数进行注册。</p>
+<p>require.init用于指定程序执行的入口。</p>
+<p>可以看到整个实现所需的源码并不多，使用起来也非常的简单。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 注册foo模块</span></span><br><span class="line"><span class="built_in">require</span>.register(<span class="string">'foo'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">module, exports, require</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> foo = <span class="function"><span class="keyword">function</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'hello, this message is from FOO.'</span>);</span><br><span class="line">  &#125;;</span><br><span class="line">  <span class="built_in">module</span>.exports = foo;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 注册bar模块</span></span><br><span class="line"><span class="built_in">require</span>.register(<span class="string">'bar'</span>, <span class="function"><span class="keyword">function</span>(<span class="params">module. exports, require</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> foo = <span class="built_in">require</span>(<span class="string">'foo'</span>);</span><br><span class="line">  <span class="built_in">module</span>.exports = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'hello, this message if from BAR.'</span>);</span><br><span class="line">    foo.call();</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;);</span><br><span class="line"><span class="comment">// 程序执行的入口模块</span></span><br><span class="line"><span class="built_in">require</span>.init(<span class="function"><span class="keyword">function</span>(<span class="params">require</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> foo = <span class="built_in">require</span>(<span class="string">'foo'</span>);</span><br><span class="line">  <span class="keyword">const</span> bar = <span class="built_in">require</span>(<span class="string">'bar'</span>);</span><br><span class="line">  foo.call();</span><br><span class="line">  bar.call();</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>当需要注册新的模块时，使用require.register方法。</p>
+<p>综合require的源码可知，require.register接收两个参数，第一个是path，这里的path用于模拟真正模块中的文件路径，为了简便起见，源码只处理了简单的字符串，也就是说’foo’和’/foo’和’./foo’是不同的三个模块，因为我们并没有对path进行解析。第二个参数是模块所在的函数，该函数接受三个参数，分别是我们上文中介绍的三个重要的模块变量（module，exports和require）。</p>
+<p>模块内的用法就是正常的CommonJS的用法，习惯NodeJS的同学一定不会陌生。</p>
+<p>最后，require.init接收一个参数，该参数是一个函数，该函数和其他模块函数有些不一样，只有一个require，可以引入不可导出（这里的require.init并非标准，只是为了方便而实现的）。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>CommonJS基本规范实现的就是这样，可以看到并不复杂，但是手动实现一遍这样的一个小库有助于理解JS模块化的原理，之前我还有一篇描述Webpack生成的bundle文件的原理的文章，可以发现其实bundle文件的原理和本文的require其实也很类似。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://github.com/ruanyf/tiny-browser-require" target="_blank" rel="noopener">tiny-browser-require - 阮一峰 - GitHub</a></li>
+<li><a href="https://oychao.github.io/2017/10/14/javascript/30_webpack_bundle_file/" target="_blank" rel="noopener">webpack输出文件浅析 - 传不习乎</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/03/react/19_redux_thunk/" rel="next" title="redux-thunk源码解析">
+                <i class="fa fa-chevron-left"></i> redux-thunk源码解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/18/javascript/33_object_define_property/" rel="prev" title="Object.defineProperty和数据双向绑定">
+                Object.defineProperty和数据双向绑定 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#JS模块"><span class="nav-number">2.</span> <span class="nav-text">JS模块</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#CommonJS规范简介"><span class="nav-number">2.1.</span> <span class="nav-text">CommonJS规范简介</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#其他模块规范"><span class="nav-number">2.2.</span> <span class="nav-text">其他模块规范</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#实现和简单应用"><span class="nav-number">3.</span> <span class="nav-text">实现和简单应用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

@@ -1,0 +1,843 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Redux是一款用于管理前端状态的库，但是集成一些附属库有助于大大提高Redux的开发效率。本文所有的库都是在React背景下使用；本文是开发笔记，非教程，适合有一定经验的开发者阅读。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="我的Redux生态系统笔记">
+<meta property="og:url" content="http://yoursite.com/2017/02/21/react/09_my_redux_ecosystem/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="Redux是一款用于管理前端状态的库，但是集成一些附属库有助于大大提高Redux的开发效率。本文所有的库都是在React背景下使用；本文是开发笔记，非教程，适合有一定经验的开发者阅读。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.371Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="我的Redux生态系统笔记">
+<meta name="twitter:description" content="Redux是一款用于管理前端状态的库，但是集成一些附属库有助于大大提高Redux的开发效率。本文所有的库都是在React背景下使用；本文是开发笔记，非教程，适合有一定经验的开发者阅读。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/02/21/react/09_my_redux_ecosystem/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>我的Redux生态系统笔记 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/02/21/react/09_my_redux_ecosystem/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">我的Redux生态系统笔记
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-02-21 23:36:00" itemprop="dateCreated datePublished" datetime="2017-02-21T23:36:00+08:00">2017-02-21</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">Redux是一款用于管理前端状态的库，但是集成一些附属库有助于大大提高Redux的开发效率。本文所有的库都是在React背景下使用；本文是开发笔记，非教程，适合有一定经验的开发者阅读。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Redux是一款用于管理前端状态的库，但是集成一些附属库有助于大大提高Redux的开发效率。本文所有的库都是在React背景下使用；<strong>本文是开发笔记，非教程，适合有一定经验的开发者阅读。</strong></p>
+<h4 id="为什么要用Redux"><a href="#为什么要用Redux" class="headerlink" title="为什么要用Redux"></a>为什么要用Redux</h4><p><a href="http://redux.js.org/docs/introduction/Motivation.html" target="_blank" rel="noopener">官方文档</a>讲了很多，传统的前端开发有很多缺点：</p>
+<ol>
+<li>随着现代前端应用变得越来越庞大，需要管理的状态越来越多；</li>
+<li>模型更新视图，视图更新模型，前端状态失控；</li>
+<li>需求经常变动，且难以维护变化和异步性（mutation and asynchronicity）。</li>
+</ol>
+<p>一句话：<strong>使用Redux是为了更好地管理状态。</strong></p>
+<h4 id="Redux三大原则"><a href="#Redux三大原则" class="headerlink" title="Redux三大原则"></a>Redux三大原则</h4><ol>
+<li>单一数据源，一个前端应用只有一颗状态树；</li>
+<li>状态只读，状态不应该被手动改变；</li>
+<li>状态只能通过纯函数改变，纯函数只接收两个参数，前一刻的状态，以及一个动作；只有一个功能，计算下一刻的状态（必须返回一个深复制的状态对象）。</li>
+</ol>
+<h4 id="Redux生态系统"><a href="#Redux生态系统" class="headerlink" title="Redux生态系统"></a>Redux生态系统</h4><p><a href="http://redux.js.org/docs/introduction/Ecosystem.html" target="_blank" rel="noopener">Redux生态系统</a>越来越繁荣，为了方便Redux的开发，有很多实用性很强的库涌现了出来。</p>
+<h3 id="Redux中的标准动作"><a href="#Redux中的标准动作" class="headerlink" title="Redux中的标准动作"></a>Redux中的标准动作</h3><h4 id="Flux-Standard-Action"><a href="#Flux-Standard-Action" class="headerlink" title="Flux Standard Action"></a>Flux Standard Action</h4><p>Redux的思想源于<a href="https://facebook.github.io/flux/" target="_blank" rel="noopener">Flux</a>，Flux对于一个标准的动作是有定义的，一个<strong>FSA（Flux Standard Action）</strong>必须符合下面的条件。</p>
+<p>一个FSA必须：</p>
+<ul>
+<li>是一个JSON对象；</li>
+<li>有type属性。</li>
+</ul>
+<p>一个FSA可能：</p>
+<ul>
+<li>有payload属性；</li>
+<li>有error属性；</li>
+<li>有meta属性。</li>
+</ul>
+<p>一个FSA必须不能</p>
+<ul>
+<li>含有除type，payload，error，meta以外的任何属性。</li>
+</ul>
+<p>注意FSA中，type用于描述类型，payload用于装载数据，error用于判别当前动作是否用于描述错误（如果是true则表示是，否则其他任何值都表示否），meta用于描述其他信息（很少用到）。</p>
+<h4 id="Redux-Actions"><a href="#Redux-Actions" class="headerlink" title="Redux-Actions"></a>Redux-Actions</h4><p>Redux-Actions就是一个用于为Redux提供FSA，并且负责提供构建处理FSA的reducer的三方库。</p>
+<p>使用Redux-Actions创建一个动作。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// data action types</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> ADD_USER = <span class="string">'ADD_USER'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// data actions</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> addUser = createAction(ADD_USER, user =&gt; user);</span><br></pre></td></tr></table></figure>
+<p>创建一个Reducer。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// user list state reducer</span></span><br><span class="line"><span class="keyword">const</span> list = handleActions(&#123;</span><br><span class="line">  [RECEIVE_USERS]: <span class="function">(<span class="params">state, action</span>) =&gt;</span> fromJS(action.payload),</span><br><span class="line">&#125;, List([]));</span><br></pre></td></tr></table></figure>
+<p>上面代码片段中，handleActions()函数接收两个参数，第一个是一个对象，键是动作，值是对应的纯函数；第二个值是初始状态。</p>
+<h3 id="Immutable对象"><a href="#Immutable对象" class="headerlink" title="Immutable对象"></a>Immutable对象</h3><p>注意上面的代码中的fromJS()和List([])。这两个函数是<a href="https://facebook.github.io/immutable-js/" target="_blank" rel="noopener">Immutable</a>中的API。</p>
+<p>Immutable是Facebook推出的一款解决常量和对象深复制问题的不可变集合对象的库，它的特点是所有Immutable对象都是不可变的，对Immutable对象进行的任何操作都不会在原有对象上进行改变，而是返回一个内存全新的对象。</p>
+<p>例如我们需要创建一个Redux的初始状态，我们可以使用Immutable的Map()来创建。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; <span class="built_in">Map</span> &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line"><span class="built_in">Map</span>(&#123;</span><br><span class="line">  count: <span class="number">0</span>,</span><br><span class="line">  curPage: <span class="number">1</span>,</span><br><span class="line">  perPage: <span class="number">10</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>或者当需要将一个复杂得JSON对象转换为Immutable对象时，可以使用Immutable的fromJS()方法来创建。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; fromJS &#125; <span class="keyword">from</span> <span class="string">'immutable'</span>;</span><br><span class="line"><span class="comment">//...</span></span><br><span class="line">fromJS(&#123;</span><br><span class="line">  count: <span class="number">0</span>,</span><br><span class="line">  curPage: <span class="number">1</span>,</span><br><span class="line">  perPage: <span class="number">10</span>,</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>当我们需要将Immutable对象转换为JSON对象时可以使用toJS()。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> obj = immutableObj.toJS();</span><br></pre></td></tr></table></figure>
+<p>修改对象使用set(k, v)方法，获取值使用get(k)，更多API，请查阅<a href="https://facebook.github.io/immutable-js/" target="_blank" rel="noopener">官网</a>。</p>
+<h3 id="Redux-Observable"><a href="#Redux-Observable" class="headerlink" title="Redux-Observable"></a>Redux-Observable</h3><p>Redux-Observable负责解决Redux中的异步动作问题，该库基于RxJS。推荐一个YouTube上的视频：<a href="https://www.youtube.com/watch?v=AslncyG8whg" target="_blank" rel="noopener">React + Redux + RxJS = Amazing!</a>，主讲者就是Redux-Observable的作者。</p>
+<h4 id="RxJS"><a href="#RxJS" class="headerlink" title="RxJS"></a>RxJS</h4><p>在使用Redux-Observable之前，需要对<a href="http://reactivex.io/rxjs/manual/overview.html" target="_blank" rel="noopener">RxJS</a>有一个基本的了解。RxJS是一个基于Observable的响应式编程库，用于使编写基于回掉函数的代码变得更容易。官网对于RxJS的一句话解释是：<strong>可以把RxJS当成处理事件的Lodash</strong>。</p>
+<p>来看官网的示例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">var</span> button = <span class="built_in">document</span>.querySelector(<span class="string">'button'</span>);</span><br><span class="line">Rx.Observable.fromEvent(button, <span class="string">'click'</span>)</span><br><span class="line">  .subscribe(<span class="function"><span class="params">()</span> =&gt;</span> <span class="built_in">console</span>.log(<span class="string">'Clicked!'</span>));</span><br></pre></td></tr></table></figure>
+<p>将按钮单击事件转换为一个Observable，并注册一个响应函数。</p>
+<h4 id="Redux-Observable处理AJAX"><a href="#Redux-Observable处理AJAX" class="headerlink" title="Redux-Observable处理AJAX"></a>Redux-Observable处理AJAX</h4><p>对于一次异步动作的处理流程，<a href="https://redux-observable.js.org/" target="_blank" rel="noopener">Redux-Observable</a>引入了一个Epic（笔者习惯译为“迁徙”，待讨论）的概念。</p>
+<p>一次迁徙就是一个动作的流程。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> <span class="string">'rxjs/Rx'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; Observable &#125; <span class="keyword">from</span> <span class="string">'rxjs/Observable'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; combineEpics &#125; <span class="keyword">from</span> <span class="string">'redux-observable'</span>;</span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> fetchingUserEpic = <span class="function"><span class="params">action$</span> =&gt;</span> (</span><br><span class="line">  action$.ofType(APP_FETCHING_USER)</span><br><span class="line">  .switchMap(<span class="function"><span class="params">action</span> =&gt;</span></span><br><span class="line">    Observable.ajax.get(<span class="string">'http://localhost/users'</span>)</span><br><span class="line">    .switchMap(<span class="function"><span class="params">payload</span> =&gt;</span></span><br><span class="line">      Observable.concat(</span><br><span class="line">        Observable.of(setCurPage(action.payload)),</span><br><span class="line">        Observable.of(receiveUsers(payload.response)),</span><br><span class="line">        Observable.of(setUsersCount(+httpHeaders(payload.xhr.getAllResponseHeaders())[<span class="string">'x-total-count'</span>])),</span><br><span class="line">        Observable.of(appFetchingUserFulfilled())</span><br><span class="line">      )</span><br><span class="line">    )</span><br><span class="line">    .catch(<span class="function"><span class="params">()</span> =&gt;</span> Observable.of(appFetchingUserFailed()))</span><br><span class="line">  )</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="comment">// export user epics</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> rootUserEpic = combineEpics(</span><br><span class="line">  fetchingUserEpic</span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+<p>上述代码定义了一个Epic，当触发了APP_FETCHING_USER事件时，发送AJAX请求，如果响应成功，则依次执行一系列后续动作，否则执行获取用户列表失败动作。</p>
+<p>然后需要将所有的Epic作为中间件交给Redux管理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> rootEpic = combineEpics(</span><br><span class="line">  rootUserEpic</span><br><span class="line">);</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> rootEpicMiddleware = createEpicMiddleware(rootEpic);</span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> store = createStore(app, applyMiddleware(rootEpicMiddleware));</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">default</span> store;</span><br></pre></td></tr></table></figure>
+<h3 id="Redux-Form"><a href="#Redux-Form" class="headerlink" title="Redux-Form"></a>Redux-Form</h3><h4 id="基本使用"><a href="#基本使用" class="headerlink" title="基本使用"></a>基本使用</h4><p>在实际过程中，一个应用会有很多状态需要处理，尤其是对于表单的状态，每次维护这些状态都需要写重复的代码。<a href="http://redux-form.com/6.5.0/docs/GettingStarted.md/" target="_blank" rel="noopener">Redux-Form</a>就是配合Redux解决表单状态管理的一个库。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// AddForm.jsx</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// ...</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">let</span> AddForm = <span class="function"><span class="params">props</span> =&gt;</span> &#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;</span><br><span class="line">    handleSubmit,</span><br><span class="line">  &#125; = props;</span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;form role=<span class="string">"form"</span> onSubmit=&#123;handleSubmit&#125;&gt;</span><br><span class="line">        &lt;Field name=<span class="string">"name"</span> type=<span class="string">"text"</span> label=<span class="string">"Name"</span> component=&#123;RenderField&#125; validate=&#123;[required]&#125; /&gt;</span><br><span class="line">        &lt;Field name=<span class="string">"email"</span> type=<span class="string">"text"</span> label=<span class="string">"Email"</span> component=&#123;RenderField&#125; validate=&#123;[required, isEmail]&#125; /&gt;</span><br><span class="line">        &lt;Field name=<span class="string">"age"</span> type=<span class="string">"text"</span> label=<span class="string">"Age"</span> component=&#123;RenderField&#125; validate=&#123;[required, isWorkingAge]&#125; /&gt;</span><br><span class="line">        &lt;button className=<span class="string">"btn btn-primary"</span> type=<span class="string">"submit"</span>&gt;Submit&lt;<span class="regexp">/button&gt;</span></span><br><span class="line"><span class="regexp">      &lt;/</span>form&gt;</span><br><span class="line">    &lt;<span class="regexp">/div&gt;</span></span><br><span class="line"><span class="regexp">  );</span></span><br><span class="line"><span class="regexp">&#125;;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">AddForm.propTypes = &#123;</span></span><br><span class="line"><span class="regexp">  handleSubmit: React.PropTypes.func.isRequired,</span></span><br><span class="line"><span class="regexp">&#125;;</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 设置form属性，即该form的名字。</span></span><br><span class="line"><span class="regexp">/</span><span class="regexp">/ 注意当需要渲染多个同类Redux-Form组件时，需要在父组件中设置form属性。</span></span><br><span class="line"><span class="regexp">AddForm = reduxForm(&#123;</span></span><br><span class="line"><span class="regexp">  form: 'userAddForm',</span></span><br><span class="line"><span class="regexp">&#125;)(AddForm);</span></span><br><span class="line"><span class="regexp"></span></span><br><span class="line"><span class="regexp">export default AddForm;</span></span><br></pre></td></tr></table></figure>
+<p>上述代码中的Field组件的component属性，实际上是我们自己写的自定义组件，该组件中有且仅有一个表单元素。</p>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- ... --&gt;</span></span><br><span class="line"><span class="tag">&lt;<span class="name">input</span> &#123;<span class="attr">...input</span>&#125; <span class="attr">placeholder</span>=<span class="string">&#123;label&#125;</span> <span class="attr">type</span>=<span class="string">&#123;type&#125;</span> /&gt;</span></span><br><span class="line"><span class="comment">&lt;!-- ... --&gt;</span></span><br></pre></td></tr></table></figure>
+<p>而validate属性中传入的数组所包含的对象都是函数类型，这些函数都接收一个参数作为待验证的值。</p>
+<h4 id="Validator"><a href="#Validator" class="headerlink" title="Validator"></a>Validator</h4><p><a href="https://www.npmjs.com/package/validator" target="_blank" rel="noopener">Validator</a>是一款功能齐全的用于验证的库，配合Redux-Form实现表单验证功能。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> required = <span class="function"><span class="params">value</span> =&gt;</span> value ? <span class="literal">undefined</span> : <span class="string">'Required'</span>;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> isEmail = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</span><br><span class="line">  value += <span class="string">''</span>;</span><br><span class="line">  <span class="keyword">return</span> validator.isEmail(value) ? <span class="literal">undefined</span> : <span class="string">'Invalid email'</span>;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">const</span> isWorkingAge = <span class="function"><span class="params">value</span> =&gt;</span> &#123;</span><br><span class="line">  value += <span class="string">''</span>;</span><br><span class="line">  <span class="keyword">return</span> validator.isInt(value, &#123;</span><br><span class="line">    min: <span class="number">18</span>,</span><br><span class="line">    max: <span class="number">60</span>,</span><br><span class="line">  &#125;) ? <span class="literal">undefined</span> : <span class="string">'Integer needed, betwwen 18 and 60'</span>;</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>这些就是AddForm.jsx中validate被赋值的数组中的元素。</p>
+<h3 id="React-Router-和-React-Router-Redux"><a href="#React-Router-和-React-Router-Redux" class="headerlink" title="React-Router 和 React-Router-Redux"></a>React-Router 和 React-Router-Redux</h3><p>使用React框架的单页应用很多都在使用<a href="https://reacttraining.com/react-router/" target="_blank" rel="noopener">React-Router</a>做前端路由，而配合<a href="https://github.com/reactjs/react-router-redux" target="_blank" rel="noopener">React-Router-Redux</a>可以实现对浏览器历史路径的状态管理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// ...</span></span><br><span class="line"><span class="keyword">import</span> &#123; syncHistoryWithStore &#125; <span class="keyword">from</span> <span class="string">'react-router-redux'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">const</span> Root = <span class="function">(<span class="params">&#123;store&#125;</span>) =&gt;</span> (</span><br><span class="line">  &lt;Provider store=&#123;store&#125;&gt;</span><br><span class="line">    &#123; <span class="comment">/* 告诉Router使用我们修改过得history */</span> &#125;</span><br><span class="line">    &lt;Router history=&#123;syncHistoryWithStore(browserHistory, store)&#125;&gt;</span><br><span class="line">      &lt;Redirect <span class="keyword">from</span>=<span class="string">"/"</span> to=<span class="string">"/home"</span> /&gt;</span><br><span class="line">      &lt;Route path=<span class="string">"/"</span> component=&#123;App&#125;&gt;</span><br><span class="line">        &lt;Route path=<span class="string">"/home"</span> component=&#123;Dashboard&#125;&gt;</span><br><span class="line">        &lt;<span class="regexp">/Route&gt;</span></span><br><span class="line"><span class="regexp">        &lt;Route path="/u</span>sers<span class="string">" component=&#123;UserModuleContainer&#125;&gt;</span></span><br><span class="line"><span class="string">        &lt;/Route&gt;</span></span><br><span class="line"><span class="string">      &lt;/Route&gt;</span></span><br><span class="line"><span class="string">    &lt;/Router&gt;</span></span><br><span class="line"><span class="string">  &lt;/Provider&gt;</span></span><br><span class="line"><span class="string">);</span></span><br></pre></td></tr></table></figure>
+<p>仅上面这样处理一下，单页应用的history状态也会被Redux管理起来。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://redux.js.org/docs/introduction/Motivation.html" target="_blank" rel="noopener">Motivation - Redux</a></li>
+<li><a href="http://redux.js.org/docs/introduction/ThreePrinciples.html" target="_blank" rel="noopener">Three Principles - Redux</a></li>
+<li><a href="http://redux.js.org/docs/introduction/Ecosystem.html" target="_blank" rel="noopener">Ecosystem - Redux</a></li>
+<li><a href="https://facebook.github.io/flux/" target="_blank" rel="noopener">Flux</a></li>
+<li><a href="https://github.com/acdlite/flux-standard-action" target="_blank" rel="noopener">Flux Standard Action - GitHub</a></li>
+<li><a href="https://facebook.github.io/immutable-js/" target="_blank" rel="noopener">Immutable - Facebook</a></li>
+<li><a href="https://www.youtube.com/watch?v=AslncyG8whg" target="_blank" rel="noopener">React + Redux + RxJS = Amazing! - Netflix</a></li>
+<li><a href="http://reactivex.io/rxjs/manual/overview.html" target="_blank" rel="noopener">Introduction - RxJS</a></li>
+<li><a href="https://redux-observable.js.org/" target="_blank" rel="noopener">Redux-Observable</a></li>
+<li><a href="http://redux-form.com/6.5.0/docs/GettingStarted.md/" target="_blank" rel="noopener">Getting Started with redux-form - Redux-Form</a></li>
+<li><a href="https://www.npmjs.com/package/validator" target="_blank" rel="noopener">Validator - NPM</a></li>
+<li><a href="https://reacttraining.com/react-router/" target="_blank" rel="noopener">React-Router</a></li>
+<li><a href="https://github.com/reactjs/react-router-redux" target="_blank" rel="noopener">React-Router-Redux - GitHub</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/07/else/12_jsfiddle_tag_in_hexo/" rel="next" title="Hexo嵌入JSFiddle标签无法在GitHub Page中正确显示">
+                <i class="fa fa-chevron-left"></i> Hexo嵌入JSFiddle标签无法在GitHub Page中正确显示
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/27/javascript/28_interview_questions/" rel="prev" title="一道关于闭包面试题">
+                一道关于闭包面试题 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#为什么要用Redux"><span class="nav-number">1.1.</span> <span class="nav-text">为什么要用Redux</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redux三大原则"><span class="nav-number">1.2.</span> <span class="nav-text">Redux三大原则</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redux生态系统"><span class="nav-number">1.3.</span> <span class="nav-text">Redux生态系统</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux中的标准动作"><span class="nav-number">2.</span> <span class="nav-text">Redux中的标准动作</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Flux-Standard-Action"><span class="nav-number">2.1.</span> <span class="nav-text">Flux Standard Action</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redux-Actions"><span class="nav-number">2.2.</span> <span class="nav-text">Redux-Actions</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Immutable对象"><span class="nav-number">3.</span> <span class="nav-text">Immutable对象</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux-Observable"><span class="nav-number">4.</span> <span class="nav-text">Redux-Observable</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#RxJS"><span class="nav-number">4.1.</span> <span class="nav-text">RxJS</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Redux-Observable处理AJAX"><span class="nav-number">4.2.</span> <span class="nav-text">Redux-Observable处理AJAX</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux-Form"><span class="nav-number">5.</span> <span class="nav-text">Redux-Form</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#基本使用"><span class="nav-number">5.1.</span> <span class="nav-text">基本使用</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Validator"><span class="nav-number">5.2.</span> <span class="nav-text">Validator</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#React-Router-和-React-Router-Redux"><span class="nav-number">6.</span> <span class="nav-text">React-Router 和 React-Router-Redux</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

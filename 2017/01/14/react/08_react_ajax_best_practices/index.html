@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="网上看到的一片比较好的关于React中的AJAX实践的总结，这里翻译过来，做个笔记。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="React的AJAX最佳实践">
+<meta property="og:url" content="http://yoursite.com/2017/01/14/react/08_react_ajax_best_practices/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="网上看到的一片比较好的关于React中的AJAX实践的总结，这里翻译过来，做个笔记。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_1_root_component.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_2_container_components.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_3_redux_async_actions.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_4_relay.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_1_root_component.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_2_container_components.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_3_redux_async_actions.png">
+<meta property="og:image" content="http://yoursite.com/images/React_AJAX_4_relay.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.374Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="React的AJAX最佳实践">
+<meta name="twitter:description" content="网上看到的一片比较好的关于React中的AJAX实践的总结，这里翻译过来，做个笔记。">
+<meta name="twitter:image" content="http://yoursite.com/images/React_AJAX_1_root_component.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2017/01/14/react/08_react_ajax_best_practices/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>React的AJAX最佳实践 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2017/01/14/react/08_react_ajax_best_practices/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">React的AJAX最佳实践
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2017-01-14 10:29:00" itemprop="dateCreated datePublished" datetime="2017-01-14T10:29:00+08:00">2017-01-14</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">网上看到的一片比较好的关于React中的AJAX实践的总结，这里翻译过来，做个笔记。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p><strong><a href="http://andrewhfarmer.com/react-ajax-best-practices/" target="_blank" rel="noopener">原文：React AJAX Best Practices - Andrew H Farmer</a></strong></p>
+<h3 id="引言"><a href="#引言" class="headerlink" title="引言"></a>引言</h3><p>当你开始问AJAX和React的时候，大神们告诉的你的第一件事是React是一个视图层的库而且React没有网络/AJAX的功能特性。</p>
+<p>了解这点虽然是应该的，但在你想要从服务器获取的数据放到React组件中的时候却并没有什么用。</p>
+<p>实际上，实现这个的方式有很多。你自己说不定就有好几种想法，但是如果你选择了一种错误的方法，你的代码可能会很混乱。</p>
+<p>所以你可能会想：哪种方式是『对的』或者『更优的』。</p>
+<blockquote>
+<p>从服务器获取数据到React组件中的最佳实践是什么？</p>
+</blockquote>
+<p>答案是…看具体情况。</p>
+<h3 id="四种方法"><a href="#四种方法" class="headerlink" title="四种方法"></a>四种方法</h3><p>我收集了四种不错的实现AJAX和React的方法。</p>
+<p>使用哪种方式取决于你的应用的大小和复杂度，以及你已经在使用的是哪些库和技术。</p>
+<table>
+<thead>
+<tr>
+<th>1.根组件</th>
+<th>2.容器组件</th>
+<th>3.Redux异步Action</th>
+<th>4.Relay</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><img src="/images/React_AJAX_1_root_component.png" alt></td>
+<td><img src="/images/React_AJAX_2_container_components.png" alt></td>
+<td><img src="/images/React_AJAX_3_redux_async_actions.png" alt></td>
+<td><img src="/images/React_AJAX_4_relay.png" alt></td>
+</tr>
+</tbody>
+</table>
+<h3 id="根组件"><a href="#根组件" class="headerlink" title="根组件"></a>根组件</h3><p>这种方式最简单所以很适合原型构建和小型应用。</p>
+<p>使用这种方法的时候，你需要创建一个根/父组件来管理所有AJAX请求。根组件在自己的状态中保存了所有AJAX响应数据，并且将状态（或者状态的一部分）作为属性传递到子组件中。</p>
+<p><img align="right" src="/images/React_AJAX_1_root_component.png" width="200"></p>
+<p>关于这种方式的例子可以查看<a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">React官方教程</a>。CommentBox组件用于发所有AJAX请求。</p>
+<blockquote>
+<p>译者注：作者写本文的时候React官方教程还是Thinking in React，现在官网已经更新了新的教程，新的教程中不含AJAX操作，详细请查阅文末的<a href="https://facebook.github.io/react/tutorial/tutorial.html" target="_blank" rel="noopener">参考3</a>。</p>
+</blockquote>
+<p>官方教程中我不喜欢的一个地方是他们使用了jQuery来发送AJAX请求。jQuery是一个拥有诸多功能特性的大型库，所以只用它做AJAX是毫无道理的。</p>
+<p>我推荐使用fetch()函数。它是一个简单的，标准的，JavaScript AJAX API。Chrome和Firefox已经支持这个函数，在node和其他浏览器中也可以通过polyfill实现。想要选择自己得AJAX库，或者想要了解fetch()的详情，请看我的文章<a href="http://andrewhfarmer.com/ajax-libraries/" target="_blank" rel="noopener">AJAX库的比较</a>。</p>
+<p>另一个坑：如果你有一个较深的组件树（子组件的子组件的子组件…），那么你将要把数据传递得很长很长，从根组件到更深的组件。</p>
+<blockquote>
+<p>什么时候使用根组件：</p>
+<ul>
+<li>你的组件树比较浅。</li>
+<li>你没有在用Redux或者flux。</li>
+</ul>
+</blockquote>
+<h3 id="容器组件"><a href="#容器组件" class="headerlink" title="容器组件"></a>容器组件</h3><p>一个容器组件用于为展现组件（presentational conponents）或者其他容器组件提供数据和行为。如果你还没听过这个词，我推荐Dan Abramov的<a href="https://medium.com/@dan_abramov/" target="_blank" rel="noopener">『展现和容器组件』</a>。</p>
+<p><img align="right" src="/images/React_AJAX_2_container_components.png" width="200"></p>
+<p>对于我们的目的来说，容器组件这种方式跟根组件方式一样，只是容器组件方式有多个组件和服务器进行交互。</p>
+<p>工作原理如下：对于每个需要服务器数据的展现组件，创建一个发送AJAX请求的容器组件以获取数据，并通过属性为子组件提供数据。</p>
+<p>举个实用的例子，假设你要用用户名和图片来展示一个用户的信息。</p>
+<p>首先创建一个接收name和profileImage属性的<code>UserProfile</code>的展示组件。该组件不应该有任何AJAX代码。</p>
+<p>然后创建一个接收userId属性的<code>UserProfileContainer</code>组件。它为特定的用户下载数据并通过属性传递给<code>UserProfile</code>。</p>
+<p>在容器组件中的AJAX请求可以通过简单的AJAX库发送。我推荐<a href="http://andrewhfarmer.com/ajax-libraries/" target="_blank" rel="noopener">fetch()</a>。</p>
+<blockquote>
+<p>什么时候使用容器组件做AJAX：</p>
+<ul>
+<li>你有一个很深的组件树。</li>
+<li>你的部分组件需要从服务器获取数据，但大多数组件都不需要。</li>
+<li>你在从多个API获取数据。</li>
+<li>你没有在用Redux/flux，或者你倾向于使用容器组件来做『异步动作』。</li>
+</ul>
+</blockquote>
+<h3 id="Redux异步Action"><a href="#Redux异步Action" class="headerlink" title="Redux异步Action"></a>Redux异步Action</h3><p><img align="right" src="/images/React_AJAX_3_redux_async_actions.png" width="200"></p>
+<p>Redux管理数据，而AJAX从服务器提供数据，所以由Redux代码应该管理你的网络请求是有道理的。</p>
+<p>如果你使用Redux，那别把AJAX放在你的React组件中，而应该放到你的<a href="http://redux.js.org/docs/advanced/" target="_blank" rel="noopener">异步Action</a>中。</p>
+<p>我推荐使用<a href="http://andrewhfarmer.com/ajax-libraries/" target="_blank" rel="noopener">fetch()</a>函数来处理实际网络请求，而正好，Redux官方文档中也是用的fetch()。官方文档中甚至用Redux、React和fetch()写了一个reddit示例API。</p>
+<p>如果你在用flux，那跟这种方式类似，在你的action中发送网络请求。</p>
+<blockquote>
+<p>什么是偶使用Redux异步Actions：</p>
+<ul>
+<li>如果你在使用Redux，这就是你在找的方法。</li>
+<li>如果你在使用flux，你的方式应该跟这个很类似。</li>
+</ul>
+</blockquote>
+<h3 id="Relay"><a href="#Relay" class="headerlink" title="Relay"></a>Relay</h3><p>如果使用<a href="http://facebook.github.io/relay/" target="_blank" rel="noopener">Relay</a>，就要用GraphQL声明React组件的数据需求，Relay会自动下载数据并填充到组件的属性中。</p>
+<p><img align="right" src="/images/React_AJAX_4_relay.png" width="200"></p>
+<p>Relay很适应大型应用来的场景，但是需要需要更多的准备成本。你需要：</p>
+<ul>
+<li>学习Relay和GraphQL。</li>
+<li>使用GrahpQL指定React组件的数据需求（而不是propTypes）。</li>
+<li>设置一个GraphQL服务器。</li>
+</ul>
+<p>Relay只负责和GraphQL服务器进行通信，所以它不会和任何三方API进行通信。</p>
+<p>目前Relay只能和单一GraphQL服务器通信，所以如果你在从多个数据源获取数据，这种方法就不适合。和多个数据源通信的特性应该会在后续版本中添加，相关情况在这个<a href="https://github.com/facebook/relay/issues/114" target="_blank" rel="noopener">GitHub Issue</a>中有讨论。</p>
+<p>如果你打算使用这种方式，<a href="https://facebook.github.io/relay/prototyping/playground.html#/" target="_blank" rel="noopener">Relay Playground</a>是一个用来搞清楚Relay是怎么工作的的一个好地方。</p>
+<blockquote>
+<p>什么时候使用Relay：</p>
+<ul>
+<li>构建一个大型应用，并且正在担忧的问题正好是Relay被设计出来解决的相关的问题。</li>
+<li>你还没有一个已经构建好的JSON API。</li>
+<li>你打算设置一个GraphQL服务器。</li>
+<li>你的应用只和单台服务器进行通信。</li>
+</ul>
+</blockquote>
+<h3 id="附赠：反模式（Anti-patterns）"><a href="#附赠：反模式（Anti-patterns）" class="headerlink" title="附赠：反模式（Anti-patterns）"></a>附赠：反模式（Anti-patterns）</h3><p>如果上述的所有方法都是符合需求的，那哪些不应该选择呢？我建议一般应该避免这两种方式。</p>
+<h4 id="反模式1：在展现组件中的AJAX请求"><a href="#反模式1：在展现组件中的AJAX请求" class="headerlink" title="反模式1：在展现组件中的AJAX请求"></a>反模式1：在展现组件中的AJAX请求</h4><p>不要在一个已经有其他功能的组件中实现AJAX逻辑，比如一个在做复杂接口的渲染组件。这会破坏<a href="https://en.wikipedia.org/wiki/Separation_of_concerns" target="_blank" rel="noopener">关注分离（Separation of concerns）</a>的设计原则。</p>
+<h4 id="反模式2：ReactDOM-render"><a href="#反模式2：ReactDOM-render" class="headerlink" title="反模式2：ReactDOM.render()"></a>反模式2：ReactDOM.render()</h4><p>你可能有在整个React逻辑外面写了AJAX逻辑并且在当获取了服务器的更新数据时调用<a href="https://facebook.github.io/react/docs/react-dom.html#render" target="_blank" rel="noopener">ReactDOM.render()</a>。</p>
+<p>这种方式可能没有问题。我不建议这么做是因为我认为根组件模式跟这种做法相似，并且更简洁。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>使用React不是Rails或者Angular，React构建的应用是多模块的（Modular），React只是其中的一个模块，AJAX库是另一个模块。</p>
+<p>你也许会需要了解一些其他模块，以及怎样把他们整合并适应在一起。</p>
+<p><em>做XXX的最好的库是什么？怎样整合YYY和React？</em><a href="http://andrewhfarmer.com/" target="_blank" rel="noopener">我的博客</a>会经常更新，并主要就是回答这类问题。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="http://andrewhfarmer.com/react-ajax-best-practices/" target="_blank" rel="noopener">React AJAX Best Practices - Andrew H Farmer</a></li>
+<li><a href="https://facebook.github.io/react/docs/thinking-in-react.html" target="_blank" rel="noopener">Thinking in React - React</a></li>
+<li><a href="https://facebook.github.io/react/tutorial/tutorial.html" target="_blank" rel="noopener">Tutorial: Intro To React - React</a></li>
+<li><a href="http://andrewhfarmer.com/ajax-libraries/" target="_blank" rel="noopener">AJAX/HTTP Library Comparison - Andrew H Farmer</a></li>
+<li><a href="https://medium.com/@dan_abramov/" target="_blank" rel="noopener">Presentational and Container Components - Dan Abramov</a></li>
+<li><a href="http://redux.js.org/docs/advanced/" target="_blank" rel="noopener">Async Actions - Redux Document</a></li>
+<li><a href="http://redux.js.org/docs/advanced/ExampleRedditAPI.htmlAsyncActions.htmlsmart-and-dumb-components-7ca2f9a7c7d0#.ojf4iy9x4" target="_blank" rel="noopener">Example: Reddit API - Redux Document</a></li>
+<li><a href="http://facebook.github.io/relay/" target="_blank" rel="noopener">Relay - Facebook</a></li>
+<li><a href="https://facebook.github.io/react/blog/2015/05/01/graphql-introduction.html#why-invent-something-new" target="_blank" rel="noopener">Why invent something new? - GraphQL Introduction - Facebook</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Separation_of_concerns" target="_blank" rel="noopener">Separation of concerns - Wikipedia</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/07/work/04_nodemon_issue/" rel="next" title="Nodemon自动重启后浏览器实时加载的两个问题">
+                <i class="fa fa-chevron-left"></i> Nodemon自动重启后浏览器实时加载的两个问题
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/26/javascript/27_currying/" rel="prev" title="JavaScript函数柯里化">
+                JavaScript函数柯里化 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#引言"><span class="nav-number">1.</span> <span class="nav-text">引言</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#四种方法"><span class="nav-number">2.</span> <span class="nav-text">四种方法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#根组件"><span class="nav-number">3.</span> <span class="nav-text">根组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#容器组件"><span class="nav-number">4.</span> <span class="nav-text">容器组件</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Redux异步Action"><span class="nav-number">5.</span> <span class="nav-text">Redux异步Action</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Relay"><span class="nav-number">6.</span> <span class="nav-text">Relay</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#附赠：反模式（Anti-patterns）"><span class="nav-number">7.</span> <span class="nav-text">附赠：反模式（Anti-patterns）</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#反模式1：在展现组件中的AJAX请求"><span class="nav-number">7.1.</span> <span class="nav-text">反模式1：在展现组件中的AJAX请求</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#反模式2：ReactDOM-render"><span class="nav-number">7.2.</span> <span class="nav-text">反模式2：ReactDOM.render()</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">9.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

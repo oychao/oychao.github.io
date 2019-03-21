@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="机器学习中，决策树（Decision Tree）是一个预测模型；他代表的是对象属性与对象值之间的一种映射关系。树中每个节点表示某个对象，而每个分叉路径则代表的某个可能的属性值，而每个叶结点则对应从根节点到该叶节点所经历的路径所表示的对象的值。决策树仅有单一输出，若欲有复数输出，可以建立独立的决策树以处理不同输出。本文主要讲解ID3算法构造决策树。">
+<meta name="keywords" content="Statistics">
+<meta property="og:type" content="article">
+<meta property="og:title" content="机器学习笔记5：决策树">
+<meta property="og:url" content="http://yoursite.com/2016/06/21/statistics/06_decision_tree/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="机器学习中，决策树（Decision Tree）是一个预测模型；他代表的是对象属性与对象值之间的一种映射关系。树中每个节点表示某个对象，而每个分叉路径则代表的某个可能的属性值，而每个叶结点则对应从根节点到该叶节点所经历的路径所表示的对象的值。决策树仅有单一输出，若欲有复数输出，可以建立独立的决策树以处理不同输出。本文主要讲解ID3算法构造决策树。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://upload.wikimedia.org/wikipedia/commons/4/46/ID3_algorithm_decision_tree.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.345Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="机器学习笔记5：决策树">
+<meta name="twitter:description" content="机器学习中，决策树（Decision Tree）是一个预测模型；他代表的是对象属性与对象值之间的一种映射关系。树中每个节点表示某个对象，而每个分叉路径则代表的某个可能的属性值，而每个叶结点则对应从根节点到该叶节点所经历的路径所表示的对象的值。决策树仅有单一输出，若欲有复数输出，可以建立独立的决策树以处理不同输出。本文主要讲解ID3算法构造决策树。">
+<meta name="twitter:image" content="https://upload.wikimedia.org/wikipedia/commons/4/46/ID3_algorithm_decision_tree.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2016/06/21/statistics/06_decision_tree/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>机器学习笔记5：决策树 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2016/06/21/statistics/06_decision_tree/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">机器学习笔记5：决策树
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2016-06-21 13:28:00" itemprop="dateCreated datePublished" datetime="2016-06-21T13:28:00+08:00">2016-06-21</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">机器学习中，决策树（Decision Tree）是一个预测模型；他代表的是对象属性与对象值之间的一种映射关系。树中每个节点表示某个对象，而每个分叉路径则代表的某个可能的属性值，而每个叶结点则对应从根节点到该叶节点所经历的路径所表示的对象的值。决策树仅有单一输出，若欲有复数输出，可以建立独立的决策树以处理不同输出。本文主要讲解ID3算法构造决策树。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<h3 id="决策树简介"><a href="#决策树简介" class="headerlink" title="决策树简介"></a>决策树简介</h3><p>机器学习中，决策树（Decision Tree）是一个预测模型；他代表的是对象属性与对象值之间的一种映射关系。树中每个节点表示某个对象，而每个分叉路径则代表的某个可能的属性值，而每个叶结点则对应从根节点到该叶节点所经历的路径所表示的对象的值。决策树仅有单一输出，若欲有复数输出，可以建立独立的决策树以处理不同输出。本文主要讲解ID3算法构造决策树。</p>
+<p><strong>学习决策树首先需要了解信息论中的熵（也称为香农熵，信息熵，Entropy）和信息增益（Information Gain）的概念。</strong></p>
+<p><strong>熵的定义是信息的期望值，想要计算熵，首先我们需要知道怎么计算信息。如果待分类的事务可能划分在多个事务中，则符号$x_i$的信息定义为。</strong></p>
+<p>$$<br>\large<br>l(x_i) = -\log_2^{p(x_i)}<br>$$</p>
+<p>由此有熵的计算公式。</p>
+<p>$$<br>\large<br>E = -\sum_{i=1}^n p(x_i)log_2^{p(x_i)}<br>$$</p>
+<p>信息增益的定义将一个数据集合的熵，减去原数据集减去某个指定特征属性的各个值之后的子数据集的熵的期望。数学公式如下。</p>
+<p>$$<br>\large<br>IG(fea) = ent(ds) - \sum_{i=0}^{len(fea)}[p(v_i) \times ent(sub(ds,fea,v_i))]<br>$$</p>
+<p>其中，<br>$IG(fea)$表示数据集中特征为$fea$的信息增益。<br>$ent(ds)$表示求数据集$ds$的熵。<br>$len(fea)$表示数据集中特征为$fea$的值的集合去重后的长度。<br>$v_i$表示特征$fea$的第$i$个取值。<br>$p(v_i)$表示$fea$取值为$v_i$概率。<br>$sub(ds,fea,v)$表示求数据集$ds$中的数据的键为$fea$且值为$v_i$时的子集，注意该子集不包括fea特征。</p>
+<p>从信息增益的定义我们可以知道，当数据集中的某一个特征属性的信息增益越大，表明该特征含有的信息量越大。</p>
+<p>下面是创建决策树的一般流程。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">if 数据集中不存在多个特征：</span><br><span class="line">    return 数据集</span><br><span class="line">else:</span><br><span class="line">    计算最佳划分数据集的最佳特征</span><br><span class="line">    按计算出的特征划分数据集</span><br><span class="line">    创建分支点</span><br><span class="line">    for 每个划分的数据子集:</span><br><span class="line">        递归调用本函数，参数为数据子集</span><br></pre></td></tr></table></figure>
+<p>构建决策树的过程的一个关键步骤就是划分数据，ID3算法采用信息增益划分数据（其他采用IG划分数据的算法还有C4.5，C5.0算法），其他算法还有采用<strong>基尼不纯度（Gini Impurity，用于分类回归树CART算法）等</strong>。</p>
+<p>构建好决策树之后，就是用其来对新数据进行分类。分类过程比较简单，本文的Python实现小节中的源码的classify(dt, labels, vec)函数用于对新数据进行分类，代码较少，读者可自行阅读。</p>
+<p>此外，构造决策树是很耗时的任务，然而用决策树进行分类却很快，因此，一般可以将决策树存储起来，以提升实际算法工作时的效率（Python中提供有pickle模块，用于存储结构化数据）。</p>
+<h3 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h3><p><img src="https://upload.wikimedia.org/wikipedia/commons/4/46/ID3_algorithm_decision_tree.png" alt></p>
+<p>上图显示了一个完整的构件好了的决策树。</p>
+<h3 id="Python实现"><a href="#Python实现" class="headerlink" title="Python实现"></a>Python实现</h3><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># -*- coding: utf-8 -*-</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="string">Decision Tree</span></span><br><span class="line"><span class="string">by Charles Ouyang</span></span><br><span class="line"><span class="string">2016.06.21</span></span><br><span class="line"><span class="string">"""</span></span><br><span class="line"><span class="keyword">import</span> math</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_data_set</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    create training data set and labels</span></span><br><span class="line"><span class="string">    :return: data set, labels</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="keyword">return</span> [[<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">1</span>, <span class="number">0</span>], [<span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>], [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], [<span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>], [<span class="number">2</span>, <span class="number">2</span>, <span class="number">2</span>], [<span class="number">2</span>, <span class="number">1</span>, <span class="number">1</span>]], [<span class="number">0</span>, <span class="number">1</span>]</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_entropy</span><span class="params">(data_set)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    calculate entropy for the data set</span></span><br><span class="line"><span class="string">    :param data_set:</span></span><br><span class="line"><span class="string">    :return: entropy</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    <span class="comment"># calculate probability for each category</span></span><br><span class="line">    total_count = len(data_set)</span><br><span class="line">    entry_dict = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> vec <span class="keyword">in</span> data_set:</span><br><span class="line">        <span class="keyword">if</span> vec[<span class="number">-1</span>] <span class="keyword">not</span> <span class="keyword">in</span> entry_dict:</span><br><span class="line">            entry_dict.setdefault(vec[<span class="number">-1</span>], <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            entry_dict[vec[<span class="number">-1</span>]] += <span class="number">1</span></span><br><span class="line">    <span class="comment"># calculate the entropy</span></span><br><span class="line">    entropy = <span class="number">.0</span></span><br><span class="line">    <span class="keyword">for</span> entry <span class="keyword">in</span> entry_dict:</span><br><span class="line">        probability = float(entry_dict[entry]) / total_count</span><br><span class="line">        entropy -= probability * math.log(probability, <span class="number">2</span>)</span><br><span class="line">    <span class="keyword">return</span> entropy</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">split_data_set</span><span class="params">(data_set, entry, value)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    get child data set while value of specific entry of origin data set is specific</span></span><br><span class="line"><span class="string">    :param data_set:</span></span><br><span class="line"><span class="string">    :param entry:</span></span><br><span class="line"><span class="string">    :param value:</span></span><br><span class="line"><span class="string">    :return: split data set</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    data_result = []</span><br><span class="line">    <span class="keyword">for</span> vec <span class="keyword">in</span> data_set:</span><br><span class="line">        <span class="keyword">if</span> vec[entry] == value:</span><br><span class="line">            data_result.append(vec[:entry] + vec[entry + <span class="number">1</span>:])</span><br><span class="line">    <span class="keyword">return</span> data_result</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_information_gain</span><span class="params">(data_set, entry)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    calculate information gain for data set and specific entry</span></span><br><span class="line"><span class="string">    :param data_set:</span></span><br><span class="line"><span class="string">    :param entry:</span></span><br><span class="line"><span class="string">    :return: information gain</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    total_count = len(data_set)</span><br><span class="line">    base_entropy = calc_entropy(data_set)</span><br><span class="line">    value_dict = &#123;&#125;</span><br><span class="line">    <span class="keyword">for</span> vec <span class="keyword">in</span> data_set:</span><br><span class="line">        <span class="keyword">if</span> vec[entry] <span class="keyword">not</span> <span class="keyword">in</span> value_dict:</span><br><span class="line">            value_dict.setdefault(vec[entry], <span class="number">1</span>)</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            value_dict[vec[entry]] += <span class="number">1</span></span><br><span class="line">    <span class="comment"># calculate entropy for entry</span></span><br><span class="line">    new_entropy = <span class="number">.0</span></span><br><span class="line">    <span class="keyword">for</span> value <span class="keyword">in</span> value_dict:</span><br><span class="line">        probability = float(value_dict[value]) / total_count</span><br><span class="line">        new_entropy += probability * calc_entropy(split_data_set(data_set, entry, value))</span><br><span class="line">    <span class="comment"># return information gain</span></span><br><span class="line">    <span class="keyword">return</span> base_entropy - new_entropy</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">calc_best_feature</span><span class="params">(data_set)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    calculate the best feature of which information gain is the highest</span></span><br><span class="line"><span class="string">    :param data_set:</span></span><br><span class="line"><span class="string">    :return:</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    best_feature = <span class="number">0</span></span><br><span class="line">    best_ig = calc_information_gain(data_set, best_feature)</span><br><span class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> range(<span class="number">1</span>, len(data_set[<span class="number">0</span>]) - <span class="number">1</span>):</span><br><span class="line">        cur_ig = calc_information_gain(data_set, i)</span><br><span class="line">        <span class="keyword">if</span> best_ig &lt; cur_ig:</span><br><span class="line">            best_ig = cur_ig</span><br><span class="line">            best_feature = i</span><br><span class="line">    <span class="keyword">return</span> best_feature</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">create_branch</span><span class="params">(data_set, labels)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    create a decision tree branch</span></span><br><span class="line"><span class="string">    :param data_set:</span></span><br><span class="line"><span class="string">    :param labels:</span></span><br><span class="line"><span class="string">    :return: a decision tree branch</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    categories = []</span><br><span class="line">    <span class="keyword">for</span> vec <span class="keyword">in</span> data_set:</span><br><span class="line">        categories.append(vec[<span class="number">-1</span>])</span><br><span class="line">    <span class="comment"># if there is no feature in data set then return the most common category</span></span><br><span class="line">    <span class="keyword">if</span> len(data_set[<span class="number">0</span>]) == <span class="number">1</span>:</span><br><span class="line">        <span class="keyword">return</span> max(set(categories), key=categories.count)</span><br><span class="line">    <span class="comment"># if there is only one category in data set then return it</span></span><br><span class="line">    <span class="keyword">if</span> len(categories) == categories.count(categories[<span class="number">0</span>]):</span><br><span class="line">        <span class="keyword">return</span> categories[<span class="number">0</span>]</span><br><span class="line">    <span class="comment"># calculate the best feature</span></span><br><span class="line">    best_feature = calc_best_feature(data_set)</span><br><span class="line">    branch = &#123;labels[best_feature]: &#123;&#125;&#125;</span><br><span class="line">    <span class="comment"># labels for next level, label of best feature removed</span></span><br><span class="line">    labels_next_level = labels[:best_feature] + labels[best_feature + <span class="number">1</span>:]</span><br><span class="line">    <span class="comment"># storing handled values</span></span><br><span class="line">    values = []</span><br><span class="line">    <span class="comment"># create children branches</span></span><br><span class="line">    <span class="keyword">for</span> vec <span class="keyword">in</span> data_set:</span><br><span class="line">        <span class="comment"># if value not handled</span></span><br><span class="line">        <span class="keyword">if</span> vec[best_feature] <span class="keyword">not</span> <span class="keyword">in</span> values:</span><br><span class="line">            values.append(vec[best_feature])</span><br><span class="line">            <span class="comment"># add branches to the tree</span></span><br><span class="line">            branch[labels[best_feature]][vec[best_feature]] = create_branch(</span><br><span class="line">                split_data_set(data_set, best_feature, vec[best_feature]), labels_next_level)</span><br><span class="line">    <span class="comment"># return the branch</span></span><br><span class="line">    <span class="keyword">return</span> branch</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">classify</span><span class="params">(dt, labels, vec)</span>:</span></span><br><span class="line">    <span class="string">"""</span></span><br><span class="line"><span class="string">    classify vector with decision tree</span></span><br><span class="line"><span class="string">    :param dt: decision tree</span></span><br><span class="line"><span class="string">    :param labels: feature labels</span></span><br><span class="line"><span class="string">    :param vec: vector</span></span><br><span class="line"><span class="string">    :return: category</span></span><br><span class="line"><span class="string">    """</span></span><br><span class="line">    key = dt.keys()[<span class="number">0</span>]</span><br><span class="line">    sub_tree = dt[key]</span><br><span class="line">    key_index = labels.index(key)</span><br><span class="line">    <span class="keyword">if</span> type(sub_tree[vec[key_index]]).__name__ != <span class="string">'dict'</span>:</span><br><span class="line">        <span class="keyword">return</span> sub_tree[vec[key_index]]</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> classify(sub_tree[vec[key_index]], labels, vec)</span><br><span class="line"><span class="keyword">if</span> __name__ == <span class="string">'__main__'</span>:</span><br><span class="line">    <span class="comment"># test code</span></span><br><span class="line">    _data_set, _labels = create_data_set()</span><br><span class="line">    _dt = create_branch(_data_set, _labels)</span><br><span class="line">    _category = classify(_dt, _labels, [<span class="number">0</span>, <span class="number">0</span>])</span><br><span class="line">    print(_category)</span><br></pre></td></tr></table></figure>
+<h3 id="决策树算法的优劣"><a href="#决策树算法的优劣" class="headerlink" title="决策树算法的优劣"></a>决策树算法的优劣</h3><p>优点：计算复杂度不高，输出结果易于理解，对中间缺失值不敏感，可以处理不相关特征数据。<br>缺点：可能会产生过度匹配问题。<br>使用数据范围：数值型和标称型。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://www.amazon.cn/%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98-%E5%93%88%E6%9E%97%E9%A1%BF/dp/B00D747PTK/ref=sr_1_1?ie=UTF8&amp;qid=1466429739&amp;sr=8-1&amp;keywords=%E6%9C%BA%E5%99%A8%E5%AD%A6%E4%B9%A0%E5%AE%9E%E6%88%98" target="_blank" rel="noopener">机器学习实战 - Peter Harrington - 亚马逊中国</a></li>
+<li><a href="https://en.wikipedia.org/wiki/ID3_algorithm" target="_blank" rel="noopener">ID3 algorithm - Wikipedia</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Decision_tree_learning" target="_blank" rel="noopener">Decision tree learning - Wikipedia</a></li>
+<li><a href="http://blog.csdn.net/v_july_v/article/details/7577684" target="_blank" rel="noopener">从决策树学习谈到贝叶斯分类算法、EM、HMM - 结构之法 算法之道 - 博客频道 - CSDN.NET</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Statistics/" rel="tag"># Statistics</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/06/20/statistics/05_knn/" rel="next" title="机器学习笔记4：K近邻算法">
+                <i class="fa fa-chevron-left"></i> 机器学习笔记4：K近邻算法
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/06/22/statistics/07_naive_bayes/" rel="prev" title="机器学习笔记6：朴素贝叶斯">
+                机器学习笔记6：朴素贝叶斯 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#决策树简介"><span class="nav-number">1.</span> <span class="nav-text">决策树简介</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#示例"><span class="nav-number">2.</span> <span class="nav-text">示例</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Python实现"><span class="nav-number">3.</span> <span class="nav-text">Python实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#决策树算法的优劣"><span class="nav-number">4.</span> <span class="nav-text">决策树算法的优劣</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

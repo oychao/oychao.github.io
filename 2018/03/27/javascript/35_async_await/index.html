@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="本文介绍一下async await以及co库的原理，算是一点心得，最近几个月搞了一些事，但是都没有写成博客，这段时间集中整理出来。">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="async await和co库深入浅出">
+<meta property="og:url" content="http://yoursite.com/2018/03/27/javascript/35_async_await/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="本文介绍一下async await以及co库的原理，算是一点心得，最近几个月搞了一些事，但是都没有写成博客，这段时间集中整理出来。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.359Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="async await和co库深入浅出">
+<meta name="twitter:description" content="本文介绍一下async await以及co库的原理，算是一点心得，最近几个月搞了一些事，但是都没有写成博客，这段时间集中整理出来。">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/03/27/javascript/35_async_await/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>async await和co库深入浅出 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/03/27/javascript/35_async_await/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">async await和co库深入浅出
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-03-27 20:10:00" itemprop="dateCreated datePublished" datetime="2018-03-27T20:10:00+08:00">2018-03-27</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">本文介绍一下async await以及co库的原理，算是一点心得，最近几个月搞了一些事，但是都没有写成博客，这段时间集中整理出来。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>本文介绍一下async await以及co库的原理，算是一点心得，最近几个月搞了一些事，但是都没有写成博客，这段时间集中整理出来。</p>
+<p>JavaScript中的async await本身也是一个语法糖，本身async await也是基于Promise实现的，使用其的最大好处是能让异步代码看上去像同步代码一样更容易理解。</p>
+<h3 id="async-await的基本用法"><a href="#async-await的基本用法" class="headerlink" title="async await的基本用法"></a>async await的基本用法</h3><p>回顾一下JavaScript中的异步代码怎么写，以jQuery的get方法为例。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$.<span class="keyword">get</span>(url, (data) =&gt; &#123;</span><br><span class="line">    <span class="built_in">console</span>.log(<span class="string">'hello world 1'</span>);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(<span class="string">'hello world 2'</span>);</span><br></pre></td></tr></table></figure>
+<p>好了，所有人都知道先输出<code>&#39;hello world 2&#39;</code>再输出<code>&#39;hello world 1&#39;</code>，但是回调函数嵌套太多时就会引起回调地狱，尤其是在NodeJS中。</p>
+<p>后来发展的过程中出现了很多优秀的解决回调地狱问题的库，其中Promise脱颖而出，最终成为标准，现代浏览器以及NodeJS早就开始支持Promise了，它的用法如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// do something asynchronous</span></span><br><span class="line">    <span class="comment">// resolve if everything goes well</span></span><br><span class="line">    <span class="comment">// reject if error</span></span><br><span class="line">&#125;).then(<span class="function"><span class="params">data</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// handle data</span></span><br><span class="line">&#125;).catch(<span class="function"><span class="params">err</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// handle error</span></span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>有关Promise的内容可以参考之前的<a href="https://oychao.github.io/2016/11/27/javascript/18_es6_promise/" target="_blank" rel="noopener">文章</a>，网上也有不少相关资料，它的出现可以说很方便地解决了回调嵌套过多的问题，但是这样的代码看上去还是令人不舒服（其实也还好），于是社区各路大神又开始献计献策，他们从别的语言中得到了灵感，于是async await被引入到了JavaScript中。</p>
+<p>相对Promise而言，async await的用法看上去就舒服很多了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> n1 = <span class="keyword">await</span> f1();</span><br><span class="line">    <span class="built_in">console</span>.log(n1);</span><br><span class="line">    <span class="keyword">const</span> n2 = <span class="keyword">await</span> f2();</span><br><span class="line">    <span class="built_in">console</span>.log(n2);</span><br><span class="line">    <span class="keyword">return</span> n1 + n2;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>这里可以看到相比一般函数而言，这里多了async和await两个关键字进行修饰，其中async用于修饰function关键字，表示这是一个异步函数，而await呢，实际上后面跟的是一个Promise（前面说过async await是基于Promise实现的）。</p>
+<p>具体是怎样的效果呢，<code>f1</code>和<code>f2</code>两个函数实际上返回的是一个Promise，假定<code>f1</code>需要0.5s才能resolve，<code>f2</code>需要0.7s才能resolve，则当<code>foo</code>执行到<code>f1</code>时，会等0.5s直到它resolve了值，0.5s之后输出结果，再执行下一句，<code>f2</code>在0.7s之后resolve了一个值，输出之后，再将相加的结果返回，也就是是说最终<code>foo</code>执行需要大约1.2s左右的时间。</p>
+<p>具体如下例所示。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f1</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> resolve(<span class="number">1</span>), <span class="number">5e2</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">f2</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">        setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> resolve(<span class="number">2</span>), <span class="number">7e2</span>);</span><br><span class="line">    &#125;);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">async</span> <span class="function"><span class="keyword">function</span> <span class="title">foo</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> n1 = <span class="keyword">await</span> f1();</span><br><span class="line">    <span class="built_in">console</span>.log(n1);</span><br><span class="line">    <span class="keyword">const</span> n2 = <span class="keyword">await</span> f2();</span><br><span class="line">    <span class="built_in">console</span>.log(n2);</span><br><span class="line">    <span class="keyword">return</span> n1 + n2;</span><br><span class="line">&#125;</span><br><span class="line">foo().then(<span class="function"><span class="params">result</span> =&gt;</span> <span class="built_in">console</span>.log(result));</span><br><span class="line"></span><br><span class="line"><span class="comment">// output:</span></span><br><span class="line"><span class="comment">// 1, after 0.5s</span></span><br><span class="line"><span class="comment">// 2, after another 0.7s</span></span><br><span class="line"><span class="comment">// 3, after 1.2s in total</span></span><br></pre></td></tr></table></figure>
+<p>注意上面代码的最后一行，<code>foo</code>执行后这里跟了一个<code>then</code>方法，聪明的读者一定想到了，async函数返回的结果实际上也是一个Promise。</p>
+<p>async await的基本用法就是这样，再来看一下<code>foo</code>函数，里面的异步是不是更容易理解呢。</p>
+<p>不过知其然还要知其所以然，我们一开始就说过，async await只是一个语法糖，只要使用generator和Promise的话，再加上一点点的黑魔法，我们能实现个八九不离十的效果出来。</p>
+<p>什么，generator你也忘得差不多了？</p>
+<h3 id="生成器函数复习"><a href="#生成器函数复习" class="headerlink" title="生成器函数复习"></a>生成器函数复习</h3><p>generator之前也写过一篇<a href="https://oychao.github.io/2016/11/16/javascript/11_es6_generator/" target="_blank" rel="noopener">文章</a>，虽然很浅显，但是足够我们用了，在我们继续async await之前，先来复习一下它吧。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span>* <span class="title">bar</span>(<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> n1 = <span class="keyword">yield</span> <span class="number">3</span>;</span><br><span class="line">    <span class="keyword">const</span> n2 = <span class="keyword">yield</span> <span class="number">4</span>;</span><br><span class="line">    <span class="keyword">return</span> n1 + n2;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">const</span> gen = bar();</span><br><span class="line"><span class="built_in">console</span>.log(gen.next()); <span class="comment">// &#123; value: 3, done: false &#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(gen.next(<span class="number">5</span>)); <span class="comment">// &#123; value: 4, done: false &#125;</span></span><br><span class="line"><span class="built_in">console</span>.log(gen.next(<span class="number">6</span>)); <span class="comment">// &#123; value: 11, done: true &#125;</span></span><br></pre></td></tr></table></figure>
+<p>以上就是一个生成器的基本用法，其中有三点需要注意的地方。</p>
+<ol>
+<li>定义生成器函数的时候function关键字后面要加星号，即<code>function* foo</code>的形式，<code>function *foo</code>的形式也可以，但是个人偏好第一种，因为这样直观地区别开了生成器函数和普通函数。</li>
+<li>关键字yield是用于向外“产出”值的地方，生成器函数被调用后返回的实际上是一个可遍历的对象，通过该对象的next方法可以得到yield产出的值。这里我们第一次调用next，产出的值是3，也就是<code>yield 3</code>对应的<code>{ value: 3, done: false}</code>，同理第二次调用产出的是4，最后一次呢？如果有return则是return的值，跟上例一样，如果没有呢？则为undefined，注意每次产出的结果是一个对象，该对象中有两个属性，分别是value和done，value的意思大家都知道了，done呢？其实就是表示当前生成器对象是否已经遍历完了，可以看到第三次调用时，done已经变成了true。</li>
+<li>最后一点是yield表达式的值的问题，注意<code>yield 3</code>并不表示<code>n1</code>等于3，yield表达式的值，是下一次next被调用时传入的值，所以可以看到第二次调用next时我们传入了5，所以<code>n1</code>实际上等于5，同理<code>n2</code>等于6，所以最终返回的结果是11，这点一定要注意。</li>
+</ol>
+<p>除此之外generator还经常和for of一起用，关于generator的更多知识大家可以去查找相关资料，这里就不多做介绍了，接下来我们开始来学习一个重要的相关库，一个新的黑魔法的大门就要向我们敞开了。</p>
+<h3 id="co库及其源码浅析"><a href="#co库及其源码浅析" class="headerlink" title="co库及其源码浅析"></a>co库及其源码浅析</h3><p><a href="https://github.com/tj/co" target="_blank" rel="noopener">co库</a>是一个利用generator和Promise让异步代码更直观的辅助库，它的使用形式如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> co <span class="keyword">from</span> <span class="string">'co'</span>;</span><br><span class="line"></span><br><span class="line">co(<span class="function"><span class="keyword">function</span>* (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">yield</span> <span class="built_in">Promise</span>.resolve(<span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;).then(<span class="function"><span class="keyword">function</span> (<span class="params">value</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(value);</span><br><span class="line">&#125;, <span class="function"><span class="keyword">function</span> (<span class="params">err</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.error(err.stack);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>这种形式的写法和上面使用async await的写法几乎是一样的，如果使用async await的话，代码如下。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">async</span> <span class="function"><span class="keyword">function</span> (<span class="params"></span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> result = <span class="keyword">await</span> <span class="built_in">Promise</span>.resolve(<span class="literal">true</span>);</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;)().then(<span class="function"><span class="keyword">function</span> (<span class="params">value</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.log(value);</span><br><span class="line">&#125;, <span class="function"><span class="keyword">function</span> (<span class="params">err</span>) </span>&#123;</span><br><span class="line">    <span class="built_in">console</span>.error(err.stack);</span><br><span class="line">&#125;);</span><br></pre></td></tr></table></figure>
+<p>co库虽然看上去很神奇，但是它的原理却并不复杂，它的工作机制主要是利用generator会转让控制权来实现的。</p>
+<p>可以看到co库接收了一个generator函数，实际上co本身也只是一个高阶函数，传入其中的generator函数的执行会由这个高阶函数来控制。</p>
+<p>它会一个阶段一个阶段地执行generator，每一个阶段执行完成之后，它又会通过Promise的then方法，将值传给generator中当前的yield表达式，这样控制权就又交回给了generator，如此往复执行，知道generator生成的值的done为true为止。</p>
+<p>以下就是一个简单的co库的实现。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> co = <span class="function"><span class="keyword">function</span> (<span class="params">gen</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">const</span> g = gen();</span><br><span class="line">    <span class="keyword">if</span> (<span class="built_in">Object</span>.prototype.toString.call(g) !== <span class="string">'[object Generator]'</span>) &#123;</span><br><span class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> <span class="built_in">Error</span>(<span class="string">'parameter must be a generator function'</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    (<span class="function"><span class="keyword">function</span> <span class="title">next</span>(<span class="params">val</span>) </span>&#123;</span><br><span class="line">        <span class="keyword">const</span> stage = g.next(val);</span><br><span class="line">        <span class="keyword">if</span> (stage.done) &#123;</span><br><span class="line">            <span class="keyword">return</span> stage.value;</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> (!!stage.value.then) &#123;</span><br><span class="line">            stage.value.then(next);</span><br><span class="line">        &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">            stage.value(next);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;)();</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>很明显，传进来的gen是一个generator函数，并且首先就被执行生成了一个generator对象，然后就是一个名为<code>next</code>的IIFE，IIFE首先会执行生成器对象的<code>next</code>方法，直到<code>stage.done</code>为<code>true</code>（生成器遍历结束）之前，如果他会去执行<code>next</code>返回回来的Promise的<code>then</code>方法，而传入<code>then</code>方法中的参数就是名为<code>next</code>的IIFE自身，这种巧妙的设计使得<code>stage.value</code>（某个yield的出来的Promise）在<code>resolve</code>之前，generator对象不会继续往后执行，直到<code>stage.value.then(next)</code>被执行之后，再次执行<code>g.next(val)</code>，这时才会将控制权交还给generator对象。</p>
+<p>如果读者还是觉得上面的解释比较绕口，可以将上述代码复制粘贴到控制台，然后再传一个generator函数给co，在程序执行之初打上断点，通过一步一步调试的方法了解整个执行过程，多调试几遍，再结合上面的文字，相信很容易就能理解co库的原理。</p>
+<h3 id="await单独使用的情况"><a href="#await单独使用的情况" class="headerlink" title="await单独使用的情况"></a>await单独使用的情况</h3><p>值得一提的是，async await并不是一直都是成双成对出现的，我们也可以只是用await来处理异步操作，比如如下代码。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> result = <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        resolve(<span class="string">'hello await'</span>);</span><br><span class="line">    &#125;, <span class="number">1e3</span>);</span><br><span class="line">&#125;);</span><br><span class="line"><span class="built_in">console</span>.log(result);</span><br></pre></td></tr></table></figure>
+<p>上述代码实际上会在1s之后输出<code>&#39;hello await&#39;</code>，但熟悉JavaScript执行原理的同学们肯定会想，按理说<code>result</code>应该是异步返回的，<code>console.log(result)</code>不应该输出<code>undefined</code>吗？</p>
+<p>实际上await单独使用也是一个语法糖，上面的代码会被JavaScript引擎预处理为一个IIFE，最终执行的代码如下所示。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">(<span class="keyword">async</span> () =&gt; &#123;<span class="keyword">void</span> (result = <span class="keyword">await</span> <span class="keyword">new</span> <span class="built_in">Promise</span>(<span class="function">(<span class="params">resolve, reject</span>) =&gt;</span> &#123;</span><br><span class="line">    setTimeout(<span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">        resolve(<span class="string">'hello await'</span>);</span><br><span class="line">    &#125;, <span class="number">1e3</span>);</span><br><span class="line">&#125;));</span><br><span class="line"><span class="built_in">console</span>.log(result);&#125;)()</span><br></pre></td></tr></table></figure>
+<p>可以看到我们单独使用await时，代码片段最终还是被包裹成了一个async await函数。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>async await关键字本质上和co的实现是类似的，它并没有引入更特殊的机制，它的出现只是为了让我们的异步代码看上去更易于理解，目前nodejs的web主流库之一koa2，就大量利用了async await的写法。</p>
+<p>本文主要介绍了一下async await的使用和co库的实现原理，希望能对看到这篇文章的朋友，尤其是初学者有所启发，零外如有谬误，欢迎指正。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://oychao.github.io/2016/11/27/javascript/18_es6_promise/" target="_blank" rel="noopener">ES6学习笔记9：生成器函数 - 传不习乎</a></li>
+<li><a href="https://oychao.github.io/2016/11/16/javascript/11_es6_generator/" target="_blank" rel="noopener">ES6学习笔记16：Promise - 传不习乎</a></li>
+<li><a href="https://github.com/tj/co" target="_blank" rel="noopener">tj/co - GitHub</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/12/17/else/14_gitlab/" rel="next" title="Git/GitHub 分支标准和习惯">
+                <i class="fa fa-chevron-left"></i> Git/GitHub 分支标准和习惯
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/04/02/javascript/36_web_worker_practice/" rel="prev" title="Web Worker的一些实践">
+                Web Worker的一些实践 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#async-await的基本用法"><span class="nav-number">2.</span> <span class="nav-text">async await的基本用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#生成器函数复习"><span class="nav-number">3.</span> <span class="nav-text">生成器函数复习</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#co库及其源码浅析"><span class="nav-number">4.</span> <span class="nav-text">co库及其源码浅析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#await单独使用的情况"><span class="nav-number">5.</span> <span class="nav-text">await单独使用的情况</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

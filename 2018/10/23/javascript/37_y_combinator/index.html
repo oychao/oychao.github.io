@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Y组合子是Lambda演算的一部分，什么你问我什么是Lambda演算，其实我也不知道，什么又是Y组合子，它在学术上的定义我也不知道，它在生产上实际生产过程中毫无用处，但是用代码将其推导出来却是一件很舒服的事。来考虑这样一个问题：实现一个匿名的递归累加函数……">
+<meta name="keywords" content="JavaScript">
+<meta property="og:type" content="article">
+<meta property="og:title" content="函数式编程中的Y组合子">
+<meta property="og:url" content="http://yoursite.com/2018/10/23/javascript/37_y_combinator/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="Y组合子是Lambda演算的一部分，什么你问我什么是Lambda演算，其实我也不知道，什么又是Y组合子，它在学术上的定义我也不知道，它在生产上实际生产过程中毫无用处，但是用代码将其推导出来却是一件很舒服的事。来考虑这样一个问题：实现一个匿名的递归累加函数……">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://abstrusegoose.com/strips/i_never_would_have_passed_kindergarten.png">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.362Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="函数式编程中的Y组合子">
+<meta name="twitter:description" content="Y组合子是Lambda演算的一部分，什么你问我什么是Lambda演算，其实我也不知道，什么又是Y组合子，它在学术上的定义我也不知道，它在生产上实际生产过程中毫无用处，但是用代码将其推导出来却是一件很舒服的事。来考虑这样一个问题：实现一个匿名的递归累加函数……">
+<meta name="twitter:image" content="http://abstrusegoose.com/strips/i_never_would_have_passed_kindergarten.png">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2018/10/23/javascript/37_y_combinator/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>函数式编程中的Y组合子 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2018/10/23/javascript/37_y_combinator/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">函数式编程中的Y组合子
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2018-10-23 22:13:00" itemprop="dateCreated datePublished" datetime="2018-10-23T22:13:00+08:00">2018-10-23</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">Y组合子是Lambda演算的一部分，什么你问我什么是Lambda演算，其实我也不知道，什么又是Y组合子，它在学术上的定义我也不知道，它在生产上实际生产过程中毫无用处，但是用代码将其推导出来却是一件很舒服的事。来考虑这样一个问题：实现一个匿名的递归累加函数……</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>Y组合子是Lambda演算的一部分，什么你问我什么是Lambda演算，其实我也不知道，什么又是Y组合子，它在学术上的定义我也不知道，它在生产上实际生产过程中毫无用处，但是用代码将其推导出来却是一件很舒服的事。</p>
+<p>来考虑这样一个问题：实现一个匿名的递归累加函数……</p>
+<h3 id="一类函数"><a href="#一类函数" class="headerlink" title="一类函数"></a>一类函数</h3><p>在解决上面的问题之前，我们先来了解两个概念，一类函数和函数的递归调用。</p>
+<p>一类函数即函数可以当做变量，参数使用，函数本身是一种对象。很多语言都有这种特性，比如我们熟悉的JavaScript，Python等等。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 面向过程编程</span></span><br><span class="line"><span class="comment">// 求数组的累加结果</span></span><br><span class="line"><span class="keyword">const</span> sum = <span class="function"><span class="keyword">function</span>(<span class="params">arr</span>) </span>&#123;</span><br><span class="line">    <span class="keyword">let</span> result = <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="keyword">let</span> i = <span class="number">0</span>; i &lt; arr.length; i++) &#123;</span><br><span class="line">        result += arr[i];</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> result;</span><br><span class="line">&#125;;</span><br><span class="line"><span class="built_in">console</span>.log(sum([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]));</span><br></pre></td></tr></table></figure>
+<p>由于有了一类函数的存在，我们可以使用函数式编程的方式处理需求。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 函数式编程</span></span><br><span class="line"><span class="comment">// 求数组的累加结果</span></span><br><span class="line"><span class="keyword">const</span> sum = <span class="function"><span class="params">arr</span> =&gt;</span> arr.reduce(<span class="function">(<span class="params">acc, n</span>) =&gt;</span> acc + n, <span class="number">0</span>);</span><br><span class="line"><span class="built_in">console</span>.log(sum([<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>]));</span><br></pre></td></tr></table></figure>
+<p>上述实现中我们给<code>reduce</code>的第一个参数是一个函数，<code>reduce</code>方法中将其应用到了数组的每个元素上。在JavaScript中，我们可以这样做，正是因为这里的函数是一类函数，而如果在C、C++或者Java（Lambda表达式也可以实现类似效果，但是Java中的函数毕竟不是一类函数）中我们却不能这样做。</p>
+<p>下面我们来看另一个概念，函数的递归调用。</p>
+<h3 id="函数的递归调用"><a href="#函数的递归调用" class="headerlink" title="函数的递归调用"></a>函数的递归调用</h3><p>同学们对于递归函数一定不陌生，我们实际学习工作过程中肯定也有这样的需求，比如一个斐波那契数列，比如树的深度优先遍历。</p>
+<p>我们先来看一个简单的累加函数，给定一个<code>n</code>，求<code>1</code>到<code>n</code>的累加结果（我们当然可以通过for或者while循环实现，但这里我们规定用函数递归调用实现）。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> f = <span class="function"><span class="params">n</span> =&gt;</span> n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + sum(n - <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>这里在<code>f</code>函数中调用了自身，并通过参数去控制结束递归调用的终止条件，这就一个基本的递归调用。</p>
+<h3 id="匿名函数的递归调用"><a href="#匿名函数的递归调用" class="headerlink" title="匿名函数的递归调用"></a>匿名函数的递归调用</h3><p>好了，介绍了两个非常基本的概念（有点无聊对不对，接下来就不无聊了，做好心理准备）。</p>
+<p>从上面的例子可以看出，递归函数的一个关键点就在于调用自身，而调用自身必须要知自身的函数名，这样才能通过作用域链访问到函数对自己的声明和定义。</p>
+<p>回到一开始提出的问题：如何实现一个匿名的递归累加函数？</p>
+<p>首先可以想到的是，函数体内我们没有办法把<code>sum</code>函数隐藏掉，但是函数外面也不能在用f函数去定义它，为了将函数名隐藏，我们可以考虑使用函数参数的形式。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">s =&gt; <span class="function"><span class="params">n</span> =&gt;</span> n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>);</span><br></pre></td></tr></table></figure>
+<p>上面是一个匿名函数，但是它没有被调用，而且这里我们已经假定了<code>s</code>是一个实现了递归的累加函数，却没有任何地方将其传进去。</p>
+<p>我们需要让<code>s</code>是一个已经实现了的递归累加函数，等等，我们不是已经有这样一个函数了吗？这个式子自己就有点像，我们把它当做参数，传入自己会怎么样呢？</p>
+<p>接下来我们做如下修改。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">s</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>))(<span class="function"><span class="params">s</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p>遗憾的是，上面的式子是错误的！注意我们在上面假定<code>s</code>是一个累加函数，但是修改后的<code>s</code>并非一个累加函数，<code>s</code>调用之后的返回值才是，怎么回去它的返回值呢？</p>
+<p>调用一下就行了。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">f</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + f(f)(n - <span class="number">1</span>))(<span class="function"><span class="params">f</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + f(f)(n - <span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p>为什么要传一个<code>f</code>给<code>f</code>呢？因为只有这样，在一层层的递归调用中，我们才能通过<code>f(f)</code>获得其返回结果。</p>
+<p>这里将改用<code>f</code>，是为了和<code>s</code>进行区分，<code>s</code>表示的是递归累加函数，而这里的<code>f</code>并不是，<code>f(f)</code>才是。</p>
+<p>好了，我们已经实现了一个完美的自调用的匿名函数，它可以实现一个累加的功能，不信你可以把下面的代码拿到浏览器控制台去运行一遍。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">f</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + f(f)(n - <span class="number">1</span>))(<span class="function"><span class="params">f</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + f(f)(n - <span class="number">1</span>))(<span class="number">5</span>);</span><br><span class="line"><span class="comment">// 15</span></span><br></pre></td></tr></table></figure>
+<p>是不是很神奇？</p>
+<p>为了让我们的函数更好看一点，我们可以进一步简化一下。</p>
+<p>注意这个表达式的左右两部分是完全一样的，也就是说它是一个函数自己在调用自己，自己是自己的唯一参数。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + f(f)(n - <span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p>这种形式还不够优雅，因为我们的累加逻辑还是耦合在这个自调用的函数之中，能不能把累加逻辑提取出来呢？</p>
+<p>继续变形。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> (<span class="function"><span class="params">s</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>))(f(f)));</span><br></pre></td></tr></table></figure>
+<p>事实上我们不希望<code>f(f)</code>立刻被执行，因为没有参数进来时，<code>f(f)</code>在匿名函数定义的时候就会立刻被执行，这样直接就会超出调用栈，这里做个小处理。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> (<span class="function"><span class="params">s</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>))(<span class="function">(<span class="params">...a</span>) =&gt;</span> f(f)(...a)));</span><br></pre></td></tr></table></figure>
+<p>注意上式中的<code>s =&gt; n =&gt; n &lt; 2 ? 1 : n + s(n - 1)</code>，这就是本小节中的第一个式子，它是不是一个优雅的匿名累加递归函数呢？</p>
+<p>我们将其再次提取出来。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">t</span> =&gt;</span> (<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> t(<span class="function">(<span class="params">...a</span>) =&gt;</span> f(f)(...a))))(<span class="function"><span class="params">s</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n + s(n - <span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p><code>t</code>表示我们要进行处理的匿名递归函数。</p>
+<p>现在已经得到了一个完美的式子，可以看出，上式的右侧是一个匿名累加函数，将其交给左侧的式子处理之后，它就成了一个可以递归调用自身的匿名累加函数。</p>
+<h3 id="Y组合子"><a href="#Y组合子" class="headerlink" title="Y组合子"></a>Y组合子</h3><p>现在我们来看下式子的左半边。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">t =&gt; <span class="function">(<span class="params">f =&gt; f(f</span>))(<span class="params">f =&gt; t((...a</span>) =&gt;</span> f(f)(...a)))</span><br></pre></td></tr></table></figure>
+<p>它将一个递归函数完美地转换成了匿名的形式，函数以参数的形式传入，完全不依赖变量声明。</p>
+<p>有的同学可能还没有意识到它的神奇。</p>
+<p>我们换个问题：实现一个匿名的递归累乘函数……</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">t</span> =&gt;</span> (<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> t(<span class="function">(<span class="params">...a</span>) =&gt;</span> f(f)(...a))))(<span class="function"><span class="params">mul</span> =&gt;</span> n =&gt; n &lt; <span class="number">2</span> ? <span class="number">1</span> : n * mul(n - <span class="number">1</span>));</span><br></pre></td></tr></table></figure>
+<p>再换个问题，实现一个匿名的递归斐波那契数列，对于传入的参数n，求斐波那契数列值中的第n个值。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">(<span class="function"><span class="params">t</span> =&gt;</span> (<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> t(<span class="function">(<span class="params">...a</span>) =&gt;</span> f(f)(...a))))(<span class="function"><span class="params">fib</span> =&gt;</span> n =&gt; n &lt; <span class="number">3</span> ? <span class="number">1</span> : fib(n - <span class="number">1</span>) + fib(n - <span class="number">2</span>));</span><br></pre></td></tr></table></figure>
+<p>看到这个式子的神奇之处了吗？它能将任何形式的函数递归调用转换为匿名函数递归调用。</p>
+<p>这个式子就被成为Y组合子，它的作用就是实现匿名函数的递归自调用，上一小节的推导过程就是Y组合子的推导过程（并不太严谨，但是大体过程有了）。</p>
+<p>事实上，函数式编程语言都能实现Y组合子。</p>
+<figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// JavaScript版本的Y组合子</span></span><br><span class="line"><span class="keyword">const</span> Y = <span class="function"><span class="params">t</span> =&gt;</span> (<span class="function"><span class="params">f</span> =&gt;</span> f(f))(<span class="function"><span class="params">f</span> =&gt;</span> t(<span class="function">(<span class="params">...a</span>) =&gt;</span> f(f)(...a)));</span><br></pre></td></tr></table></figure>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Python版本的Y组合子</span></span><br><span class="line">Y = <span class="keyword">lambda</span> t: (<span class="keyword">lambda</span> f: f(f))(<span class="keyword">lambda</span> f: t(<span class="keyword">lambda</span> *a: f(f)(*a)))</span><br></pre></td></tr></table></figure>
+<figure class="highlight julia"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># Julia版本的Y组合子</span></span><br><span class="line">Y = t -&gt; (f -&gt; f(f))(f -&gt; t((a...) -&gt; f(f)(a...)))</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>让我来猜一下同学们看这篇文章的感受吧。</p>
+<p><img src="http://abstrusegoose.com/strips/i_never_would_have_passed_kindergarten.png" alt="假如让写编程书的那群人来出数学书"></p>
+<p>我相信对于绝大多数人来说，一开始的时候Y组合子并不好理解，如果同学们感兴趣的话，这个过程建议手动去推一推，上面的每一个步骤都可以仔细去看一看，这样更容易加深每一步的理解。</p>
+<p>当然，不理解它也没有什么影响，Y组合子在实际生产过程中确实没什么用，毕竟什么情况下一个递归函数会非要匿名呢？至少我从来没遇到过。</p>
+<h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
+<li><a href="https://zhuanlan.zhihu.com/p/20616683" target="_blank" rel="noopener">重新发明 Y 组合子 JavaScript(ES6) 版 - 王霄池</a></li>
+<li><a href="https://www.zhihu.com/question/20115649/answer/14029761" target="_blank" rel="noopener">函数式编程的 Y Combinator 有哪些实用价值？ - 温悦</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/JavaScript/" rel="tag"># JavaScript</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2018/09/26/algorithm/02_edit_distance/" rel="next" title="最小编辑距离">
+                <i class="fa fa-chevron-left"></i> 最小编辑距离
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2018/11/26/algorithm/03_modified_preordered_tree_tranvesal/" rel="prev" title="关系型数据库中树结构的路径查询">
+                关系型数据库中树结构的路径查询 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#一类函数"><span class="nav-number">2.</span> <span class="nav-text">一类函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#函数的递归调用"><span class="nav-number">3.</span> <span class="nav-text">函数的递归调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#匿名函数的递归调用"><span class="nav-number">4.</span> <span class="nav-text">匿名函数的递归调用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Y组合子"><span class="nav-number">5.</span> <span class="nav-text">Y组合子</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">7.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>

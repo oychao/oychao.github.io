@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+
+<html class="theme-next gemini use-motion" lang>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2">
+
+<link rel="stylesheet" href="/css/main.css?v=7.0.1">
+
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png?v=7.0.1">
+
+
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png?v=7.0.1">
+
+
+  <link rel="mask-icon" href="/images/logo.svg?v=7.0.1" color="#222">
+
+
+
+
+
+
+
+<script id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Gemini',
+    version: '7.0.1',
+    sidebar: {"position":"left","display":"post","offset":12,"onmobile":false,"dimmer":false},
+    back2top: true,
+    back2top_sidebar: false,
+    fancybox: false,
+    fastclick: false,
+    lazyload: false,
+    tabs: true,
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+  
+
+
+
+
+  <meta name="description" content="Riact框架中并没有什么场景需要用到特别复杂的数据结构，但是为了具体的实现，有些地方还是想写篇笔记提一下。">
+<meta name="keywords" content="React">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Riact开发笔记之Diff数据结构篇">
+<meta property="og:url" content="http://yoursite.com/2019/03/01/react/21_riact_development_2/index.html">
+<meta property="og:site_name" content="传不习乎">
+<meta property="og:description" content="Riact框架中并没有什么场景需要用到特别复杂的数据结构，但是为了具体的实现，有些地方还是想写篇笔记提一下。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="http://yoursite.com/images/riact_tree_reconciliation.jpg">
+<meta property="og:image" content="http://yoursite.com/images/riact_basic_reordering.jpg">
+<meta property="og:updated_time" content="2019-03-21T17:27:34.370Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Riact开发笔记之Diff数据结构篇">
+<meta name="twitter:description" content="Riact框架中并没有什么场景需要用到特别复杂的数据结构，但是为了具体的实现，有些地方还是想写篇笔记提一下。">
+<meta name="twitter:image" content="http://yoursite.com/images/riact_tree_reconciliation.jpg">
+
+
+
+
+
+
+  <link rel="canonical" href="http://yoursite.com/2019/03/01/react/21_riact_development_2/">
+
+
+
+<script id="page.configurations">
+  CONFIG.page = {
+    sidebar: "",
+  };
+</script>
+
+  <title>Riact开发笔记之Diff数据结构篇 | 传不习乎</title>
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .motion-element,
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-title { opacity: initial; }
+
+  .use-motion .logo,
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="default">
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/" class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">传不习乎</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+    
+      
+        <p class="site-subtitle">Stay hungry, Stay foolish</p>
+      
+    
+    
+  </div>
+
+  <div class="site-nav-toggle">
+    <button aria-label="Toggle navigation bar">
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  
+    <ul id="menu" class="menu">
+      
+        
+        
+        
+          
+          <li class="menu-item menu-item-home">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/" rel="section"><i class="menu-item-icon fa fa-fw fa-home"></i> <br>Home</a>
+
+  </li>
+        
+        
+        
+          
+          <li class="menu-item menu-item-archives">
+
+    
+    
+    
+      
+    
+
+    
+
+    <a href="/archives/" rel="section"><i class="menu-item-icon fa fa-fw fa-archive"></i> <br>Archives</a>
+
+  </li>
+
+      
+      
+    </ul>
+  
+
+  
+
+  
+</nav>
+
+
+
+  
+
+
+
+</div>
+    </header>
+
+    
+
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+            
+
+          
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+  
+  
+  
+  <div class="post-block">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2019/03/01/react/21_riact_development_2/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="欧阳/Ouyang">
+      <meta itemprop="description" content>
+      <meta itemprop="image" content="/images/avatar.gif">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="传不习乎">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">Riact开发笔记之Diff数据结构篇
+
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+
+            
+            
+            
+
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">Posted on</span>
+              
+
+              
+                
+              
+
+              <time title="Created: 2019-03-01 00:25:00" itemprop="dateCreated datePublished" datetime="2019-03-01T00:25:00+08:00">2019-03-01</time>
+            
+
+            
+          </span>
+
+          
+
+          
+            
+            
+          
+
+          
+          
+
+          
+
+          
+
+          
+            <div class="post-description">Riact框架中并没有什么场景需要用到特别复杂的数据结构，但是为了具体的实现，有些地方还是想写篇笔记提一下。</div>
+          
+
+        </div>
+      </header>
+    
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <script type="text/x-mathjax-config">
+MathJax.Hub.Config({
+tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
+});
+</script>
+<script type="text/javascript" async src="https://cdn.bootcss.com/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+</script>
+
+<h2 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h2><p><a href="https://github.com/oychao/riact" target="_blank" rel="noopener">Riact框架</a>中并没有什么场景需要用到特别复杂的数据结构，但是为了具体的实现，有些地方还是想写篇笔记提一下。</p>
+<p>在<a href="http://localhost:4000/2019/02/15/react/20_develop_a_framework_1/" target="_blank" rel="noopener">上一篇</a>文章中我们介绍基于最长上升子序列（Longest Increasing Subsequence）的Diff算法实现，但是其中却隐去了很多细节，那就是对于移动，删除，插入等操作到底应该用怎样的形式存储。</p>
+<h2 id="Riact更新DOM的过程"><a href="#Riact更新DOM的过程" class="headerlink" title="Riact更新DOM的过程"></a>Riact更新DOM的过程</h2><p>为了搞清楚我们应该怎样结合算法来选择合适的存储方式，首先需要知道Riact更新DOM的过程。</p>
+<p>在<a href="https://oychao.github.io/2017/10/11/react/18_set_state/" target="_blank" rel="noopener">调用setState方法时到底发生了什么</a>一文中，我们介绍了React中为了优化DOM的更新而使用到的一种“事务”的设计，总结起来就是，<strong>处于事务中的操作都会把当前的需要更新的组件放到一个dirtyComponents的数组中，等到事务的结束阶段，在去进行批量更新视图的操作。</strong></p>
+<blockquote>
+<p>严格来说，这是React16之前的设计。</p>
+</blockquote>
+<p>Riact中同样采用了这种设计，所以当我们在Diff的过程中发现了差异，我们并不急于立刻去真地更新DOM，同样地，我们会将操作（更新属性，替换，移动，删除，插入节点等）先存储起来，等到真正更新DOM的时候，再将存储起来的操作执行。</p>
+<blockquote>
+<p>在React中，计算Diff的过程被称作Reconciliation，大多数中文文档将其翻译为“一致化”，“协调”，意思虽然是正确地，但对于刚开始接触这个概念的同学却难以理解，而reconcile本身有调节（矛盾）的意思，我们可以理解为新旧虚拟DOM是有矛盾（差异）的，这个过程就是使之一致（一致化）的过程。此外，真正更新DOM的过程被称作Commit阶段。</p>
+</blockquote>
+<p><img src="/images/riact_tree_reconciliation.jpg" alt="图1. Tree Reconciliation"></p>
+<p>从图1可以看出，当我们对两颗树进行对比之后，我们会将相关的操作都存储在旧的节点上，但此时我们不会直接更新它。</p>
+<p>比如图1中有一个li节点需要被更新属性，这些新的属性都会被存在该节点的一个字段上（Riact中是patch字段），同样的，即便是替换，也会将新的DOM存起来，等到commit阶段（事务结束的时候）再拿出来。</p>
+<h2 id="列表更新"><a href="#列表更新" class="headerlink" title="列表更新"></a>列表更新</h2><h3 id="操作的存储"><a href="#操作的存储" class="headerlink" title="操作的存储"></a>操作的存储</h3><p>对于两棵树的协调和提交，基本上目前流行的前端框架都是只对同级节点进行对比，这里理解起来更简单，从上图中就能看出来。</p>
+<p>关键的难点是列表的对比怎么处理，不难看出，在所有的操作中更新操作是容易处理的，只需要像上面一样，将待更新的操作存储到相同标记的旧节点上即可。</p>
+<p>而对于删除、插入和移动操作，我们不能将其放到自身节点上。</p>
+<ol>
+<li>首先对于插入操作，旧的列表中本来就没有对应的节点，将其存储到对应节点上也就无从说起；</li>
+<li>对于移动操作，如果被移动的节点如果需要更新的情况下，我们就需要在该节点的patch属性上同时存储移动操作和更新操作，这样并不直观；</li>
+<li>删除操作可以放到自身节点上，但为了便于处理，我们希望把删除和插入以及更新放到同一个层级上。</li>
+</ol>
+<p>对于列表的这三种操作，它们其实并非是对单个节点的操作，而是对整个列表的操作，所以实际上Riact会将这些操作存储到列表的父节点上。</p>
+<p><img src="/images/riact_basic_reordering.jpg" alt="图2. Basic Reordering"></p>
+<p>事实上，列表节点的父节点中存储的操作分别会放到3个数组中，这3个数组分别存储了删除，移动和插入操作。</p>
+<blockquote>
+<p>这里的列表都是带标记（key）的列表，Riact中对于在JSX中使用数组生成的节点并不支持不带key的情况。</p>
+</blockquote>
+<h3 id="顺序表的问题"><a href="#顺序表的问题" class="headerlink" title="顺序表的问题"></a>顺序表的问题</h3><p>到了一次事务结束的时候，我们开始更新真实的DOM，此时对于一个列表，增、删、移动的信息都已经能够拿到了。</p>
+<p>在JavaScript中对一个数组的插入，删除，和移动，估计大多数同学对此都不会陌生，我们有很多很方便的方法能帮助我们达到目的，比如<code>pop</code>，<code>push</code>，<code>shift</code>，<code>unshift</code>，<code>splice</code>等等方法可以帮助我们操作数组，我们还有<code>indexOf</code>等方法可以帮助我们定位元素的位置。</p>
+<p>但列表更新这个场景中这些方法真的可以被使用吗？在<a href="https://github.com/oychao/riact" target="_blank" rel="noopener">上一篇</a>笔记的最后我写了一个小小的悬念：<strong>显然我们并不能用这些方法。</strong></p>
+<p>为什么呢？在<a href="https://www.amazon.cn/dp/B0097CON2S/ref=sr_1_1?ie=UTF8&amp;qid=1551507179&amp;sr=8-1&amp;keywords=javascript%E8%AF%AD%E8%A8%80%E7%B2%BE%E7%B2%B9" target="_blank" rel="noopener">JavaScript语言精粹</a>一书中，Douglas提到<code>shift</code>和<code>unshift</code>的操作效率较低，实际上是从顺序表结构的存储来考虑的，由于一个数组在内存中是一串连续的地址，如果我们需要对数组的头部进行插入和删除，就意味着整个数组的后续元素都要被前移或者后移，仅仅是一次调用，其时间复杂度就已经达到了$\mathrm{O} \log n$，这是无法接受的，类似地，<code>splice</code>也是如此。</p>
+<p>也许有的同学会说，既然这种方法效率如此之差，我们为什么还要使用它呢？其实如果不是对要求特别高，我们可以随意地使用它们，毕竟有这样的场景存在，而大多数实际场景下，顺序表的长度也不会特别大。但如果是开发底层基础设施的时候，这些方法会被频繁大量的调用，我们就不得不注意它们带来的影响了。</p>
+<blockquote>
+<p>该用还是要用的，如果任何情况都纠结这些，那需求就做不完了。</p>
+</blockquote>
+<h3 id="链表的基本操作"><a href="#链表的基本操作" class="headerlink" title="链表的基本操作"></a>链表的基本操作</h3><p>需要对一个列表进行频繁的插入、删除和移动，我们很容易就想到<a href="https://en.wikipedia.org/wiki/Linked_list" target="_blank" rel="noopener">链表（Linked List）</a>，这是数据结构中最基础的东西，这里就不再赘述了。</p>
+<p>所以虚拟DOM的节点必须有一个nextSibling的属性，用来存储下一个兄弟节点。</p>
+<p>需要注意的是，链表的插入，删除，需要获取的都不是真正要被操作的那个元素，而是该元素的前一个元素。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">// 代码1. 链表的元素删除操作</span><br><span class="line">// a --&gt; b --&gt; c --&gt; d</span><br><span class="line"></span><br><span class="line">// 如果需要删除c，我们需要存储的就是b节点</span><br><span class="line">b.next = b.next.next</span><br><span class="line"></span><br><span class="line">// 如果需要删除a，则直接将HEAD设置为b</span><br><span class="line">HEAD.next = b</span><br></pre></td></tr></table></figure>
+<p>同样的插入也是一样。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">// 代码2. 链表的元素插入操作</span><br><span class="line">// a --&gt; b --&gt; c --&gt; d</span><br><span class="line"></span><br><span class="line">// 插入m到b后面</span><br><span class="line">m.next = b.next</span><br><span class="line">b.next = m</span><br><span class="line"></span><br><span class="line">// 插入到链表的头部</span><br><span class="line">m.next = HEAD.next</span><br><span class="line">HEAD.next = m</span><br></pre></td></tr></table></figure>
+<p>对于移动某个节点，相当于是删除操作和插入操作的结合操作，所以不仅仅是被移动的节点的前继节点需要被存储，移动目标位置的前继节点也要存储。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">// 代码3. 链表的元素移动操作</span><br><span class="line">// a --&gt; b --&gt; c --&gt; d</span><br><span class="line"></span><br><span class="line">// 移动d到a后面</span><br><span class="line">// 第一步，删除d并存储</span><br><span class="line">N = c.next</span><br><span class="line">c.next = c.next.next</span><br><span class="line">// 第二步，将c插入到a后面</span><br><span class="line">N.next = a.next</span><br><span class="line">a.next = N</span><br><span class="line"></span><br><span class="line">// 将d移动到表头</span><br><span class="line">// 第一步，同上</span><br><span class="line">// 第二步，将d插入到表头，参见代码2.</span><br><span class="line"></span><br><span class="line">// 将a移动到表尾</span><br><span class="line">// 第一步，删除a，参见代码1.</span><br><span class="line">// 第二步，将a插入表尾，参见代码2.</span><br></pre></td></tr></table></figure>
+<p>可以看到为了操作链表，每一次操作需要存储的都是目标节点的前继节点，这就需要在我们实现Diff算法的时候去注意。</p>
+<h3 id="操作的实时更新"><a href="#操作的实时更新" class="headerlink" title="操作的实时更新"></a>操作的实时更新</h3><p>实现的过程还会遇到的一个问题是，在操作的进行过程中会打乱链表的顺序，考虑如下情况。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">// 代码4. 被移动的链表操作</span><br><span class="line">// a --&gt; b --&gt; c --&gt; d</span><br><span class="line">// 假设有如下操作</span><br><span class="line">//   1. 删除b节点</span><br><span class="line">//   2. 移动d节点到b节点的后面</span><br><span class="line">// 如果按照顺序执行，在操作1删除b节点执行之后，操作2的执行将会失败，因为此时b节点已经被删除了</span><br></pre></td></tr></table></figure>
+<p>所以实际上三种操作都会打乱链表的顺序，所以在实施的过程中，Riact还需要维护一个对每个将被操作的节点前继节点的散列表来解决这个问题。</p>
+<p>具体的代码可以参见<a href="https://github.com/oychao/riact/blob/master/src/core/virtualDom/PatchReorderLisBased.ts" target="_blank" rel="noopener">Riact中的实现</a>。</p>
+<blockquote>
+<p>这一步的设计并不优雅，其实使用双向链表可能会好一些，但Riact的考虑的是尽量简化虚拟DOM节点的结构，所以并没有提供一个previousSibling这样一个属性，但双向链表显然也是能够实现同样的操作的。</p>
+</blockquote>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>到这里为止，列表更新过程中需要注意到的数据结构方面的点已经基本被提到了，虽然还有一些细节，但这里没有办法做到面面俱到，如果对这方面感兴趣的同学，可以考虑自己去手动实现一个具备类似Reconciliation - Commit功能的虚拟DOM。</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
+<li><a href="https://github.com/oychao/riact" target="_blank" rel="noopener">oychao/riact - GitHub</a></li>
+<li><a href="http://localhost:4000/2019/02/15/react/20_develop_a_framework_1/" target="_blank" rel="noopener">Riact开发笔记之Diff算法篇 - 传不习乎</a></li>
+<li><a href="https://oychao.github.io/2017/10/11/react/18_set_state/" target="_blank" rel="noopener">调用setState方法时到底发生了什么 - 传不习乎</a></li>
+<li><a href="https://www.amazon.cn/dp/B0097CON2S/ref=sr_1_1?ie=UTF8&amp;qid=1551507179&amp;sr=8-1&amp;keywords=javascript%E8%AF%AD%E8%A8%80%E7%B2%BE%E7%B2%B9" target="_blank" rel="noopener">JavaScript语言精粹 - Douglas Crockford - 亚马逊</a></li>
+<li><a href="https://en.wikipedia.org/wiki/Linked_list" target="_blank" rel="noopener">Linked List - wikipedia</a></li>
+</ol>
+
+      
+    </div>
+
+    
+
+    
+    
+    
+
+    
+
+    
+      
+    
+    
+
+    
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/React/" rel="tag"># React</a>
+          
+        </div>
+      
+
+      
+      
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2019/02/15/react/20_riact_development_1/" rel="next" title="Riact开发笔记之Diff算法篇">
+                <i class="fa fa-chevron-left"></i> Riact开发笔记之Diff算法篇
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2019/03/02/react/22_riact_development_3/" rel="prev" title="Riact开发笔记之设计模式篇">
+                Riact开发笔记之设计模式篇 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </div>
+  
+  
+  
+  </article>
+
+
+  </div>
+
+
+          </div>
+          
+
+  
+
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            Table of Contents
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            Overview
+          </li>
+        </ul>
+      
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-overview">
+          <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+            
+              <p class="site-author-name" itemprop="name">欧阳/Ouyang</p>
+              <div class="site-description motion-element" itemprop="description"></div>
+          </div>
+
+          
+            <nav class="site-state motion-element">
+              
+                <div class="site-state-item site-state-posts">
+                
+                  <a href="/archives/">
+                
+                    <span class="site-state-item-count">97</span>
+                    <span class="site-state-item-name">posts</span>
+                  </a>
+                </div>
+              
+
+              
+
+              
+                
+                
+                <div class="site-state-item site-state-tags">
+                  
+                    
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                      
+                    
+                    <span class="site-state-item-count">10</span>
+                    <span class="site-state-item-name">tags</span>
+                  
+                </div>
+              
+            </nav>
+          
+
+          
+
+          
+
+          
+
+          
+
+          
+          
+
+          
+            
+          
+          
+
+        </div>
+      </div>
+
+      
+      <!--noindex-->
+        <div class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+            
+            
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Riact更新DOM的过程"><span class="nav-number">2.</span> <span class="nav-text">Riact更新DOM的过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#列表更新"><span class="nav-number">3.</span> <span class="nav-text">列表更新</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#操作的存储"><span class="nav-number">3.1.</span> <span class="nav-text">操作的存储</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#顺序表的问题"><span class="nav-number">3.2.</span> <span class="nav-text">顺序表的问题</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#链表的基本操作"><span class="nav-number">3.3.</span> <span class="nav-text">链表的基本操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#操作的实时更新"><span class="nav-number">3.4.</span> <span class="nav-text">操作的实时更新</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+            
+
+          </div>
+        </div>
+      <!--/noindex-->
+      
+
+      
+
+    </div>
+  </aside>
+  
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright">&copy; <span itemprop="copyrightYear">2019</span>
+  <span class="with-love" id="animate">
+    <i class="fa fa-user"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">欧阳/Ouyang</span>
+
+  
+
+  
+</div>
+
+
+  <div class="powered-by">Powered by <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> v3.8.0</div>
+
+
+
+  <span class="post-meta-divider">|</span>
+
+
+
+  <div class="theme-info">Theme – <a href="https://theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Gemini</a> v7.0.1</div>
+
+
+
+
+        
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+
+    
+      <div class="back-to-top">
+        <i class="fa fa-arrow-up"></i>
+        
+      </div>
+    
+
+    
+
+    
+
+    
+  </div>
+
+  
+
+<script>
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  <script src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+
+  
+
+
+  <script src="/js/src/utils.js?v=7.0.1"></script>
+
+  <script src="/js/src/motion.js?v=7.0.1"></script>
+
+
+
+  
+  
+
+
+  <script src="/js/src/affix.js?v=7.0.1"></script>
+
+  <script src="/js/src/schemes/pisces.js?v=7.0.1"></script>
+
+
+
+
+  
+  <script src="/js/src/scrollspy.js?v=7.0.1"></script>
+<script src="/js/src/post-details.js?v=7.0.1"></script>
+
+
+
+  
+
+
+  <script src="/js/src/next-boot.js?v=7.0.1"></script>
+
+
+  
+
+  
+
+  
+
+  
+
+
+  
+
+
+  
+
+
+
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+</body>
+</html>
