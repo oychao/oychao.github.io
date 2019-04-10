@@ -105,7 +105,7 @@
 <meta property="og:description" content="中间件模式在前端框架中的有着广泛的应用，无论是浏览器端还是Node端都有用武之地，毫无疑问它是一种经典且实用的设计模式。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/middleware_pattern.jpg">
-<meta property="og:updated_time" content="2019-04-10T14:01:48.634Z">
+<meta property="og:updated_time" content="2019-04-10T14:08:21.186Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="中间件模式在前端框架中的应用">
 <meta name="twitter:description" content="中间件模式在前端框架中的有着广泛的应用，无论是浏览器端还是Node端都有用武之地，毫无疑问它是一种经典且实用的设计模式。">
@@ -382,7 +382,7 @@
 <p>但总而言之，中间件模式的基本结构都可以用下图描述。</p>
 <p><img src="/images/middleware_pattern.jpg" alt="图1. 中间件模式的运作流程"></p>
 <p>特定的数据通过一个又一个的中间进行处理，而这些中间件的功能完全可以根据开发者自己的业务逻辑进行定制实现。</p>
-<h2 id="框架中的应用"><a href="#框架中的应用" class="headerlink" title="框架中的应用"></a>框架中的应用</h2><p>为了更好地理解中间件模式，本文选取了四个中间件模式在前端框架中的典型实现，包括浏览器端和Node端。</p>
+<h2 id="框架中的应用"><a href="#框架中的应用" class="headerlink" title="框架中的应用"></a>框架中的应用</h2><p>为了更好地理解中间件模式，本文选取了三个中间件模式在前端框架中的典型实现，包括浏览器端和Node端。</p>
 <h3 id="express"><a href="#express" class="headerlink" title="express"></a>express</h3><p>express是Node端最普及的框架，Node帮助JavaScript在后端开辟了一个新天地，其中express的普及功不可没。</p>
 <p>在express中也有中间件的设计，它使得我们能用更方便以及更容易维护的方式对一次请求和响应进行处理，一个最基本的express应用层中间件用法如下。</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码1</span></span><br><span class="line"><span class="comment">// 全部请求有效</span></span><br><span class="line">app.use(<span class="function"><span class="keyword">function</span> (<span class="params">req, res, next</span>) </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">'Time:'</span>, <span class="built_in">Date</span>.now())</span><br><span class="line">  next()</span><br><span class="line">&#125;)</span><br></pre></td></tr></table></figure>
@@ -436,7 +436,7 @@
 <p>回忆一下<code>compose</code>的用法，它其实就是接收了一个数组，将其做了如下变换。</p>
 <figure class="highlight javascript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 代码14</span></span><br><span class="line">a(b(c(d(...yourArgs))));</span><br><span class="line"><span class="comment">// 等价于</span></span><br><span class="line">compose(a, b, c, d)(...yourArgs);</span><br></pre></td></tr></table></figure>
 <p>因此，中间件数组也变成了<code>chain[0](chain[1](store.dispatch))</code>，注意这里的<code>dispatch</code>是从<code>store</code>中取的，是可用的<code>dispatch</code>，实际上也就是中间件调用链中最尾端的<code>next</code>。</p>
-<p>这样，我们的中间件就将每一次action都层层包裹了起来，我们也可以通过中间件劫持每一次dispatch出来的<code>action</code>。</p>
+<p>这样，我们的中间件就将每一次action都层层包裹了起来，我们也可以通过中间件劫持每一次dispatch出来的action。</p>
 <h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>从中间件模式的设计原理和应用可以看出，当我们需要对某个（或者某个系列的）对象进行顺序处理，且支持自定义处理的逻辑修改时，我们就可以用到这种设计模式，它通过将所有中间件用合适的方式链接起来，然后通过next函数决定是否使用后继的中间件。</p>
 <p>它在前端的世界中应用很广泛，但它的设计根据业务逻辑的不同而不同（比如koa中的中间件是异步的方法，redux中的中间件又是高阶函数），并且在组装的时候不同的中间件又有不同的组装方式。</p>
 <h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><ol>
