@@ -96,21 +96,21 @@
 
 
 
-  <meta name="description" content="最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是有向无环图（Directed Acyclic Graph, DAG），不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
+  <meta name="description" content="最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个有向无环图（Directed Acyclic Graph, DAG）进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
 <meta name="keywords" content="Algorithm">
 <meta property="og:type" content="article">
-<meta property="og:title" content="一种有向无环图的自动拓扑排序方法">
+<meta property="og:title" content="一种有向无环图的自动布局方法">
 <meta property="og:url" content="http://yoursite.com/2019/06/08/algorithm/05_dag/index.html">
 <meta property="og:site_name" content="传不习乎">
-<meta property="og:description" content="最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是有向无环图（Directed Acyclic Graph, DAG），不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
+<meta property="og:description" content="最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个有向无环图（Directed Acyclic Graph, DAG）进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
 <meta property="og:locale" content="default">
 <meta property="og:image" content="http://yoursite.com/images/DAG.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG2.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG3.jpg">
-<meta property="og:updated_time" content="2019-06-08T16:09:44.095Z">
+<meta property="og:updated_time" content="2019-06-08T16:32:16.521Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="一种有向无环图的自动拓扑排序方法">
-<meta name="twitter:description" content="最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是有向无环图（Directed Acyclic Graph, DAG），不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
+<meta name="twitter:title" content="一种有向无环图的自动布局方法">
+<meta name="twitter:description" content="最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个有向无环图（Directed Acyclic Graph, DAG）进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
 <meta name="twitter:image" content="http://yoursite.com/images/DAG.jpg">
 
 
@@ -128,7 +128,7 @@
   };
 </script>
 
-  <title>一种有向无环图的自动拓扑排序方法 | 传不习乎</title>
+  <title>一种有向无环图的自动布局方法 | 传不习乎</title>
   
 
 
@@ -314,7 +314,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">一种有向无环图的自动拓扑排序方法
+          <h1 class="post-title" itemprop="name headline">一种有向无环图的自动布局方法
 
               
             
@@ -361,7 +361,7 @@
           
 
           
-            <div class="post-description">最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是有向无环图（Directed Acyclic Graph, DAG），不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。</div>
+            <div class="post-description">最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个有向无环图（Directed Acyclic Graph, DAG）进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。</div>
           
 
         </div>
@@ -385,7 +385,7 @@ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 <script type="text/javascript" async src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
 
-<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是<strong>有向无环图（Directed Acyclic Graph, DAG）</strong>，不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。</p>
+<h3 id="概述"><a href="#概述" class="headerlink" title="概述"></a>概述</h3><p>最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个<strong>有向无环图（Directed Acyclic Graph, DAG）</strong>进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。</p>
 <p>本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。</p>
 <h3 id="DAG的概念"><a href="#DAG的概念" class="headerlink" title="DAG的概念"></a>DAG的概念</h3><p>这里我直接引用DAG在<a href="https://zh.wikipedia.org/wiki/%E6%9C%89%E5%90%91%E6%97%A0%E7%8E%AF%E5%9B%BE" target="_blank" rel="noopener">维基百科上的原文</a>了。</p>
 <blockquote>
