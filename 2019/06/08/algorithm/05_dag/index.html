@@ -107,7 +107,7 @@
 <meta property="og:image" content="http://yoursite.com/images/DAG.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG2.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG3.jpg">
-<meta property="og:updated_time" content="2019-06-08T16:00:32.288Z">
+<meta property="og:updated_time" content="2019-06-08T16:03:44.522Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一种有向无环图的自动拓扑排序方法">
 <meta name="twitter:description" content="最近换了新的公司，在前公司的时候开发过一个流程图渲染库，当时业务中的流程图本质是就是有向无环图（Directed Acyclic Graph, DAG），不过当时实现的难点在响应式设计、交互和渲染性能上面，后续虽然产品有提自动拓扑的需求，但是那时候我早已经离职了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
@@ -468,17 +468,19 @@ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 <p> 注意这里的线段长度都是1，目前为止并没有什么问题。我们继续往下画，很容易发现A点还有一个分支是指向D的，接下来处理这个分支，由于A已经有一个后继点B和A拥有相同的Y坐标，所以D的Y坐标需要加一，并按照刚才的做法继续往下画。</p>
 <div style="text-align: center;">表3.贪心法画出的局部图</div>
 
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">Start -----&gt; A ---+--&gt; B ------&gt; C -----&gt; End</span><br><span class="line">                  |</span><br><span class="line">                  +--&gt; D ------&gt; E（这里E需要指向C，但它们显然不在同一层级）</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
-<p>当遇到E指向C的有向边时，已经没有办法再用贪心法画下去了，因为E和C根本不在同一<strong>层级（rank）</strong>。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">Start -----&gt; A ---+--&gt; B ------&gt; C -----&gt; End</span><br><span class="line">                  |</span><br><span class="line">                  +--&gt; D ------&gt; E（这里E需要指向C，但它们显然不在同一深度）</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
+<p>当遇到E指向C的有向边时，已经没有办法再用贪心法画下去了，因为E和C根本不在同一<strong>深度（depth）</strong>。</p>
 <p>也就是说目前为止从起点到C有两条路径可以到达，分别是Start，A，B，C和Start，A，D，E，C，而C在这两条路径中的深度不一样。</p>
 <p>为了实现图1中的效果，这里B和C之间的距离必须延长1个单位长度，否则没有办法使整张图的节点按照规律有序排列，修改后的图如下所示。</p>
-<div style="text-align: center;">表4.贪心法画出的局部图</div>
+<div style="text-align: center;">表4.调整节点深度后的局部图</div>
 
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">Start -----&gt; A ---+--&gt; B -----------+--&gt; C -----&gt; End</span><br><span class="line">                  |                 |</span><br><span class="line">                  +--&gt; D -----&gt; E --+</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
 <p>接下来F和G的点就还按照刚才的方法继续就行了。</p>
+<div style="text-align: center;">表5.最终的DAG图</div>
+
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">/*</span><br><span class="line">Start --+--&gt; A ---+--&gt; B -----------+--&gt; C --+--&gt; End</span><br><span class="line">        |         |                 |        |</span><br><span class="line">        |         +--&gt; D --+--&gt; E --+        |</span><br><span class="line">        |                  |        |        |</span><br><span class="line">        |                  +--&gt; F --+        |</span><br><span class="line">        |                                    |</span><br><span class="line">        +--&gt; G ------------------------------+</span><br><span class="line">*/</span><br></pre></td></tr></table></figure>
-<p>现在再来看一下Start，A，B，C和Start，A，D，E，C这两条路径，这次用程序实现的方式来说明一遍层级在上图中的计算过程。</p>
-<p><strong>如果将DAG当做一棵树来看待，用深度遍历的方式去遍历，则部分处于多条路径的节点可以被多次遍历，可重复遍历的节点在不同路径中将有多个深度值，取其所有深度值中最大的值作为该节点的层级。</strong></p>
+<p>现在再来看一下Start，A，B，C和Start，A，D，E，C这两条路径，这次用程序实现的方式来说明一遍深度在上图中的计算过程。</p>
+<p><strong>如果将DAG当做一棵树来看待，用深度遍历的方式去遍历，则部分处于多条路径的节点可以被多次遍历，可重复遍历的节点在不同路径中将有多个深度值，取其所有深度值中最大的值作为该节点的深度。</strong></p>
 <p>TBD</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>TBD</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
