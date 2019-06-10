@@ -107,7 +107,8 @@
 <meta property="og:image" content="http://yoursite.com/images/DAG.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG2.jpg">
 <meta property="og:image" content="http://yoursite.com/images/DAG3.jpg">
-<meta property="og:updated_time" content="2019-06-08T16:32:16.521Z">
+<meta property="og:image" content="http://yoursite.com/images/DAG4.png">
+<meta property="og:updated_time" content="2019-06-10T15:31:43.347Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="一种有向无环图的自动布局方法">
 <meta name="twitter:description" content="最近换了新的公司，在前公司的时候开发过一个流程图编辑器，其本质是对一个有向无环图（Directed Acyclic Graph, DAG）进行编辑，实现的主要难点在响应式设计、交互和渲染性能上面，后来产品的同学提出了流程图自动布局的需求，但这时距离我离职已经只有两三天了。本以为这个坑就这样留给其他同学了，但没想到我进入新公司之后我接手的第一件活还是这个，看来跟DAG确实有一定的缘分。">
@@ -482,6 +483,12 @@ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
 <p>现在再来看一下Start，A，B，C和Start，A，D，E，C这两条路径，这次用程序实现的方式来说明一遍深度在上图中的计算过程。</p>
 <p><strong>如果将DAG当做一棵树来看待，用深度遍历的方式去遍历，则部分处于多条路径的节点可以被重复遍历，可重复遍历的节点在不同路径中将有不同的深度值，取其所有深度值中最大的值作为该节点的深度。</strong></p>
 <p>TBD</p>
+<h4 id="实现效果"><a href="#实现效果" class="headerlink" title="实现效果"></a>实现效果</h4><p>TBD</p>
+<p>最终的实现效果如下图所示。</p>
+<div style="text-align: center;"><img src="/images/DAG4.png" width="500"></div>
+
+<div style="text-align: center;">图4.使用SVG实现的效果</div>
+
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>TBD</p>
 <h3 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h3><ol>
 <li><a href="https://zh.wikipedia.org/wiki/%E6%9C%89%E5%90%91%E6%97%A0%E7%8E%AF%E5%9B%BE" target="_blank" rel="noopener">有向无环图 - wikipedia</a></li>
@@ -672,7 +679,7 @@ tex2jax: {inlineMath: [['$','$'], ['\\(','\\)']]}
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DAG的概念"><span class="nav-number">2.</span> <span class="nav-text">DAG的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法描述"><span class="nav-number">3.</span> <span class="nav-text">算法描述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更详细的问题描述"><span class="nav-number">3.1.</span> <span class="nav-text">更详细的问题描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据结构"><span class="nav-number">3.2.</span> <span class="nav-text">数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#算法过程"><span class="nav-number">3.3.</span> <span class="nav-text">算法过程</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#概述"><span class="nav-number">1.</span> <span class="nav-text">概述</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#DAG的概念"><span class="nav-number">2.</span> <span class="nav-text">DAG的概念</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#算法描述"><span class="nav-number">3.</span> <span class="nav-text">算法描述</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#更详细的问题描述"><span class="nav-number">3.1.</span> <span class="nav-text">更详细的问题描述</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#数据结构"><span class="nav-number">3.2.</span> <span class="nav-text">数据结构</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#算法过程"><span class="nav-number">3.3.</span> <span class="nav-text">算法过程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#实现效果"><span class="nav-number">3.4.</span> <span class="nav-text">实现效果</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参考"><span class="nav-number">5.</span> <span class="nav-text">参考</span></a></li></ol></div>
             
 
           </div>
